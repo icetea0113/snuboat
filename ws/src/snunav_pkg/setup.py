@@ -1,5 +1,3 @@
-import os
-from glob import glob
 from setuptools import find_packages, setup
 
 package_name = 'snunav_pkg'
@@ -12,17 +10,17 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-    (os.path.join('share', package_name, 'msg'), glob('msg/*.msg')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='jyseo',
-    maintainer_email='jyseo@todo.todo',
+    maintainer_email='mouse89077@snu.ac.kr',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+                'mission_director = snunav_pkg.mission_director:main',
         ],
     },
 )
