@@ -1,0 +1,1 @@
+/home/jyseo/snuboat/ws/build/snumsg_pkg/rosidl_cmake/rosidl_cmake-extras.cmake

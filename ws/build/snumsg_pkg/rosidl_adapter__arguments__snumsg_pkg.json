@@ -1,0 +1,6 @@
+{
+  "package_name": "snumsg_pkg",
+  "non_idl_tuples": [
+    "/home/jyseo/snuboat/ws/src/snumsg_pkg:msg/MissionCode.msg"
+  ]
+}

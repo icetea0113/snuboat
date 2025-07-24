@@ -11,7 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'snumsg_pkg'],
     zip_safe=True,
     maintainer='jyseo',
     maintainer_email='mouse89077@snu.ac.kr',

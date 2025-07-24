@@ -1,0 +1,1 @@
+/home/jyseo/snuboat/ws/build/snumsg_pkg/ament_cmake_core/snumsg_pkgConfig.cmake

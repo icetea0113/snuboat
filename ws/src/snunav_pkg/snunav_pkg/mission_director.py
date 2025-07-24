@@ -16,36 +16,40 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import String
+from snumsg_pkg.msg import MissionCode
 
-
-class MinimalPublisher(Node):
+class MissionDirector(Node):
 
     def __init__(self):
-        super().__init__('minimal_publisher')
+        super().__init__('mission_director')
         self.publisher_ = self.create_publisher(String, 'topic', 10)
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
 
-    def timer_callback(self):
-        msg = String()
-        msg.data = 'Hello World: %d' % self.i
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
+        self.
 
+    def timer_callback(self):
+        msg = MissionCode()
+        msg.timestamp.sec = self.i  # Example usage of timestamp
+        msg.timestamp.nanosec = 0  # Set nanoseconds to zero for simplicity
+        msg.value = 1111111111111111  # Example mission code logic
+        # msg.data = 'Hello World: %d' % self.i
+        self.publisher_.publish(msg)
+        self.get_logger().info('Publishing: "%s"' % msg.value)
+        self.i += 1
 
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_publisher = MinimalPublisher()
+    mission_director = MissionDirector()
 
-    rclpy.spin(minimal_publisher)
+    rclpy.spin(mission_director)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_publisher.destroy_node()
+    mission_director.destroy_node()
     rclpy.shutdown()
 
 
