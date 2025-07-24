@@ -15,37 +15,77 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import String
+from std_msgs.msg import String, Float32MultiArray
 
 
-class MinimalPublisher(Node):
+class MotorInterface(Node):
 
     def __init__(self):
-        super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(String, 'topic', 10)
-        timer_period = 0.5  # seconds
+        super().__init__('motor_interface')
+
+        self.state_publisher_ = self.create_publisher(
+            Float32MultiArray,
+            'ctrl',
+            10)
+        
+        timer_period = 0.1  # seconds
+        
+        self.subscriber_ = self.create_subscription(
+            Float32MultiArray,
+            'ctrl_cmd',
+            self.listener_callback,
+            10)
+        self.motor_state_subscriber_ = self.create_subscription(
+            Float32MultiArray,
+            'motor_state',
+            self.motor_state_callback,
+            10)
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
+
+        self.cmd_rps_p, self.cmd_del_p = 0.0, 0.0 
+        self.cmd_rps_s, self.cmd_del_s = 0.0, 0.0
+        
+        self.rps_p, self.del_p = 0.0, 0.0
+        self.rps_s, self.del_s = 0.0, 0.0
 
     def timer_callback(self):
-        msg = String()
-        msg.data = 'Hello World: %d' % self.i
+        msg = Float32MultiArray()
+        msg.data = [self.rps_p, self.del_p, self.rps_s, self.del_s]
         self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
 
+    def listener_callback(self, msg):
+        self.cmd_rps_p, self.cmd_del_p, self.cmd_rps_s, self.cmd_del_s = msg.data
+        self.get_logger().info('Received command: '
+                                'cmd_rps_p: %.2f, cmd_del_p: %.2f,'
+                                'cmd_rps_s: %.2f, cmd_del_s: %.2f' %
+                                (self.cmd_rps_p, self.cmd_del_p,
+                                self.cmd_rps_s, self.cmd_del_s))
 
+    def motor_state_callback(self, msg):
+        self.rps_p, self.del_p, self.rps_s, self.del_s = msg.data
+        
+        # Publish the received motor state
+        state_msg = Float32MultiArray()
+        state_msg.data = [self.rps_p, self.del_p, self.rps_s, self.del_s]
+        self.state_publisher_.publish(state_msg)
+        
+        self.get_logger().info('Actual state: '
+                                'rps_p: %.2f, del_p: %.2f,'
+                                'rps_s: %.2f, del_s: %.2f' %
+                                (self.rps_p, self.del_p,
+                                self.rps_s, self.del_s))
+        
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_publisher = MinimalPublisher()
+    motor_interface = MotorInterface()
 
-    rclpy.spin(minimal_publisher)
+    rclpy.spin(motor_interface)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_publisher.destroy_node()
+    motor_interface.destroy_node()
     rclpy.shutdown()
 
 
