@@ -15,7 +15,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='jyseo',
-    maintainer_email='jyseo@todo.todo',
+    maintainer_email='mouse89077@snu.ac.kr',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
@@ -23,6 +23,7 @@ setup(
         'console_scripts': [
             'motor_interface = snunav_pkg.motor_interface:main',
             'navigation = snunav_pkg.navigation:main',
+            'mission_director = snunav_pkg.mission_director:main',
         ],
     },
 )
