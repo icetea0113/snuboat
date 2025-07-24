@@ -18,10 +18,10 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 
-class MinimalPublisher(Node):
+class MissionDirector(Node):
 
     def __init__(self):
-        super().__init__('minimal_publisher')
+        super().__init__('mission_director')
         self.publisher_ = self.create_publisher(String, 'topic', 10)
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
@@ -38,7 +38,7 @@ class MinimalPublisher(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_publisher = MinimalPublisher()
+    minimal_publisher = MissionDirector()
 
     rclpy.spin(minimal_publisher)
 
