@@ -1,2 +1,2 @@
-string timestamp
+string tick
 uint32 value

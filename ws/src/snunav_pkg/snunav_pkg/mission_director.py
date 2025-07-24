@@ -31,8 +31,8 @@ class MissionDirector(Node):
 
     def timer_callback(self):
         msg = MissionCode()
-        msg.timestamp.sec = self.i  # Example usage of timestamp
-        msg.timestamp.nanosec = 0  # Set nanoseconds to zero for simplicity
+        msg.tick.sec = self.i  # Example usage of tick
+        msg.tick.nanosec = 0  # Set nanoseconds to zero for simplicity
         msg.value = 1111111111111111  # Example mission code logic
         # msg.data = 'Hello World: %d' % self.i
         self.publisher_.publish(msg)
