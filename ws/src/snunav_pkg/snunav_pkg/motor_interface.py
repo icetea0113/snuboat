@@ -40,18 +40,12 @@ class MotorInterface(Node):
             'motor_state',
             self.motor_state_callback,
             10)
-        self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.cmd_rps_p, self.cmd_del_p = 0.0, 0.0 
         self.cmd_rps_s, self.cmd_del_s = 0.0, 0.0
         
         self.rps_p, self.del_p = 0.0, 0.0
         self.rps_s, self.del_s = 0.0, 0.0
-
-    def timer_callback(self):
-        msg = Float32MultiArray()
-        msg.data = [self.rps_p, self.del_p, self.rps_s, self.del_s]
-        self.publisher_.publish(msg)
 
     def listener_callback(self, msg):
         self.cmd_rps_p, self.cmd_del_p, self.cmd_rps_s, self.cmd_del_s = msg.data
