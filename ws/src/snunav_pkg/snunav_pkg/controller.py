@@ -18,6 +18,10 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
+from utils.freeRunning import speedMapping, turning, zigzag, pivotTurn, crabbing, pullOut, spiral
+# from docking import heuristicDocking_Entering, DRLDocking_Entering, DRL_Approach, DRL_Turning, DRL_Entering, DRL_Pushing, heuristicDocking_Approaching, heuristicDocking_Turning, heuristicDocking_Entering, heuristicDocking_Pushing
+# from DP import DP_controlMethod1, DP_controlMethod2
+# from PP import PP_algorithm1, PP_algorithm2
 
 class Controller(Node):
     def __init__(self):
@@ -55,19 +59,19 @@ class Controller(Node):
     def freeRunningController(self):
         submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
         if submaneuver_mode == 0x00:
-            self.speedMapping()
+            speedMapping()
         elif submaneuver_mode == 0x10:
-            self.turning()
+            turning()
         elif submaneuver_mode == 0x20:
-            self.zigzag()
+            zigzag()
         elif submaneuver_mode == 0x30:
-            self.pivotTurn()
+            pivotTurn()
         elif submaneuver_mode == 0x40:
-            self.crabbing()
+            crabbing()
         elif submaneuver_mode == 0x50:
-            self.pullOut()
+            pullOut()
         elif submaneuver_mode == 0x60:
-            self.spiral()
+            spiral()
         else:
             raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
 
