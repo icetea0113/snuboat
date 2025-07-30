@@ -89,8 +89,9 @@ class Navigation(Node):
         self.vel_marker = np.zeros(6, dtype=np.float32)
 
     def mission_callback(self, msg):
+        # motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
         self.mission_code = int(msg.mission_code, 16)
-        self.active_sensor_mode = (self.mission_code & 0x00FF0000) >> 16
+        self.active_sensor_mode = (self.mission_code & 0x0F0000) >> 16
         self.get_logger().info(f'Received Mission Code: {hex(self.mission_code)}, Sensor Mode: {hex(self.active_sensor_mode)}')
 
     ## -- TODO : Implement actual sensor data processing logic
@@ -126,19 +127,19 @@ class Navigation(Node):
         status_prefix = ""
         status_suffix = ""
 
-        if self.active_sensor_mode == 0x00: # Qualisys
+        if self.active_sensor_mode == 0x0: # Qualisys
             self.pose = self.pose_qualisys
             self.vel = self.vel_qualisys
             status_suffix = str(self.status_qualisys)
-        elif self.active_sensor_mode == 0x10: # SLAM
+        elif self.active_sensor_mode == 0x1: # SLAM
             self.pose = self.pose_slam
             self.vel = self.vel_slam
             status_suffix = str(self.status_slam)
-        elif self.active_sensor_mode == 0x20: # GPS-RTK
+        elif self.active_sensor_mode == 0x2: # GPS-RTK
             self.pose = self.pose_gps_rtk
             self.vel = self.vel_gps_rtk
             status_suffix = str(self.status_gps_rtk)
-        elif self.active_sensor_mode == 0x30: # Marker
+        elif self.active_sensor_mode == 0x3: # Marker
             self.pose = self.pose_marker
             self.vel = self.vel_marker
             status_suffix = str(self.status_marker)

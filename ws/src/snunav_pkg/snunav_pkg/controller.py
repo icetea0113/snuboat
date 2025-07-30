@@ -45,12 +45,12 @@ class Controller(Node):
 
     def mission_callback(self, msg):
         mission_code = int(msg.mission_code, 16)
-        self.mission_code = (mission_code & 0x0000FFFF)
+        self.mission_code = (mission_code & 0x00FFF0)
         self.controllerMode()
         self.get_logger().info('Received maneuver code: "%s"' % hex(self.mission_code))
 
     def controllerMode(self):
-        maneuver_mode = (self.mission_code & 0x0000F000) >> 12
+        maneuver_mode = (self.mission_code & 0x00F000) >> 12
         if maneuver_mode == 0x0:
             self.freeRunningController()
         elif maneuver_mode == 0x1:
@@ -63,8 +63,9 @@ class Controller(Node):
             raise ValueError("Unknown maneuver mode: {}".format(hex(maneuver_mode)))
     
     def freeRunningController(self):
+        # motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
         ctrl_cmd = np.zeros(4)  # [rpsP, rpsS, delP, delS]
-        submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
+        submaneuver_mode = (self.mission_code & 0x000FF0) >> 4
         state = 0
         if submaneuver_mode == 0x00:
             target_rps = 0.0
@@ -98,7 +99,7 @@ class Controller(Node):
         self.get_logger().info(f'Published control command: {self.ctrl_cmd}')
 
     def dockingController(self):
-        submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
+        submaneuver_mode = (self.mission_code & 0x000FF0) >> 4
         if submaneuver_mode == 0x00:
             self.heuristicDocking_Entering()
         elif submaneuver_mode == 0x10:
@@ -129,7 +130,7 @@ class Controller(Node):
             raise ValueError("Unknown docking submaneuver mode: {}".format(hex(submaneuver_mode)))
     
     def DPController(self):
-        submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
+        submaneuver_mode = (self.mission_code & 0x000FF0) >> 4
         if submaneuver_mode == 0x00:
             self.DP_controlMethod1()
         elif submaneuver_mode == 0x10:
@@ -138,7 +139,7 @@ class Controller(Node):
             raise ValueError("Unknown DP submaneuver mode: {}".format(hex(submaneuver_mode)))
     
     def PPController(self):
-        submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
+        submaneuver_mode = (self.mission_code & 0x000FF0) >> 4
         if submaneuver_mode == 0x00:
             self.PP_algorithm1()
         elif submaneuver_mode == 0x10:
