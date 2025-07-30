@@ -28,6 +28,7 @@ class MinimalPublisher(Node):
         self.i = 0
 
     def timer_callback(self):
+        
         msg = String()
         msg.data = 'Hello World: %d' % self.i
         self.publisher_.publish(msg)

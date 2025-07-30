@@ -1,1 +1,0 @@
-/home/jyseo/snuboat/ws/build/snumsg_pkg/rosidl_typesupport_introspection_c/snumsg_pkg/msg/detail/mission_code__rosidl_typesupport_introspection_c.h

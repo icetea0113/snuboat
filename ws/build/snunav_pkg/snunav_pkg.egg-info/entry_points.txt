@@ -1,3 +1,0 @@
-[console_scripts]
-mission_director = snunav_pkg.mission_director:main
-

@@ -1,1 +1,0 @@
-/home/jyseo/snuboat/ws/build/snumsg_pkg/rosidl_typesupport_fastrtps_cpp/snumsg_pkg/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h

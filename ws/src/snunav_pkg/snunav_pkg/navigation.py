@@ -15,7 +15,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
-from snunav_pkg.msg import MissionDirector, Sensor
+from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
 
 # MissionDirector message information
@@ -44,12 +44,12 @@ class Navigation(Node):
         super().__init__('navigation')
         
         # Publishers
-        self.sensor_state_publisher_ = self.create_publisher(SensorState, 'sensor_state', 10)
+        self.sensor_state_publisher_ = self.create_publisher(Sensor, 'sensor', 10)
 
         # Subscribers
         self.mission_subscriber_ = self.create_subscription(
-            MissionDirector,
-            'mission_director',
+            MissionCode,
+            'mission_code',
             self.mission_callback,
             10)
         
@@ -89,7 +89,7 @@ class Navigation(Node):
         self.vel_marker = np.zeros(6, dtype=np.float32)
 
     def mission_callback(self, msg):
-        self.mission_code = msg.missioncode
+        self.mission_code = msg.value
         self.active_sensor_mode = (self.mission_code & 0x00FF0000) >> 16
         self.get_logger().info(f'Received Mission Code: {hex(self.mission_code)}, Sensor Mode: {hex(self.active_sensor_mode)}')
 
@@ -150,7 +150,7 @@ class Navigation(Node):
             self.status = STATUS_ERROR
 
         # Publish the current sensor state
-        msg = SensorState()
+        msg = Sensor()
         msg.tick = self.get_clock().now().to_msg()
         msg.status = self.status
         msg.pose = self.pose.tolist()

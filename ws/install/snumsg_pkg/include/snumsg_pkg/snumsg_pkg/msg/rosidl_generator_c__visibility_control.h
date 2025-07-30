@@ -1,1 +1,0 @@
-/home/jyseo/snuboat/ws/build/snumsg_pkg/rosidl_generator_c/snumsg_pkg/msg/rosidl_generator_c__visibility_control.h
