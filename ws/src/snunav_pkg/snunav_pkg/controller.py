@@ -18,7 +18,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
-from utils.freeRunning import speedMapping, turning, zigzag, pivotTurn, crabbing, pullOut, spiral
+from utils.free_running import FreeRunning
 # from docking import heuristicDocking_Entering, DRLDocking_Entering, DRL_Approach, DRL_Turning, DRL_Entering, DRL_Pushing, heuristicDocking_Approaching, heuristicDocking_Turning, heuristicDocking_Entering, heuristicDocking_Pushing
 # from DP import DP_controlMethod1, DP_controlMethod2
 # from PP import PP_algorithm1, PP_algorithm2
@@ -28,7 +28,9 @@ class Controller(Node):
         super().__init__('controller')
         
         self.pos = np.array([0.0, 0.0, 0.0])
-        self.ctrl_cmd = np.array([0.0, 0.0, 0.0, 0.0])  # [rps_p, del_p, rps_s, del_s]
+        self.vel = np.array([0.0, 0.0, 0.0])
+        self.ctrl_cmd = np.array([0.0, 0.0, 0.0, 0.0])  # [rpsP, delP, rpsS, delS]
+        self.ctrl = np.array([0.0, 0.0, 0.0, 0.0])
         self.status = 0                                 # 0 = init, 1 = run, 2 = pause, 3 = done
         self.mission_code = 0x00000000
         self.__missionCodeParser = self.create_subscription(
@@ -59,19 +61,20 @@ class Controller(Node):
     def freeRunningController(self):
         submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
         if submaneuver_mode == 0x00:
-            speedMapping()
+            target_rps = 0.0
+            FreeRunning.speed_mapping(target_rps, self.vel)
         elif submaneuver_mode == 0x10:
-            turning()
+            control = FreeRunning.turning(self.pos, self.ctrl)
         elif submaneuver_mode == 0x20:
-            zigzag()
+            control = FreeRunning.zigzag(self.pos, self.ctrl)
         elif submaneuver_mode == 0x30:
-            pivotTurn()
+            control = FreeRunning.pivot_turn(self.pos, self.ctrl)
         elif submaneuver_mode == 0x40:
-            crabbing()
+            control = FreeRunning.crabbing(self.pos, self.ctrl)
         elif submaneuver_mode == 0x50:
-            pullOut()
+            control = FreeRunning.pull_out(self.pos, self.ctrl)
         elif submaneuver_mode == 0x60:
-            spiral()
+            control = FreeRunning.spiral(self.pos, self.ctrl)
         else:
             raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
 

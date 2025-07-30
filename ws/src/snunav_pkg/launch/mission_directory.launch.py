@@ -15,6 +15,8 @@ def generate_launch_description():
     mission_params = {}
     if 'mission_director' in config:
         mission_params = config.get('mission_director', {}).get('ros__parameters', {})
+    if 'controller' in config:
+        controller_params = config.get('controller', {}).get('ros__parameters', {})
 
     return LaunchDescription([
         Node(
@@ -23,5 +25,12 @@ def generate_launch_description():
             name='mission_director_node',     #
             output='screen',
             parameters=[mission_params]
+        ),
+        Node(
+            package='snunav_pkg',
+            executable='controller',    # 노드 실행 파일 이름
+            name='controller_node',     #
+            output='screen',
+            parameters=[controller_params]
         ),
     ])

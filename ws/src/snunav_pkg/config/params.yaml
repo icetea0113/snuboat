@@ -18,4 +18,49 @@ mission_director:
     motor_mode: '0' # 0: Manual, 1: Auto
     status: '0' # Initializing, 1: Running, 2: Stop, 3: Standby, 4: Complete
 ################################################################################
+controller:
+  ros__parameters:
+    common_params:
+      del_rate: 0.1 # [deg/s]
+      rps_rate: 0.1 # [rad/s]
+      rps_max: 2.0 # [rad/s]
+      del_max: 30.0 # [deg]
+      deadzone_start: 1 # rps
+      deadzone_end:   1 # rps
 
+    free_running_mode : 
+      speed_mapping_mode:
+        len_timeseries: 100
+        rps_cmd : 0.0
+        del_cmd : 0.0
+        conv_u_tol : 0.05 # [m/s]
+
+      turning_mode:
+        rps_cmd : 0.0
+        del_cmd : 0.0
+
+      zigzag_mode:
+        rps_cmd : 0.0
+        target_psi : 0.0
+        initial_psi_direction : 1 # 1: Right, -1: Left
+
+      pivot_turn_mode:
+        rpsP_cmd : 0.0
+        rpsS_cmd : 0.0
+
+      crabbing_mode:
+        rpsP_cmd : 0.0
+        rpsS_cmd : 0.0
+        delP_cmd : 0.0
+        delS_cmd : 0.0
+
+      pull_out_mode:
+        rps_cmd : 0.0
+        del_cmd : 0.0
+        turning_duration : 0.0 # [s]
+
+      spiral_mode:
+        rps_cmd : 0.0
+        del_cmd : [20.0, 10.0, 5.0]
+        turning_duration : 0.0 # [s]
+##################################################################################
