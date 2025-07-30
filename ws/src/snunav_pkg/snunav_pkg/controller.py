@@ -64,17 +64,17 @@ class Controller(Node):
             target_rps = 0.0
             FreeRunning.speed_mapping(target_rps, self.vel)
         elif submaneuver_mode == 0x10:
-            control = FreeRunning.turning(self.pos, self.ctrl)
+            ctrl_cmd = FreeRunning.turning(self.pos, self.ctrl)
         elif submaneuver_mode == 0x20:
-            control = FreeRunning.zigzag(self.pos, self.ctrl)
+            ctrl_cmd = FreeRunning.zigzag(self.pos, self.ctrl)
         elif submaneuver_mode == 0x30:
-            control = FreeRunning.pivot_turn(self.pos, self.ctrl)
+            ctrl_cmd = FreeRunning.pivot_turn(self.pos, self.ctrl)
         elif submaneuver_mode == 0x40:
-            control = FreeRunning.crabbing(self.pos, self.ctrl)
+            ctrl_cmd = FreeRunning.crabbing(self.pos, self.ctrl)
         elif submaneuver_mode == 0x50:
-            control = FreeRunning.pull_out(self.pos, self.ctrl)
+            ctrl_cmd = FreeRunning.pull_out(self.pos, self.ctrl)
         elif submaneuver_mode == 0x60:
-            control = FreeRunning.spiral(self.pos, self.ctrl)
+            ctrl_cmd = FreeRunning.spiral(self.pos, self.ctrl)
         else:
             raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
 
