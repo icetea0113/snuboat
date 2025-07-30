@@ -89,7 +89,7 @@ class Navigation(Node):
         self.vel_marker = np.zeros(6, dtype=np.float32)
 
     def mission_callback(self, msg):
-        self.mission_code = msg.value
+        self.mission_code = int(msg.mission_code, 16)
         self.active_sensor_mode = (self.mission_code & 0x00FF0000) >> 16
         self.get_logger().info(f'Received Mission Code: {hex(self.mission_code)}, Sensor Mode: {hex(self.active_sensor_mode)}')
 

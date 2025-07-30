@@ -16,37 +16,122 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import String
+from snumsg_pkg.msg import MissionCode, Sensor
+import numpy as np
 
-
-class MinimalPublisher(Node):
-
+class Controller(Node):
     def __init__(self):
-        super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(String, 'topic', 10)
-        timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
-
-    def timer_callback(self):
+        super().__init__('controller')
         
-        msg = String()
-        msg.data = 'Hello World: %d' % self.i
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
+        self.pos = np.array([0.0, 0.0, 0.0])
+        self.ctrl_cmd = np.array([0.0, 0.0, 0.0, 0.0])  # [rps_p, del_p, rps_s, del_s]
+        self.status = 0                                 # 0 = init, 1 = run, 2 = pause, 3 = done
+        self.mission_code = 0x00000000
+        self.__missionCodeParser = self.create_subscription(
+            MissionCode,
+            'mission_code',
+            self.mission_callback,
+            10)
 
+    def mission_callback(self, msg):
+        mission_code = int(msg.mission_code, 16)
+        self.mission_code = (mission_code & 0x0000FFFF)
+        self.controllerMode()
+        self.get_logger().info('Received maneuver code: "%s"' % hex(self.mission_code))
+
+    def controllerMode(self):
+        maneuver_mode = (self.mission_code & 0x0000F000) >> 12
+        if maneuver_mode == 0x0:
+            self.freeRunningController()
+        elif maneuver_mode == 0x1:
+            self.dockingController()
+        elif maneuver_mode == 0x2:
+            self.DPController()
+        elif maneuver_mode == 0x3:
+            self.PPController()
+        else:
+            raise ValueError("Unknown maneuver mode: {}".format(hex(maneuver_mode)))
+    
+    def freeRunningController(self):
+        submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
+        if submaneuver_mode == 0x00:
+            self.speedMapping()
+        elif submaneuver_mode == 0x10:
+            self.turning()
+        elif submaneuver_mode == 0x20:
+            self.zigzag()
+        elif submaneuver_mode == 0x30:
+            self.pivotTurn()
+        elif submaneuver_mode == 0x40:
+            self.crabbing()
+        elif submaneuver_mode == 0x50:
+            self.pullOut()
+        elif submaneuver_mode == 0x60:
+            self.spiral()
+        else:
+            raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
+
+    def dockingController(self):
+        submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
+        if submaneuver_mode == 0x00:
+            self.heuristicDocking_Entering()
+        elif submaneuver_mode == 0x10:
+            self.DRLDocking_Entering()
+        elif submaneuver_mode == 0x20:
+            stage = submaneuver_mode & 0x0F
+            if stage == 0x01:
+                self.DRL_Approach()
+            elif stage == 0x02:
+                self.DRL_Turning()
+            elif stage == 0x03:
+                self.DRL_Entering()
+            elif stage == 0x04:
+                self.DRL_Pushing()
+            else:
+                raise ValueError("Unknown DRL docking stage: {}".format(hex(stage)))
+        elif submaneuver_mode == 0x30:
+            stage = submaneuver_mode & 0x0F
+            if stage == 0x01:
+                self.heuristicDocking_Approaching()
+            elif stage == 0x02:
+                self.heuristicDocking_Turning()
+            elif stage == 0x03:
+                self.heuristicDocking_Entering()
+            elif stage == 0x04:
+                self.heuristicDocking_Pushing()
+        else:
+            raise ValueError("Unknown docking submaneuver mode: {}".format(hex(submaneuver_mode)))
+    
+    def DPController(self):
+        submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
+        if submaneuver_mode == 0x00:
+            self.DP_controlMethod1()
+        elif submaneuver_mode == 0x10:
+            self.DP_controlMethod2()
+        else:
+            raise ValueError("Unknown DP submaneuver mode: {}".format(hex(submaneuver_mode)))
+    
+    def PPController(self):
+        submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
+        if submaneuver_mode == 0x00:
+            self.PP_algorithm1()
+        elif submaneuver_mode == 0x10:
+            self.PP_algorithm2()
+        else:
+            raise ValueError("Unknown PP submaneuver mode: {}".format(hex(submaneuver_mode)))
+    
 
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_publisher = MinimalPublisher()
+    controller = Controller()
 
-    rclpy.spin(minimal_publisher)
+    rclpy.spin(controller)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_publisher.destroy_node()
+    controller.destroy_node()
     rclpy.shutdown()
 
 
