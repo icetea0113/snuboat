@@ -1,0 +1,9 @@
+setup.py
+snumsg_pkg/__init__.py
+snumsg_pkg.egg-info/PKG-INFO
+snumsg_pkg.egg-info/SOURCES.txt
+snumsg_pkg.egg-info/dependency_links.txt
+snumsg_pkg.egg-info/top_level.txt
+snumsg_pkg/msg/__init__.py
+snumsg_pkg/msg/_mission_code.py
+snumsg_pkg/msg/_sensor.py

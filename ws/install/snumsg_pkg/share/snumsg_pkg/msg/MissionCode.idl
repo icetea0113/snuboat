@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from snumsg_pkg/msg/MissionCode.msg
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Time.idl"
+
+module snumsg_pkg {
+  module msg {
+    struct MissionCode {
+      builtin_interfaces::msg::Time tick;
+
+      string mission_code;
+    };
+  };
+};
