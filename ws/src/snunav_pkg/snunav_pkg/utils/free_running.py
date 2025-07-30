@@ -26,15 +26,36 @@ class FreeRunning(Node):
 
         # 각 함수별 파라미터 저장 변수들
         self._speed_mapping_params = {}
+        self._speed_mapping_start = False
+        self._speed_mapping_duration = 0.0
+        self._speed_mapping_end = False
+        
         self._turning_params = {}
+        self._turning_start = False
+        self._turning_duration = 0.0
+        self._turning_end = False
+        
         self._zigzag_params = {}
         self._zigzag_direction = 0
+        self._zigzag_start = False
+        self._zigzag_duration = 0.0
+        self._zigzag_end = False
+        
         self._pivot_turn_params = {}
+        self._pivot_turn_start = False
+        self._pivot_turn_duration = 0.0
+        self._pivot_turn_end = False
+
         self._crabbing_params = {}
+        self._crabbing_start = False
+        self._crabbing_duration = 0.0
+        self._crabbing_end = False
+        
         self._pull_out_params = {}
         self._pull_out_start = False
         self._pull_out_duration = 0.0
         self._pull_out_end = False
+        
         self._spiral_params = {}
         self._spiral_target_del_idx = 0
         self._spiral_start = False
@@ -50,17 +71,25 @@ class FreeRunning(Node):
         self.get_logger().info(f'  deadzone_start: {self.deadzone_start}')
         self.get_logger().info(f'  deadzone_end: {self.deadzone_end}')
 
-    def speed_mapping(self, ctrl, vel):
+    def speed_mapping(self, tick, ctrl):
         # 한 번만 파라미터 로드
         if not self._speed_mapping_loaded:
             self._speed_mapping_params = {
                 'len_timeseries': self.declare_parameter('free_running_mode.speed_mapping_mode.len_timeseries', 100).get_parameter_value().integer_value,
                 'target_rps': self.declare_parameter('free_running_mode.speed_mapping_mode.target_rps', 0.0).get_parameter_value().double_value,
                 'target_del': self.declare_parameter('free_running_mode.speed_mapping_mode.target_del', 0.0).get_parameter_value().double_value,
-                'conv_u_tol': self.declare_parameter('free_running_mode.speed_mapping_mode.conv_u_tol', 0.05).get_parameter_value().double_value
+                'conv_u_tol': self.declare_parameter('free_running_mode.speed_mapping_mode.conv_u_tol', 0.05).get_parameter_value().double_value,
+                'duration': self.declare_parameter('free_running_mode.speed_mapping_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._speed_mapping_loaded = True
-            
+        
+        if not self._speed_mapping_start:
+            self._speed_mapping_start = True
+            self._speed_mapping_duration = tick.sec + self._speed_mapping_params['duration']
+        if tick.sec >= self._speed_mapping_duration:
+            self.get_logger().info('Speed mapping completed.')
+            self._speed_mapping_end = True
+        
         rpsP, rpsS = ctrl[0], ctrl[1]
         
         target_rps = self._speed_mapping_params['target_rps']
@@ -80,17 +109,25 @@ class FreeRunning(Node):
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)    
         
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])  # [rpsP, rpsS, delP, delS]
-        return ctrl_cmd
+        return ctrl_cmd, self._speed_mapping_end
 
-    def turning(self, ctrl):
+    def turning(self, tick, ctrl):
         # 한 번만 파라미터 로드
         if not self._turning_loaded:
             self._turning_params = {
                 'target_rps': self.declare_parameter('free_running_mode.turning_mode.target_rps', 0.0).get_parameter_value().double_value,
-                'target_del': self.declare_parameter('free_running_mode.turning_mode.target_del', 0.0).get_parameter_value().double_value
+                'target_del': self.declare_parameter('free_running_mode.turning_mode.target_del', 0.0).get_parameter_value().double_value,
+                'duration': self.declare_parameter('free_running_mode.turning_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._turning_loaded = True
 
+        if not self._turning_start:
+            self._turning_start = True
+            self._turning_duration = tick.sec + self._turning_params['duration']
+        if tick.sec >= self._turning_duration:
+            self.get_logger().info('Turning completed.')
+            self._turning_end = True
+            
         rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
 
         target_rps = self._turning_params['target_rps']
@@ -128,15 +165,16 @@ class FreeRunning(Node):
         delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
 
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
-        return ctrl_cmd
+        return ctrl_cmd, self._turning_end
 
-    def zigzag(self, pos, ctrl):
+    def zigzag(self, tick, pos, ctrl):
         # 한 번만 파라미터 로드
         if not self._zigzag_loaded:
             self._zigzag_params = {
                 'target_rps': self.declare_parameter('free_running_mode.zigzag_mode.target_rps', 0.0).get_parameter_value().double_value,
                 'target_psi': self.declare_parameter('free_running_mode.zigzag_mode.target_psi', 0.0).get_parameter_value().double_value,
-                'initial_psi_direction': self.declare_parameter('free_running_mode.zigzag_mode.initial_psi_direction', 1).get_parameter_value().integer_value
+                'initial_psi_direction': self.declare_parameter('free_running_mode.zigzag_mode.initial_psi_direction', 1).get_parameter_value().integer_value,
+                'duration': self.declare_parameter('free_running_mode.zigzag_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._zigzag_loaded = True
         
@@ -146,6 +184,14 @@ class FreeRunning(Node):
         target_psi = self._zigzag_params['target_psi']
         initial_psi_direction = self._zigzag_params['initial_psi_direction']
         
+        if not self._zigzag_start:
+            self._zigzag_start = True
+            self._zigzag_direction = initial_psi_direction
+            self._zigzag_duration = tick.sec + self._zigzag_params['duration']
+        if tick.sec >= self._zigzag_duration:
+            self.get_logger().info('Zigzag completed.')
+            self._zigzag_end = True
+            
         if self._zigzag_direction == 0:
             self._zigzag_direction = initial_psi_direction
 
@@ -182,17 +228,24 @@ class FreeRunning(Node):
                 
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
         # del_rate를 사용한 zigzag 로직 구현
-        return ctrl_cmd
+        return ctrl_cmd, self._zigzag_end
 
-    def pivot_turn(self, ctrl):
+    def pivot_turn(self, tick, ctrl):
         # 한 번만 파라미터 로드
         if not self._pivot_turn_loaded:
             self._pivot_turn_params = {
                 'target_rpsP': self.declare_parameter('free_running_mode.pivot_turn_mode.target_rpsP', 0.0).get_parameter_value().double_value,
-                'target_rpsS': self.declare_parameter('free_running_mode.pivot_turn_mode.target_rpsS', 0.0).get_parameter_value().double_value
+                'target_rpsS': self.declare_parameter('free_running_mode.pivot_turn_mode.target_rpsS', 0.0).get_parameter_value().double_value,
+                'duration': self.declare_parameter('free_running_mode.pivot_turn_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._pivot_turn_loaded = True
-
+        if not self._pivot_turn_start:
+            self._pivot_turn_start = True
+            self._pivot_turn_duration = tick.sec + self._pivot_turn_params['duration']
+        if tick.sec >= self._pivot_turn_duration:
+            self.get_logger().info('Pivot turn completed.')
+            self._pivot_turn_end = True
+            
         rpsP, rpsS = ctrl[0], ctrl[1]
         
         target_rpsP = self._pivot_turn_params['target_rpsP']
@@ -214,18 +267,27 @@ class FreeRunning(Node):
 
         # deadzone_start, deadzone_end를 고려한 pivot turn 로직
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])  # [rpsP, rpsS, delP, delS]
-        return ctrl_cmd
+        return ctrl_cmd, self._pivot_turn_end
 
-    def crabbing(self, ctrl):
+    def crabbing(self, tick, ctrl):
         # 한 번만 파라미터 로드
         if not self._crabbing_loaded:
             self._crabbing_params = {
                 'target_rpsP': self.declare_parameter('free_running_mode.crabbing_mode.target_rpsP', 0.0).get_parameter_value().double_value,
                 'target_rpsS': self.declare_parameter('free_running_mode.crabbing_mode.target_rpsS', 0.0).get_parameter_value().double_value,
                 'target_delP': self.declare_parameter('free_running_mode.crabbing_mode.target_delP', 0.0).get_parameter_value().double_value,
-                'target_delS': self.declare_parameter('free_running_mode.crabbing_mode.target_delS', 0.0).get_parameter_value().double_value
+                'target_delS': self.declare_parameter('free_running_mode.crabbing_mode.target_delS', 0.0).get_parameter_value().double_value,
+                'duration': self.declare_parameter('free_running_mode.crabbing_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._crabbing_loaded = True
+        
+        if not self._crabbing_start:
+            self._crabbing_start = True
+            self._crabbing_duration = tick.sec + self._crabbing_params['duration']
+        if tick.sec >= self._crabbing_duration:
+            self.get_logger().info('Crabbing completed.')
+            self._crabbing_end = True
+            
         rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
         
         target_rpsP = self._crabbing_params['target_rpsP']
@@ -264,7 +326,7 @@ class FreeRunning(Node):
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
         
         # Implement the crabbing logic here
-        return ctrl_cmd
+        return ctrl_cmd, self._crabbing_end
 
     def pull_out(self, tick, ctrl):
         # 한 번만 파라미터 로드
@@ -272,7 +334,7 @@ class FreeRunning(Node):
             self._pull_out_params = {
                 'target_rps': self.declare_parameter('free_running_mode.pull_out_mode.target_rps', 0.0).get_parameter_value().double_value,
                 'target_del': self.declare_parameter('free_running_mode.pull_out_mode.target_del', 0.0).get_parameter_value().double_value,
-                'turning_duration': self.declare_parameter('free_running_mode.pull_out_mode.turning_duration', 0.0).get_parameter_value().double_value
+                'duration': self.declare_parameter('free_running_mode.pull_out_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._pull_out_loaded = True
         
@@ -286,7 +348,7 @@ class FreeRunning(Node):
             target_del = 0.0
         if not self._pull_out_start:
             self._pull_out_start = True
-            self._pull_out_duration = tick.sec + self._pull_out_params['turning_duration']
+            self._pull_out_duration = tick.sec + self._pull_out_params['duration']
         
         if abs(target_rps-rpsP) < self.rps_rate * self.dt:
             rpsP_cmd = target_rps
@@ -315,7 +377,7 @@ class FreeRunning(Node):
                 
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
         # Implement the pull out logic here
-        return ctrl_cmd
+        return ctrl_cmd, self._pull_out_end
 
     def spiral(self, tick, ctrl):
         # 한 번만 파라미터 로드
@@ -323,7 +385,7 @@ class FreeRunning(Node):
             self._spiral_params = {
                 'target_rps': self.declare_parameter('free_running_mode.spiral_mode.target_rps', 0.0).get_parameter_value().double_value,
                 'target_del': self.declare_parameter('free_running_mode.spiral_mode.target_del', [20.0, 10.0, 5.0]).get_parameter_value().double_array_value,
-                'turning_duration': self.declare_parameter('free_running_mode.spiral_mode.turning_duration', 0.0).get_parameter_value().double_value
+                'duration': self.declare_parameter('free_running_mode.spiral_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._spiral_loaded = True
             
@@ -348,7 +410,7 @@ class FreeRunning(Node):
                 self._spiral_start = False
             if not self._spiral_start:
                 self._spiral_start = True
-                self._spiral_duration = tick.sec + self._spiral_params['turning_duration']
+                self._spiral_duration = tick.sec + self._spiral_params['duration']
         
         if abs(target_rps-rpsP) < self.rps_rate * self.dt:
             rpsP_cmd = target_rps
@@ -378,7 +440,7 @@ class FreeRunning(Node):
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
             # Implement the spiral logic here
         # Implement the spiral logic here
-        return ctrl_cmd
+        return ctrl_cmd, self._spiral_end
 
 def main(args=None):
     rclpy.init(args=args)

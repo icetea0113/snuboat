@@ -36,33 +36,38 @@ controller:
         target_rps : 0.0
         target_del : 0.0
         conv_u_tol : 0.05 # [m/s]
+        duration : 0.0 # [s]
 
       turning_mode:
         target_rps : 0.0
         target_del : 0.0
+        duration : 0.0 # [s]
 
       zigzag_mode:
         target_rps : 0.0
         target_psi : 0.0
         initial_psi_direction : 1 # 1: Right, -1: Left
+        duration : 0.0 # [s]
 
       pivot_turn_mode:
         target_rpsP : 0.0
         target_rpsS : 0.0
+        duration : 0.0 # [s]
 
       crabbing_mode:
         target_rpsP : 0.0
         target_rpsS : 0.0
         target_delP : 0.0
         target_delS : 0.0
+        duration : 0.0 # [s]
 
       pull_out_mode:
         target_rps : 0.0
         target_del : 0.0
-        turning_duration : 0.0 # [s]
+        duration : 0.0 # [s]
 
       spiral_mode:
         target_rps : 0.0
         target_del : [20.0, 10.0, 5.0]
-        turning_duration : 0.0 # [s]
+        duration : 0.0 # [s]
 ##################################################################################

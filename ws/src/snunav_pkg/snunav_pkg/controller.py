@@ -65,24 +65,32 @@ class Controller(Node):
     def freeRunningController(self):
         ctrl_cmd = np.zeros(4)  # [rpsP, rpsS, delP, delS]
         submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
+        state = 0
         if submaneuver_mode == 0x00:
             target_rps = 0.0
-            ctrl_cmd = FreeRunning.speed_mapping(target_rps, self.vel)
+            ctrl_cmd, state = FreeRunning.speed_mapping(target_rps, self.vel)
         elif submaneuver_mode == 0x10:
-            ctrl_cmd = FreeRunning.turning(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.turning(self.pos, self.ctrl)
         elif submaneuver_mode == 0x20:
-            ctrl_cmd = FreeRunning.zigzag(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.zigzag(self.pos, self.ctrl)
         elif submaneuver_mode == 0x30:
-            ctrl_cmd = FreeRunning.pivot_turn(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.pivot_turn(self.pos, self.ctrl)
         elif submaneuver_mode == 0x40:
-            ctrl_cmd = FreeRunning.crabbing(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.crabbing(self.pos, self.ctrl)
         elif submaneuver_mode == 0x50:
-            ctrl_cmd = FreeRunning.pull_out(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.pull_out(self.pos, self.ctrl)
         elif submaneuver_mode == 0x60:
-            ctrl_cmd = FreeRunning.spiral(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.spiral(self.pos, self.ctrl)
         else:
+            self.status = 2  # pause
             raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
         
+        if self.status == 0:  # init
+            self.status = 1
+        if state == 1:
+            self.status = 3
+            ctrl_cmd = np.zeros(4)  # Stop the controller
+
         self.ctrl_cmd = ctrl_cmd
         ctrl_msg = Float32MultiArray()
         ctrl_msg.data = self.ctrl_cmd.tolist()
