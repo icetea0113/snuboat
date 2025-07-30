@@ -15,7 +15,7 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import String
+from std_msgs.msg import String, Float32MultiArray
 from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
 from utils.free_running import FreeRunning
@@ -38,6 +38,10 @@ class Controller(Node):
             'mission_code',
             self.mission_callback,
             10)
+        self.__ctrlcmdPublisher = self.create_publisher(
+            Float32MultiArray,
+            'ctrl_cmd',
+            10)
 
     def mission_callback(self, msg):
         mission_code = int(msg.mission_code, 16)
@@ -59,10 +63,11 @@ class Controller(Node):
             raise ValueError("Unknown maneuver mode: {}".format(hex(maneuver_mode)))
     
     def freeRunningController(self):
+        ctrl_cmd = np.zeros(4)  # [rpsP, rpsS, delP, delS]
         submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4
         if submaneuver_mode == 0x00:
             target_rps = 0.0
-            FreeRunning.speed_mapping(target_rps, self.vel)
+            ctrl_cmd = FreeRunning.speed_mapping(target_rps, self.vel)
         elif submaneuver_mode == 0x10:
             ctrl_cmd = FreeRunning.turning(self.pos, self.ctrl)
         elif submaneuver_mode == 0x20:
@@ -77,6 +82,12 @@ class Controller(Node):
             ctrl_cmd = FreeRunning.spiral(self.pos, self.ctrl)
         else:
             raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
+        
+        self.ctrl_cmd = ctrl_cmd
+        ctrl_msg = Float32MultiArray()
+        ctrl_msg.data = self.ctrl_cmd.tolist()
+        self.__ctrlcmdPublisher.publish(ctrl_msg)
+        self.get_logger().info(f'Published control command: {self.ctrl_cmd}')
 
     def dockingController(self):
         submaneuver_mode = (self.mission_code & 0x00000FF0) >> 4

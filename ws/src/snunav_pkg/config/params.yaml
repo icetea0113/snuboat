@@ -1,6 +1,7 @@
 ################################################################################
 mission_director:
   ros__parameters:
+    frequency: 10.0 # [Hz]
     maneuver_mode: '1' # 1: Free running, 2: Docking, 3: DP, 4: Navigation
 
     # 1: Free running
@@ -27,40 +28,41 @@ controller:
       del_max: 30.0 # [deg]
       deadzone_start: 1 # rps
       deadzone_end:   1 # rps
+      frequency: 10.0 # [Hz]
 
     free_running_mode : 
       speed_mapping_mode:
         len_timeseries: 100
-        rps_cmd : 0.0
-        del_cmd : 0.0
+        target_rps : 0.0
+        target_del : 0.0
         conv_u_tol : 0.05 # [m/s]
 
       turning_mode:
-        rps_cmd : 0.0
-        del_cmd : 0.0
+        target_rps : 0.0
+        target_del : 0.0
 
       zigzag_mode:
-        rps_cmd : 0.0
+        target_rps : 0.0
         target_psi : 0.0
         initial_psi_direction : 1 # 1: Right, -1: Left
 
       pivot_turn_mode:
-        rpsP_cmd : 0.0
-        rpsS_cmd : 0.0
+        target_rpsP : 0.0
+        target_rpsS : 0.0
 
       crabbing_mode:
-        rpsP_cmd : 0.0
-        rpsS_cmd : 0.0
-        delP_cmd : 0.0
-        delS_cmd : 0.0
+        target_rpsP : 0.0
+        target_rpsS : 0.0
+        target_delP : 0.0
+        target_delS : 0.0
 
       pull_out_mode:
-        rps_cmd : 0.0
-        del_cmd : 0.0
+        target_rps : 0.0
+        target_del : 0.0
         turning_duration : 0.0 # [s]
 
       spiral_mode:
-        rps_cmd : 0.0
-        del_cmd : [20.0, 10.0, 5.0]
+        target_rps : 0.0
+        target_del : [20.0, 10.0, 5.0]
         turning_duration : 0.0 # [s]
 ##################################################################################

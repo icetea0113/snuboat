@@ -28,6 +28,7 @@ setup(
             'motor_interface = snunav_pkg.motor_interface:main',
             'navigation = snunav_pkg.navigation:main',
             'mission_director = snunav_pkg.mission_director:main',
+            'controller = snunav_pkg.controller:main',
         ],
     },
 )
