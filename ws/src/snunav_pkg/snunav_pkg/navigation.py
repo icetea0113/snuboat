@@ -15,6 +15,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
+from nav_msgs.msg import Odometry
 from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
 
@@ -55,7 +56,7 @@ class Navigation(Node):
         
         # Sensor Subscribers (assuming Float32MultiArray: [status, pose(6), vel(6)])
         self.qualisys_subscriber_ = self.create_subscription(Float32MultiArray, 'qualisys_data', self.qualisys_callback, 10)
-        self.slam_subscriber_ = self.create_subscription(Float32MultiArray, 'slam_data', self.slam_callback, 10)
+        self.slam_subscriber_ = self.create_subscription(Odometry, '/kiss/odometry', self.slam_callback, 10)
         self.gps_rtk_subscriber_ = self.create_subscription(Float32MultiArray, 'gps_rtk_data', self.gps_rtk_callback, 10)
         self.marker_subscriber_ = self.create_subscription(Float32MultiArray, 'marker_data', self.marker_callback, 10)
 
@@ -103,10 +104,21 @@ class Navigation(Node):
             self.vel_qualisys = np.array(msg.data[7:13], dtype=np.float32)
 
     def slam_callback(self, msg):
-        if len(msg.data) == 13:
-            self.status_slam = int(msg.data[0])
-            self.pose_slam = np.array(msg.data[1:7], dtype=np.float32)
-            self.vel_slam = np.array(msg.data[7:13], dtype=np.float32)
+        self.status_slam = STATUS_SLAM_ON
+        
+        pose = msg.pose.pose
+        x, y, z, w = pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w
+            
+        roll = np.arctan2(2*(w*x + y*z), 1 - 2*(x*x + y*y))
+        pitch = np.arcsin(2*(w*y - z*x))
+        yaw = np.arctan2(2*(w*z + x*y), 1 - 2*(y*y + z*z))
+        
+        self.pose_slam = np.array([pose.position.x, pose.position.y, pose.position.z, 
+                                roll, pitch, yaw], dtype=np.float32)
+        
+        twist = msg.twist.twist
+        self.vel_slam = np.array([twist.linear.x, twist.linear.y, twist.linear.z, 
+                                twist.angular.x, twist.angular.y, twist.angular.z], dtype=np.float32)
 
     def gps_rtk_callback(self, msg):
         if len(msg.data) == 13:

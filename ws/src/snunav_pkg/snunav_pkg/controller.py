@@ -15,7 +15,7 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import String, Float32MultiArray
+from std_msgs.msg import String, Float32MultiArray, Int32
 from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
 from utils.free_running import FreeRunning
@@ -41,6 +41,10 @@ class Controller(Node):
         self.__ctrlcmdPublisher = self.create_publisher(
             Float32MultiArray,
             'ctrl_cmd',
+            10)
+        self.status_publisher = self.create_publisher(
+            Int32,
+            'ctrl_status',
             10)
 
     def mission_callback(self, msg):
@@ -91,6 +95,12 @@ class Controller(Node):
         if state == 1:
             self.status = 3
             ctrl_cmd = np.zeros(4)  # Stop the controller
+            
+        status_msg = Int32()
+        status_msg.data = self.status
+        self.status_publisher.publish(status_msg)
+        self.get_logger().info(f'Published status command: {self.status}')
+
 
         self.ctrl_cmd = ctrl_cmd
         ctrl_msg = Float32MultiArray()

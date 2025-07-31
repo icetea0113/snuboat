@@ -16,6 +16,7 @@ import os
 import rclpy
 from rclpy.node import Node
 
+from std_msgs.msg import Int32
 from snumsg_pkg.msg import MissionCode  # 변경: std_msgs/String → MissionCode
 
 class MissionDirector(Node):
@@ -42,6 +43,8 @@ class MissionDirector(Node):
         self.update_params()
         self.timer = self.create_timer(1/self.frequency, self.timer_callback)
 
+        self.status_subscriber_ = self.create_subscription(Int32, 'ctrl_status', self. status_callback, 10)
+
     def update_params(self):
         """현재 파라미터 서버에 설정된 값을 읽어와서 속성에 저장합니다."""
         # get_parameter().value 가 int 등이 올 수 있으므로 str()로 변환
@@ -55,7 +58,8 @@ class MissionDirector(Node):
 
     def timer_callback(self):
         # 런타임 중에 파라미터가 바뀔 수도 있으므로, 매번 콜백마다 갱신
-        self.update_params()
+        # self.update_params()
+        # <!> yaml 파일에서 읽어오는 것은 처음 실행할 때 뿐이고
 
         # MissionCode 메시지 생성 및 발행
         msg = MissionCode()
@@ -73,6 +77,9 @@ class MissionDirector(Node):
 
         self.publisher_.publish(msg)
         self.get_logger().info(f'Publishing mission_code: "{msg.mission_code}"')
+
+    def status_callback(self, msg):
+        self.status = msg.data
 
 def main(args=None):
     rclpy.init(args=args)

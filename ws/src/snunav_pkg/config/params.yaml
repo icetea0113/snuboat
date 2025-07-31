@@ -15,7 +15,7 @@ mission_director:
     sub_maneuver_mode: '0'
 
     subsub_maneuver_mode: '0' # 0: Approaching stage, 1: Turning stage, 2: Entering stage, 3: Pushing stage
-    sensor_mode: '0' # 0: Qualisys, 1: SLAM, 2: GPS-RTK, 3: Marker
+    sensor_mode: '1' # 0: Qualisys, 1: SLAM, 2: GPS-RTK, 3: Marker
     motor_mode: '0' # 0: Manual, 1: Auto
     status: '0' # Initializing, 1: Running, 2: Stop, 3: Standby, 4: Complete
 ################################################################################
