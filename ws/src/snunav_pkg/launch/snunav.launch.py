@@ -6,18 +6,23 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     ld = LaunchDescription()
-    config = os.path.join(
+        
+    config_path = os.path.join(
         get_package_share_directory('snunav_pkg'),
         'config',
         'params.yaml'
-        )
+    )
+    with open(config_path, 'r') as file:
+        config = yaml.safe_load(file)
         
     mission_params = {}
+    controller_params = {}
     if 'mission_director' in config:
         mission_params = config.get('mission_director', {}).get('ros__parameters', {})
     if 'controller' in config:
         controller_params = config.get('controller', {}).get('ros__parameters', {})
-
+        
+        
     return LaunchDescription([
         Node(
             package='snunav_pkg',
