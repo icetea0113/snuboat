@@ -1,0 +1,19 @@
+################################################################################
+mission_director:
+  ros__parameters:
+    maneuver_mode: '1' # 1: Free running, 2: Docking, 3: DP, 4: Navigation
+    # 1: Free running
+      # 00: Speed mapping, 01: Turning, 02: Zigzag, 03: Pivot turn, 04: Crabbing, 05: Pull out, 06: Spiral
+    # 2: Docking
+      # 0: Heuristic (Entering), 1: Deep-RL (Entering), 2: Heuristic (Multi-stage), 3 : Deep-RL (Multi-stage)
+        # 0: Approaching stage, 1: Turning stage, 2: Entering stage, 3: Pushing stage
+    # 3: DP
+      # TBD
+    # 4: Navigation
+      # TBD
+    sub_maneuver_mode: '01' 
+    sensor_mode: '0' # 0: Qualisys, 1: SLAM, 2: GPS-RTK, 3: Marker
+    motor_mode: '0' # 0: Manual, 1: Auto
+    status: '0' # Initializing, 1: Running, 2: Stop, 3: Standby, 4: Complete
+################################################################################
+
