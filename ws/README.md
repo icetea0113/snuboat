@@ -8,8 +8,11 @@ rosdep update
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --packages-select snumsg_pkg snunav_pkg --symlink-install
 
-# 3. 빌드 결과 적용 (둘 중 하나만 하여도 됨)
-source ~/snu_boat_ws/install/setup.bash
-source ~/snu_bost_ws/install/local_setup.bash
+# 3. 빌드 결과 적용 at the path of ws(둘 중 하나만 하여도 됨)
+source ./install/setup.bash
+source ./install/local_setup.bash
 
 source ~/.bashrc
+
+# 4. roslaunch
+ros2 launch snunav_pkg sils.launch.py

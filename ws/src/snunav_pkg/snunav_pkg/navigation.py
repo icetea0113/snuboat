@@ -37,6 +37,9 @@ STATUS_GPS_RTK_STANDBY = "22"
 STATUS_MARKER_OFF = "30"
 STATUS_MARKER_ON = "31"
 STATUS_MARKER_STANDBY = "32"
+STATUS_SILS_OFF = "40"
+STATUS_SILS_ON = "41"
+STATUS_SILS_STANDBY = "42"
 STATUS_ERROR = "99"
 
 class Navigation(Node):
@@ -59,6 +62,7 @@ class Navigation(Node):
         self.slam_subscriber_ = self.create_subscription(Odometry, '/kiss/odometry', self.slam_callback, 10)
         self.gps_rtk_subscriber_ = self.create_subscription(Float32MultiArray, 'gps_rtk_data', self.gps_rtk_callback, 10)
         self.marker_subscriber_ = self.create_subscription(Float32MultiArray, 'marker_data', self.marker_callback, 10)
+        self.sils_subscriber_ = self.create_subscription(Float32MultiArray, 'sils_navigation_data', self.sils_callback, 10)
 
         # Timer
         timer_period = 0.1  # seconds
@@ -88,6 +92,11 @@ class Navigation(Node):
         self.status_marker = STATUS_MARKER_OFF
         self.pose_marker = np.zeros(6, dtype=np.float32)
         self.vel_marker = np.zeros(6, dtype=np.float32)
+        
+        self.status_sils = STATUS_SILS_OFF
+        self.pose_sils = np.zeros(6, dtype=np.float32)
+        self.vel_sils = np.zeros(6, dtype=np.float32)
+
 
     def mission_callback(self, msg):
         # motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
@@ -131,6 +140,14 @@ class Navigation(Node):
             self.status_marker = int(msg.data[0])
             self.pose_marker = np.array(msg.data[1:7], dtype=np.float32)
             self.vel_marker = np.array(msg.data[7:13], dtype=np.float32)
+            
+    def sils_callback(self, msg):
+        self.status_sils = STATUS_SILS_ON
+        if len(msg.data) == 13:
+            self.status_sils = int(msg.data[0])
+            self.pose_sils = np.array(msg.data[1:7], dtype=np.float32)
+            self.vel_sils = np.array(msg.data[7:13], dtype=np.float32)
+            self.get_logger().info(f'SILS Status: {self.status_sils}, Pose: {self.pose_sils}, Velocity: {self.vel_sils}')
 
     ##############################################################################
     

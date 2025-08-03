@@ -18,7 +18,7 @@ from rclpy.node import Node
 from std_msgs.msg import String, Float32MultiArray, Int32
 from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
-from utils.free_running import FreeRunning
+from snunav_pkg.utils.free_running import FreeRunning
 # from docking import heuristicDocking_Entering, DRLDocking_Entering, DRL_Approach, DRL_Turning, DRL_Entering, DRL_Pushing, heuristicDocking_Approaching, heuristicDocking_Turning, heuristicDocking_Entering, heuristicDocking_Pushing
 # from DP import DP_controlMethod1, DP_controlMethod2
 # from PP import PP_algorithm1, PP_algorithm2
@@ -38,9 +38,13 @@ class Controller(Node):
             'mission_code',
             self.mission_callback,
             10)
-        self.__ctrlcmdPublisher = self.create_publisher(
+        self.__ctrlcmdboatPublisher = self.create_publisher(
             Float32MultiArray,
-            'ctrl_cmd',
+            'ctrl_cmd_boat',
+            10)
+        self.__ctrlcmdsilsPublisher = self.create_publisher(
+            Float32MultiArray,
+            'ctrl_cmd_sils',
             10)
         self.status_publisher = self.create_publisher(
             Int32,
@@ -49,23 +53,42 @@ class Controller(Node):
 
     def mission_callback(self, msg):
         mission_code = int(msg.mission_code, 16)
-        self.mission_code = (mission_code & 0x00FFF0)
+        self.mission_code = (mission_code & 0x000FFF0)
+        self.is_sils = (mission_code & 0xF000000) >> 24
+        self.get_logger().info('SILS mode: %s' % self.is_sils)
         self.controllerMode()
         self.get_logger().info('Received maneuver code: "%s"' % hex(self.mission_code))
 
     def controllerMode(self):
         maneuver_mode = (self.mission_code & 0x00F000) >> 12
-        if maneuver_mode == 0x0:
-            self.freeRunningController()
-        elif maneuver_mode == 0x1:
-            self.dockingController()
+        if maneuver_mode == 0x1:
+            # self.freeRunningController()
+            self.ctrl_cmd = np.array([20.0, 20.0, 30.0, 30.0])  # Example control command
         elif maneuver_mode == 0x2:
-            self.DPController()
+            self.dockingController()
         elif maneuver_mode == 0x3:
+            self.DPController()
+        elif maneuver_mode == 0x4:
             self.PPController()
         else:
             raise ValueError("Unknown maneuver mode: {}".format(hex(maneuver_mode)))
-    
+
+        status_msg = Int32()
+        status_msg.data = self.status
+        self.status_publisher.publish(status_msg)
+        self.get_logger().info(f'Published status command: {self.status}')
+
+        ctrl_msg = Float32MultiArray()
+        ctrl_msg.data = self.ctrl_cmd.tolist()
+        if self.is_sils:
+            self.__ctrlcmdsilsPublisher.publish(ctrl_msg)
+            self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
+        else:
+            self.__ctrlcmdboatPublisher.publish(ctrl_msg)
+            self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
+        
+
+
     def freeRunningController(self):
         # motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
         ctrl_cmd = np.zeros(4)  # [rpsP, rpsS, delP, delS]
@@ -96,24 +119,17 @@ class Controller(Node):
             self.status = 3
             ctrl_cmd = np.zeros(4)  # Stop the controller
             
-        status_msg = Int32()
-        status_msg.data = self.status
-        self.status_publisher.publish(status_msg)
-        self.get_logger().info(f'Published status command: {self.status}')
-
-
         self.ctrl_cmd = ctrl_cmd
-        ctrl_msg = Float32MultiArray()
-        ctrl_msg.data = self.ctrl_cmd.tolist()
-        self.__ctrlcmdPublisher.publish(ctrl_msg)
-        self.get_logger().info(f'Published control command: {self.ctrl_cmd}')
+
 
     def dockingController(self):
         submaneuver_mode = (self.mission_code & 0x000FF0) >> 4
         if submaneuver_mode == 0x00:
-            self.heuristicDocking_Entering()
+            pass
+            # self.heuristicDocking_Entering()
         elif submaneuver_mode == 0x10:
-            self.DRLDocking_Entering()
+            pass
+            # self.DRLDocking_Entering()
         elif submaneuver_mode == 0x20:
             stage = submaneuver_mode & 0x0F
             if stage == 0x01:

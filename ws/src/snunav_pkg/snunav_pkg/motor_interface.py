@@ -13,6 +13,9 @@
 # limitations under the License.
 
 import rclpy
+import socket
+import threading
+import time
 from rclpy.node import Node
 
 from std_msgs.msg import String, Float32MultiArray
@@ -22,52 +25,28 @@ class MotorInterface(Node):
 
     def __init__(self):
         super().__init__('motor_interface')
+        self.DEST  = ("192.168.1.100", 7777)
+        self.BIND  = ("192.168.1.2", 7777)  # 수신 포트
 
-        self.state_publisher_ = self.create_publisher(
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind(self.BIND)
+        
+        self.ctrl_cmd_boat_sub = self.create_subscription(
             Float32MultiArray,
-            'ctrl',
+            'ctrl_cmd_boat',
+            self.motor_interface_callback,
             10)
         
-        timer_period = 0.1  # seconds
-        
-        self.subscriber_ = self.create_subscription(
+        self.ctrl_fb_boat_pub = self.create_publisher(
             Float32MultiArray,
-            'ctrl_cmd',
-            self.listener_callback,
-            10)
-        self.motor_state_subscriber_ = self.create_subscription(
-            Float32MultiArray,
-            'motor_state',
-            self.motor_state_callback,
-            10)
+            'ctrl_fb_boat',
+            10)        
 
-        self.cmd_rps_p, self.cmd_del_p = 0.0, 0.0 
-        self.cmd_rps_s, self.cmd_del_s = 0.0, 0.0
+    def motor_interface_callback(self, msg):
+        # receive feedback from boat
         
-        self.rps_p, self.del_p = 0.0, 0.0
-        self.rps_s, self.del_s = 0.0, 0.0
-
-    def listener_callback(self, msg):
-        self.cmd_rps_p, self.cmd_del_p, self.cmd_rps_s, self.cmd_del_s = msg.data
-        self.get_logger().info('Received command: '
-                                'cmd_rps_p: %.2f, cmd_del_p: %.2f,'
-                                'cmd_rps_s: %.2f, cmd_del_s: %.2f' %
-                                (self.cmd_rps_p, self.cmd_del_p,
-                                self.cmd_rps_s, self.cmd_del_s))
-
-    def motor_state_callback(self, msg):
-        self.rps_p, self.del_p, self.rps_s, self.del_s = msg.data
-        
-        # Publish the received motor state
-        state_msg = Float32MultiArray()
-        state_msg.data = [self.rps_p, self.del_p, self.rps_s, self.del_s]
-        self.state_publisher_.publish(state_msg)
-        
-        self.get_logger().info('Actual state: '
-                                'rps_p: %.2f, del_p: %.2f,'
-                                'rps_s: %.2f, del_s: %.2f' %
-                                (self.rps_p, self.del_p,
-                                self.rps_s, self.del_s))
+        # make ctrl cmd string
+        pass
         
 def main(args=None):
     rclpy.init(args=args)

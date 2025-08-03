@@ -14,38 +14,77 @@
 
 import rclpy
 from rclpy.node import Node
+from std_msgs.msg import String, Float32MultiArray, Int32
+from snumsg_pkg.msg import MissionCode, Sensor
+import numpy as np
 
 from std_msgs.msg import String
 
 
-class MinimalPublisher(Node):
+class SILS(Node):
 
     def __init__(self):
-        super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(String, 'topic', 10)
-        timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
+        super().__init__('sils')
+        self.pos = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])  # [x, y, z, roll, pitch, yaw]
+        self.vel = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])  # [vx, vy, vz, vroll, vpitch, vyaw]
+        self.port_rps_cmd = 0.0
+        self.port_steer_cmd = 0.0
+        self.stbd_rps_cmd = 0.0
+        self.stbd_steer_cmd = 0.0
+        self.port_rps_fb = 0.0
+        self.port_steer_fb = 0.0
+        self.stbd_rps_fb = 0.0
+        self.stbd_steer_fb = 0.0
+        # Subscribers
+        self.ctrl_cmd = self.create_subscription(
+            Float32MultiArray,
+            'ctrl_cmd_sils',
+            self.sils_callback,
+            10)
+        self.navigation_sils_pub = self.create_publisher(Float32MultiArray, 'sils_navigation_data', 10)
+        self.motor_fb_sils_pub = self.create_publisher(Float32MultiArray, 'sils_motor_fb_data', 10)
 
-    def timer_callback(self):
-        msg = String()
-        msg.data = 'Hello World: %d' % self.i
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
-
+    def sils_callback(self, msg):
+        if len(msg.data) == 4:
+            self.port_rps_cmd = float(msg.data[0])
+            self.port_steer_cmd = float(msg.data[1])
+            self.stbd_rps_cmd = float(msg.data[2])
+            self.stbd_steer_cmd = float(msg.data[3])
+            self.get_logger().info(f'SILS control command received: '
+                                   f'Port RPS: {self.port_rps_cmd}, Port Steer: {self.port_steer_cmd}, '
+                                   f'Starboard RPS: {self.stbd_rps_cmd}, Starboard Steer: {self.stbd_steer_cmd}')
+        else:
+            self.get_logger().error('Invalid SILS control command received. Expected 4 values.')
+        
+        # Boat Dynamics Simulation
+        
+        #Publish Navigation Data
+        nav_msg = Float32MultiArray()
+        nav_msg.data = [
+            self.pos[0], self.pos[1], self.pos[2],
+            self.pos[3], self.pos[4], self.pos[5],
+            self.vel[0], self.vel[1], self.vel[2],
+            self.vel[3], self.vel[4], self.vel[5]]
+        self.navigation_sils_pub.publish(nav_msg)
+        self.get_logger().info(f'Published SILS navigation data: {nav_msg.data}')
+        
+        #Publish Motor Feedback Data
+        motor_fb_msg = Float32MultiArray()
+        motor_fb_msg.data = [self.port_rps_fb, self.port_steer_fb, self.stbd_rps_fb, self.stbd_steer_fb]
+        self.motor_fb_sils_pub.publish(motor_fb_msg)
+        self.get_logger().info(f'Published SILS motor feedback data: {motor_fb_msg.data}')
 
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_publisher = MinimalPublisher()
+    sils = SILS()
 
-    rclpy.spin(minimal_publisher)
+    rclpy.spin(sils)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_publisher.destroy_node()
+    sils.destroy_node()
     rclpy.shutdown()
 
 

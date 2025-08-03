@@ -1,0 +1,1 @@
+/root/snu/snuboat/ws/build/snumsg_pkg/ament_cmake_python/snumsg_pkg/snumsg_pkg.egg-info/SOURCES.txt

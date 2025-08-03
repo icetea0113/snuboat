@@ -7,7 +7,7 @@ package_name = 'snunav_pkg'
 setup(
     name=package_name,
     version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    packages=find_packages(include=[package_name, f'{package_name}.*']),
     data_files=[
         ('share/'+package_name,["package.xml"]),
         ('share/ament_index/resource_index/packages',
@@ -29,6 +29,7 @@ setup(
             'navigation = snunav_pkg.navigation:main',
             'mission_director = snunav_pkg.mission_director:main',
             'controller = snunav_pkg.controller:main',
+            'sils = snunav_pkg.sils:main',
         ],
     },
 )

@@ -1,0 +1,267 @@
+[0.000000] (-) TimerEvent: {}
+[0.000070] (-) JobUnselected: {'identifier': 'kiss_icp'}
+[0.000087] (-) JobUnselected: {'identifier': 'lio_sam'}
+[0.000097] (-) JobUnselected: {'identifier': 'microstrain_inertial_description'}
+[0.000106] (-) JobUnselected: {'identifier': 'microstrain_inertial_driver'}
+[0.000115] (-) JobUnselected: {'identifier': 'microstrain_inertial_examples'}
+[0.000123] (-) JobUnselected: {'identifier': 'microstrain_inertial_msgs'}
+[0.000129] (-) JobUnselected: {'identifier': 'microstrain_inertial_rqt'}
+[0.000137] (-) JobUnselected: {'identifier': 'ouster_ros'}
+[0.000145] (-) JobUnselected: {'identifier': 'ouster_sensor_msgs'}
+[0.000154] (snumsg_pkg) JobQueued: {'identifier': 'snumsg_pkg', 'dependencies': OrderedDict()}
+[0.000166] (snunav_pkg) JobQueued: {'identifier': 'snunav_pkg', 'dependencies': OrderedDict([('snumsg_pkg', '/root/snu/snuboat/ws/install/snumsg_pkg')])}
+[0.000416] (snumsg_pkg) JobStarted: {'identifier': 'snumsg_pkg'}
+[0.002798] (snumsg_pkg) JobProgress: {'identifier': 'snumsg_pkg', 'progress': 'cmake'}
+[0.003163] (snumsg_pkg) Command: {'cmd': ['/usr/bin/cmake', '/root/snu/snuboat/ws/src/snumsg_pkg', '-DAMENT_CMAKE_SYMLINK_INSTALL=1', '-DCMAKE_INSTALL_PREFIX=/root/snu/snuboat/ws/install/snumsg_pkg'], 'cwd': '/root/snu/snuboat/ws/build/snumsg_pkg', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('HOSTNAME', '8937392d4ac4'), ('GIT_ASKPASS', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/extensions/git/dist/askpass.sh'), ('SHLVL', '2'), ('LD_LIBRARY_PATH', '/root/snu/snuboat/ws/install/snumsg_pkg/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/bin/helpers/browser.sh'), ('HOME', '/root'), ('OLDPWD', '/root/snu/snuboat/ws/install'), ('TERM_PROGRAM_VERSION', '1.99.2'), ('VSCODE_IPC_HOOK_CLI', '/tmp/vscode-ipc-5aa4637a-7b24-43d3-8dbe-97b40016cea1.sock'), ('ROS_PYTHON_VERSION', '3'), ('VSCODE_GIT_ASKPASS_MAIN', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/extensions/git/dist/askpass-main.js'), ('PS1', '\\[\x1b]633;A\x07\\]\\[\\e[32m\\]\\u@\\h \\[\\e[33m\\]\\w \\[\\e[91m\\]$(parse_git_branch)\\[\\e[00m\\]$ \\[\x1b]633;B\x07\\]'), ('VSCODE_GIT_ASKPASS_NODE', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/node'), ('COLORTERM', 'truecolor'), ('REMOTE_CONTAINERS', 'true'), ('COLCON_PREFIX_PATH', '/root/snu/snuboat/ws/install'), ('ROS_DISTRO', 'humble'), ('REMOTE_CONTAINERS_IPC', '/tmp/vscode-remote-containers-ipc-ebb38cfb-68e5-45eb-8342-23c118b02121.sock'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm-256color'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/bin/remote-cli:/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand'), ('REMOTE_CONTAINERS_SOCKETS', '["/tmp/vscode-ssh-auth-ebb38cfb-68e5-45eb-8342-23c118b02121.sock"]'), ('LANG', 'en_US.UTF-8'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('VSCODE_GIT_IPC_HANDLE', '/tmp/vscode-git-f1f2abdf2a.sock'), ('TERM_PROGRAM', 'vscode'), ('SSH_AUTH_SOCK', '/tmp/vscode-ssh-auth-ebb38cfb-68e5-45eb-8342-23c118b02121.sock'), ('AMENT_PREFIX_PATH', '/root/snu/snuboat/ws/install/snunav_pkg:/root/snu/snuboat/ws/install/snumsg_pkg:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', ''), ('PWD', '/root/snu/snuboat/ws/build/snumsg_pkg'), ('PYTHONPATH', '/root/snu/snuboat/ws/build/snunav_pkg:/root/snu/snuboat/ws/install/snunav_pkg/lib/python3.10/site-packages:/root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/snu/snuboat/ws/install/snumsg_pkg:/root/snu/snuboat/ws/install/snunav_pkg:/opt/ros/humble')]), 'shell': False}
+[0.023868] (snumsg_pkg) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[0.044161] (snumsg_pkg) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[0.046720] (snumsg_pkg) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.069753] (snumsg_pkg) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[0.072644] (snumsg_pkg) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[0.072769] (snumsg_pkg) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[0.072934] (snumsg_pkg) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[0.074151] (snumsg_pkg) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[0.100399] (snumsg_pkg) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[0.100484] (-) TimerEvent: {}
+[0.103344] (snumsg_pkg) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[0.103468] (snumsg_pkg) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[0.103677] (snumsg_pkg) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[0.104316] (snumsg_pkg) StdoutLine: {'line': b'-- Found geometry_msgs: 4.9.0 (/opt/ros/humble/share/geometry_msgs/cmake)\n'}
+[0.155339] (snumsg_pkg) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter \n'}
+[0.177502] (snumsg_pkg) StdoutLine: {'line': b'-- Override CMake install command with custom implementation using symlinks instead of copying resources\n'}
+[0.196673] (snumsg_pkg) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.7 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[0.198024] (snumsg_pkg) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.7 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[0.200441] (snumsg_pkg) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.7 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[0.201207] (-) TimerEvent: {}
+[0.204272] (snumsg_pkg) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.209257] (snumsg_pkg) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.223471] (snumsg_pkg) StdoutLine: {'line': b'-- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)\n'}
+[0.303132] (-) TimerEvent: {}
+[0.324700] (snumsg_pkg) StdoutLine: {'line': b'-- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)\n'}
+[0.404095] (-) TimerEvent: {}
+[0.472709] (snumsg_pkg) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.504258] (-) TimerEvent: {}
+[0.532863] (snumsg_pkg) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.540873] (snumsg_pkg) StdoutLine: {'line': b'-- Found PythonInterp: /usr/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") \n'}
+[0.541309] (snumsg_pkg) StdoutLine: {'line': b'-- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)\n'}
+[0.549980] (snumsg_pkg) StdoutLine: {'line': b'-- Found PythonLibs: /usr/lib/aarch64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") \n'}
+[0.550111] (snumsg_pkg) StdoutLine: {'line': b'-- Using PYTHON_EXECUTABLE: /usr/bin/python3\n'}
+[0.550149] (snumsg_pkg) StdoutLine: {'line': b'-- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10\n'}
+[0.550168] (snumsg_pkg) StdoutLine: {'line': b'-- Using PYTHON_LIBRARIES: /usr/lib/aarch64-linux-gnu/libpython3.10.so\n'}
+[0.557207] (snumsg_pkg) StdoutLine: {'line': b'-- Found PythonExtra: .so  \n'}
+[0.579750] (snumsg_pkg) StdoutLine: {'line': b'-- Found ament_lint_auto: 0.12.14 (/opt/ros/humble/share/ament_lint_auto/cmake)\n'}
+[0.584834] (snumsg_pkg) StdoutLine: {'line': b"-- Added test 'lint_cmake' to check CMake code style\n"}
+[0.585157] (snumsg_pkg) StdoutLine: {'line': b"-- Added test 'xmllint' to check XML markup files\n"}
+[0.586370] (snumsg_pkg) StdoutLine: {'line': b'-- Configuring done\n'}
+[0.600391] (snumsg_pkg) StdoutLine: {'line': b'-- Generating done\n'}
+[0.604492] (snumsg_pkg) StdoutLine: {'line': b'-- Build files have been written to: /root/snu/snuboat/ws/build/snumsg_pkg\n'}
+[0.604525] (-) TimerEvent: {}
+[0.607544] (snumsg_pkg) CommandEnded: {'returncode': 0}
+[0.607756] (snumsg_pkg) JobProgress: {'identifier': 'snumsg_pkg', 'progress': 'build'}
+[0.608268] (snumsg_pkg) Command: {'cmd': ['/usr/bin/cmake', '--build', '/root/snu/snuboat/ws/build/snumsg_pkg', '--', '-j10', '-l10'], 'cwd': '/root/snu/snuboat/ws/build/snumsg_pkg', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('HOSTNAME', '8937392d4ac4'), ('GIT_ASKPASS', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/extensions/git/dist/askpass.sh'), ('SHLVL', '2'), ('LD_LIBRARY_PATH', '/root/snu/snuboat/ws/install/snumsg_pkg/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/bin/helpers/browser.sh'), ('HOME', '/root'), ('OLDPWD', '/root/snu/snuboat/ws/install'), ('TERM_PROGRAM_VERSION', '1.99.2'), ('VSCODE_IPC_HOOK_CLI', '/tmp/vscode-ipc-5aa4637a-7b24-43d3-8dbe-97b40016cea1.sock'), ('ROS_PYTHON_VERSION', '3'), ('VSCODE_GIT_ASKPASS_MAIN', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/extensions/git/dist/askpass-main.js'), ('PS1', '\\[\x1b]633;A\x07\\]\\[\\e[32m\\]\\u@\\h \\[\\e[33m\\]\\w \\[\\e[91m\\]$(parse_git_branch)\\[\\e[00m\\]$ \\[\x1b]633;B\x07\\]'), ('VSCODE_GIT_ASKPASS_NODE', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/node'), ('COLORTERM', 'truecolor'), ('REMOTE_CONTAINERS', 'true'), ('COLCON_PREFIX_PATH', '/root/snu/snuboat/ws/install'), ('ROS_DISTRO', 'humble'), ('REMOTE_CONTAINERS_IPC', '/tmp/vscode-remote-containers-ipc-ebb38cfb-68e5-45eb-8342-23c118b02121.sock'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm-256color'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/bin/remote-cli:/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand'), ('REMOTE_CONTAINERS_SOCKETS', '["/tmp/vscode-ssh-auth-ebb38cfb-68e5-45eb-8342-23c118b02121.sock"]'), ('LANG', 'en_US.UTF-8'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('VSCODE_GIT_IPC_HANDLE', '/tmp/vscode-git-f1f2abdf2a.sock'), ('TERM_PROGRAM', 'vscode'), ('SSH_AUTH_SOCK', '/tmp/vscode-ssh-auth-ebb38cfb-68e5-45eb-8342-23c118b02121.sock'), ('AMENT_PREFIX_PATH', '/root/snu/snuboat/ws/install/snunav_pkg:/root/snu/snuboat/ws/install/snumsg_pkg:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', ''), ('PWD', '/root/snu/snuboat/ws/build/snumsg_pkg'), ('PYTHONPATH', '/root/snu/snuboat/ws/build/snunav_pkg:/root/snu/snuboat/ws/install/snunav_pkg/lib/python3.10/site-packages:/root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/snu/snuboat/ws/install/snumsg_pkg:/root/snu/snuboat/ws/install/snunav_pkg:/opt/ros/humble')]), 'shell': False}
+[0.622723] (snumsg_pkg) StdoutLine: {'line': b'[  2%] \x1b[34m\x1b[1mGenerating C code for ROS interfaces\x1b[0m\n'}
+[0.626403] (snumsg_pkg) StdoutLine: {'line': b'[  5%] \x1b[34m\x1b[1mGenerating C++ code for ROS interfaces\x1b[0m\n'}
+[0.629258] (snumsg_pkg) StdoutLine: {'line': b'[  5%] Built target ament_cmake_python_symlink_snumsg_pkg\n'}
+[0.705165] (-) TimerEvent: {}
+[0.708840] (snumsg_pkg) StdoutLine: {'line': b'running egg_info\n'}
+[0.709042] (snumsg_pkg) StdoutLine: {'line': b'creating snumsg_pkg.egg-info\n'}
+[0.709270] (snumsg_pkg) StdoutLine: {'line': b'writing snumsg_pkg.egg-info/PKG-INFO\n'}
+[0.709332] (snumsg_pkg) StdoutLine: {'line': b'writing dependency_links to snumsg_pkg.egg-info/dependency_links.txt\n'}
+[0.709430] (snumsg_pkg) StdoutLine: {'line': b'writing top-level names to snumsg_pkg.egg-info/top_level.txt\n'}
+[0.709591] (snumsg_pkg) StdoutLine: {'line': b"writing manifest file 'snumsg_pkg.egg-info/SOURCES.txt'\n"}
+[0.710111] (snumsg_pkg) StdoutLine: {'line': b"reading manifest file 'snumsg_pkg.egg-info/SOURCES.txt'\n"}
+[0.710295] (snumsg_pkg) StdoutLine: {'line': b"writing manifest file 'snumsg_pkg.egg-info/SOURCES.txt'\n"}
+[0.722404] (snumsg_pkg) StdoutLine: {'line': b'[  5%] Built target ament_cmake_python_build_snumsg_pkg_egg\n'}
+[0.738790] (snumsg_pkg) StdoutLine: {'line': b'[  5%] Built target snumsg_pkg__cpp\n'}
+[0.739464] (snumsg_pkg) StdoutLine: {'line': b'[  7%] \x1b[32mBuilding C object CMakeFiles/snumsg_pkg__rosidl_generator_c.dir/rosidl_generator_c/snumsg_pkg/msg/detail/mission_code__functions.c.o\x1b[0m\n'}
+[0.739738] (snumsg_pkg) StdoutLine: {'line': b'[ 10%] \x1b[32mBuilding C object CMakeFiles/snumsg_pkg__rosidl_generator_c.dir/rosidl_generator_c/snumsg_pkg/msg/detail/sensor__functions.c.o\x1b[0m\n'}
+[0.743644] (snumsg_pkg) StdoutLine: {'line': b'[ 15%] \x1b[34m\x1b[1mGenerating C++ type support for eProsima Fast-RTPS\x1b[0m\n'}
+[0.743829] (snumsg_pkg) StdoutLine: {'line': b'[ 15%] \x1b[34m\x1b[1mGenerating C++ type support dispatch for ROS interfaces\x1b[0m\n'}
+[0.745255] (snumsg_pkg) StdoutLine: {'line': b'[ 17%] \x1b[34m\x1b[1mGenerating C++ introspection for ROS interfaces\x1b[0m\n'}
+[0.760626] (snumsg_pkg) StdoutLine: {'line': b'[ 20%] \x1b[32m\x1b[1mLinking C shared library libsnumsg_pkg__rosidl_generator_c.so\x1b[0m\n'}
+[0.774679] (snumsg_pkg) StdoutLine: {'line': b'[ 20%] Built target snumsg_pkg__rosidl_generator_c\n'}
+[0.779030] (snumsg_pkg) StdoutLine: {'line': b'[ 23%] \x1b[34m\x1b[1mGenerating C type support dispatch for ROS interfaces\x1b[0m\n'}
+[0.780180] (snumsg_pkg) StdoutLine: {'line': b'[ 25%] \x1b[34m\x1b[1mGenerating C type support for eProsima Fast-RTPS\x1b[0m\n'}
+[0.781128] (snumsg_pkg) StdoutLine: {'line': b'[ 28%] \x1b[34m\x1b[1mGenerating C introspection for ROS interfaces\x1b[0m\n'}
+[0.806128] (-) TimerEvent: {}
+[0.851475] (snumsg_pkg) StdoutLine: {'line': b'[ 30%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/snumsg_pkg/msg/sensor__type_support.cpp.o\x1b[0m\n'}
+[0.853214] (snumsg_pkg) StdoutLine: {'line': b'[ 33%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/snumsg_pkg/msg/mission_code__type_support.cpp.o\x1b[0m\n'}
+[0.869683] (snumsg_pkg) StdoutLine: {'line': b'[ 38%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/snumsg_pkg/msg/detail/mission_code__type_support.cpp.o\x1b[0m\n'}
+[0.869859] (snumsg_pkg) StdoutLine: {'line': b'[ 38%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/snumsg_pkg/msg/detail/sensor__type_support.cpp.o\x1b[0m\n'}
+[0.880451] (snumsg_pkg) StdoutLine: {'line': b'[ 43%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/snumsg_pkg/msg/detail/dds_fastrtps/mission_code__type_support.cpp.o\x1b[0m\n'}
+[0.880635] (snumsg_pkg) StdoutLine: {'line': b'[ 43%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/snumsg_pkg/msg/detail/dds_fastrtps/sensor__type_support.cpp.o\x1b[0m\n'}
+[0.896097] (snumsg_pkg) StdoutLine: {'line': b'[ 46%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_c.dir/rosidl_typesupport_c/snumsg_pkg/msg/mission_code__type_support.cpp.o\x1b[0m\n'}
+[0.901431] (snumsg_pkg) StdoutLine: {'line': b'[ 48%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_c.dir/rosidl_typesupport_c/snumsg_pkg/msg/sensor__type_support.cpp.o\x1b[0m\n'}
+[0.907132] (-) TimerEvent: {}
+[0.927099] (snumsg_pkg) StdoutLine: {'line': b'[ 51%] \x1b[32m\x1b[1mLinking CXX shared library libsnumsg_pkg__rosidl_typesupport_c.so\x1b[0m\n'}
+[0.931388] (snumsg_pkg) StdoutLine: {'line': b'[ 53%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/snumsg_pkg/msg/detail/mission_code__type_support_c.cpp.o\x1b[0m\n'}
+[0.932843] (snumsg_pkg) StdoutLine: {'line': b'[ 56%] \x1b[32mBuilding CXX object CMakeFiles/snumsg_pkg__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/snumsg_pkg/msg/detail/sensor__type_support_c.cpp.o\x1b[0m\n'}
+[0.941112] (snumsg_pkg) StdoutLine: {'line': b'[ 58%] \x1b[32mBuilding C object CMakeFiles/snumsg_pkg__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/snumsg_pkg/msg/detail/mission_code__type_support.c.o\x1b[0m\n'}
+[0.949608] (snumsg_pkg) StdoutLine: {'line': b'[ 58%] Built target snumsg_pkg__rosidl_typesupport_c\n'}
+[0.959145] (snumsg_pkg) StdoutLine: {'line': b'[ 61%] \x1b[32mBuilding C object CMakeFiles/snumsg_pkg__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/snumsg_pkg/msg/detail/sensor__type_support.c.o\x1b[0m\n'}
+[0.996267] (snumsg_pkg) StdoutLine: {'line': b'[ 64%] \x1b[32m\x1b[1mLinking C shared library libsnumsg_pkg__rosidl_typesupport_introspection_c.so\x1b[0m\n'}
+[1.008263] (-) TimerEvent: {}
+[1.020803] (snumsg_pkg) StdoutLine: {'line': b'[ 66%] \x1b[32m\x1b[1mLinking CXX shared library libsnumsg_pkg__rosidl_typesupport_cpp.so\x1b[0m\n'}
+[1.025901] (snumsg_pkg) StdoutLine: {'line': b'[ 66%] Built target snumsg_pkg__rosidl_typesupport_introspection_c\n'}
+[1.040824] (snumsg_pkg) StdoutLine: {'line': b'[ 66%] Built target snumsg_pkg__rosidl_typesupport_cpp\n'}
+[1.109155] (-) TimerEvent: {}
+[1.116551] (snumsg_pkg) StdoutLine: {'line': b'[ 69%] \x1b[32m\x1b[1mLinking CXX shared library libsnumsg_pkg__rosidl_typesupport_introspection_cpp.so\x1b[0m\n'}
+[1.130791] (snumsg_pkg) StdoutLine: {'line': b'[ 71%] \x1b[32m\x1b[1mLinking CXX shared library libsnumsg_pkg__rosidl_typesupport_fastrtps_c.so\x1b[0m\n'}
+[1.137386] (snumsg_pkg) StdoutLine: {'line': b'[ 74%] \x1b[32m\x1b[1mLinking CXX shared library libsnumsg_pkg__rosidl_typesupport_fastrtps_cpp.so\x1b[0m\n'}
+[1.145432] (snumsg_pkg) StdoutLine: {'line': b'[ 74%] Built target snumsg_pkg__rosidl_typesupport_introspection_cpp\n'}
+[1.157320] (snumsg_pkg) StdoutLine: {'line': b'[ 74%] Built target snumsg_pkg__rosidl_typesupport_fastrtps_c\n'}
+[1.162954] (snumsg_pkg) StdoutLine: {'line': b'[ 74%] Built target snumsg_pkg__rosidl_typesupport_fastrtps_cpp\n'}
+[1.168795] (snumsg_pkg) StdoutLine: {'line': b'[ 74%] Built target snumsg_pkg\n'}
+[1.175618] (snumsg_pkg) StdoutLine: {'line': b'[ 76%] \x1b[34m\x1b[1mGenerating Python code for ROS interfaces\x1b[0m\n'}
+[1.210808] (-) TimerEvent: {}
+[1.309633] (snumsg_pkg) StdoutLine: {'line': b'[ 76%] Built target snumsg_pkg__py\n'}
+[1.311088] (-) TimerEvent: {}
+[1.315721] (snumsg_pkg) StdoutLine: {'line': b'[ 79%] \x1b[32mBuilding C object CMakeFiles/snumsg_pkg__rosidl_generator_py.dir/rosidl_generator_py/snumsg_pkg/msg/_mission_code_s.c.o\x1b[0m\n'}
+[1.315850] (snumsg_pkg) StdoutLine: {'line': b'[ 82%] \x1b[32mBuilding C object CMakeFiles/snumsg_pkg__rosidl_generator_py.dir/rosidl_generator_py/snumsg_pkg/msg/_sensor_s.c.o\x1b[0m\n'}
+[1.355670] (snumsg_pkg) StdoutLine: {'line': b'[ 84%] \x1b[32m\x1b[1mLinking C shared library rosidl_generator_py/snumsg_pkg/libsnumsg_pkg__rosidl_generator_py.so\x1b[0m\n'}
+[1.369132] (snumsg_pkg) StdoutLine: {'line': b'[ 84%] Built target snumsg_pkg__rosidl_generator_py\n'}
+[1.376247] (snumsg_pkg) StdoutLine: {'line': b'[ 92%] \x1b[32mBuilding C object CMakeFiles/snumsg_pkg__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/snumsg_pkg/_snumsg_pkg_s.ep.rosidl_typesupport_c.c.o\x1b[0m\n'}
+[1.376334] (snumsg_pkg) StdoutLine: {'line': b'[ 92%] \x1b[32mBuilding C object CMakeFiles/snumsg_pkg__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/snumsg_pkg/_snumsg_pkg_s.ep.rosidl_typesupport_fastrtps_c.c.o\x1b[0m\n'}
+[1.376359] (snumsg_pkg) StdoutLine: {'line': b'[ 92%] \x1b[32mBuilding C object CMakeFiles/snumsg_pkg__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/snumsg_pkg/_snumsg_pkg_s.ep.rosidl_typesupport_introspection_c.c.o\x1b[0m\n'}
+[1.412127] (-) TimerEvent: {}
+[1.413265] (snumsg_pkg) StdoutLine: {'line': b'[100%] \x1b[32m\x1b[1mLinking C shared library rosidl_generator_py/snumsg_pkg/snumsg_pkg_s__rosidl_typesupport_introspection_c.cpython-310-aarch64-linux-gnu.so\x1b[0m\n'}
+[1.413361] (snumsg_pkg) StdoutLine: {'line': b'[100%] \x1b[32m\x1b[1mLinking C shared library rosidl_generator_py/snumsg_pkg/snumsg_pkg_s__rosidl_typesupport_fastrtps_c.cpython-310-aarch64-linux-gnu.so\x1b[0m\n'}
+[1.413458] (snumsg_pkg) StdoutLine: {'line': b'[100%] \x1b[32m\x1b[1mLinking C shared library rosidl_generator_py/snumsg_pkg/snumsg_pkg_s__rosidl_typesupport_c.cpython-310-aarch64-linux-gnu.so\x1b[0m\n'}
+[1.428164] (snumsg_pkg) StdoutLine: {'line': b'[100%] Built target snumsg_pkg__rosidl_typesupport_fastrtps_c__pyext\n'}
+[1.428281] (snumsg_pkg) StdoutLine: {'line': b'[100%] Built target snumsg_pkg__rosidl_typesupport_c__pyext\n'}
+[1.428305] (snumsg_pkg) StdoutLine: {'line': b'[100%] Built target snumsg_pkg__rosidl_typesupport_introspection_c__pyext\n'}
+[1.432635] (snumsg_pkg) CommandEnded: {'returncode': 0}
+[1.432916] (snumsg_pkg) JobProgress: {'identifier': 'snumsg_pkg', 'progress': 'install'}
+[1.436026] (snumsg_pkg) Command: {'cmd': ['/usr/bin/cmake', '--install', '/root/snu/snuboat/ws/build/snumsg_pkg'], 'cwd': '/root/snu/snuboat/ws/build/snumsg_pkg', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('HOSTNAME', '8937392d4ac4'), ('GIT_ASKPASS', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/extensions/git/dist/askpass.sh'), ('SHLVL', '2'), ('LD_LIBRARY_PATH', '/root/snu/snuboat/ws/install/snumsg_pkg/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/bin/helpers/browser.sh'), ('HOME', '/root'), ('OLDPWD', '/root/snu/snuboat/ws/install'), ('TERM_PROGRAM_VERSION', '1.99.2'), ('VSCODE_IPC_HOOK_CLI', '/tmp/vscode-ipc-5aa4637a-7b24-43d3-8dbe-97b40016cea1.sock'), ('ROS_PYTHON_VERSION', '3'), ('VSCODE_GIT_ASKPASS_MAIN', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/extensions/git/dist/askpass-main.js'), ('PS1', '\\[\x1b]633;A\x07\\]\\[\\e[32m\\]\\u@\\h \\[\\e[33m\\]\\w \\[\\e[91m\\]$(parse_git_branch)\\[\\e[00m\\]$ \\[\x1b]633;B\x07\\]'), ('VSCODE_GIT_ASKPASS_NODE', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/node'), ('COLORTERM', 'truecolor'), ('REMOTE_CONTAINERS', 'true'), ('COLCON_PREFIX_PATH', '/root/snu/snuboat/ws/install'), ('ROS_DISTRO', 'humble'), ('REMOTE_CONTAINERS_IPC', '/tmp/vscode-remote-containers-ipc-ebb38cfb-68e5-45eb-8342-23c118b02121.sock'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm-256color'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/root/.vscode-server/bin/4949701c880d4bdb949e3c0e6b400288da7f474b/bin/remote-cli:/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand'), ('REMOTE_CONTAINERS_SOCKETS', '["/tmp/vscode-ssh-auth-ebb38cfb-68e5-45eb-8342-23c118b02121.sock"]'), ('LANG', 'en_US.UTF-8'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('VSCODE_GIT_IPC_HANDLE', '/tmp/vscode-git-f1f2abdf2a.sock'), ('TERM_PROGRAM', 'vscode'), ('SSH_AUTH_SOCK', '/tmp/vscode-ssh-auth-ebb38cfb-68e5-45eb-8342-23c118b02121.sock'), ('AMENT_PREFIX_PATH', '/root/snu/snuboat/ws/install/snunav_pkg:/root/snu/snuboat/ws/install/snumsg_pkg:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', ''), ('PWD', '/root/snu/snuboat/ws/build/snumsg_pkg'), ('PYTHONPATH', '/root/snu/snuboat/ws/build/snunav_pkg:/root/snu/snuboat/ws/install/snunav_pkg/lib/python3.10/site-packages:/root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/snu/snuboat/ws/install/snumsg_pkg:/root/snu/snuboat/ws/install/snunav_pkg:/opt/ros/humble')]), 'shell': False}
+[1.438297] (snumsg_pkg) StdoutLine: {'line': b'-- Install configuration: ""\n'}
+[1.438565] (snumsg_pkg) StdoutLine: {'line': b'-- Execute custom install script\n'}
+[1.438869] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/ament_index/resource_index/rosidl_interfaces/snumsg_pkg\n'}
+[1.441745] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__functions.h\n'}
+[1.444222] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__struct.h\n'}
+[1.446590] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__type_support.h\n'}
+[1.449154] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__functions.h\n'}
+[1.451526] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__struct.h\n'}
+[1.453863] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__type_support.h\n'}
+[1.456224] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/mission_code.h\n'}
+[1.458558] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/rosidl_generator_c__visibility_control.h\n'}
+[1.461017] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/sensor.h\n'}
+[1.463573] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/environment/library_path.sh\n'}
+[1.466316] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/environment/library_path.dsv\n'}
+[1.469443] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__rosidl_typesupport_fastrtps_c.h\n'}
+[1.472926] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__rosidl_typesupport_fastrtps_c.h\n'}
+[1.476214] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/rosidl_typesupport_fastrtps_c__visibility_control.h\n'}
+[1.479493] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__builder.hpp\n'}
+[1.482366] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__struct.hpp\n'}
+[1.485217] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__traits.hpp\n'}
+[1.488064] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__type_support.hpp\n'}
+[1.498998] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__builder.hpp\n'}
+[1.503504] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__struct.hpp\n'}
+[1.506164] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__traits.hpp\n'}
+[1.508690] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__type_support.hpp\n'}
+[1.511017] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/mission_code.hpp\n'}
+[1.513222] (-) TimerEvent: {}
+[1.513425] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/rosidl_generator_cpp__visibility_control.hpp\n'}
+[1.515828] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/sensor.hpp\n'}
+[1.518438] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[1.521002] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[1.523497] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h\n'}
+[1.526030] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__rosidl_typesupport_introspection_c.h\n'}
+[1.528331] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__rosidl_typesupport_introspection_c.h\n'}
+[1.530818] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/rosidl_typesupport_introspection_c__visibility_control.h\n'}
+[1.533521] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/mission_code__rosidl_typesupport_introspection_cpp.hpp\n'}
+[1.535986] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/include/snumsg_pkg/snumsg_pkg/msg/detail/sensor__rosidl_typesupport_introspection_cpp.hpp\n'}
+[1.538487] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/environment/pythonpath.sh\n'}
+[1.540756] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/environment/pythonpath.dsv\n'}
+[1.543498] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg-0.0.0-py3.10.egg-info/PKG-INFO\n'}
+[1.545872] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg-0.0.0-py3.10.egg-info/SOURCES.txt\n'}
+[1.548173] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg-0.0.0-py3.10.egg-info/dependency_links.txt\n'}
+[1.550521] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg-0.0.0-py3.10.egg-info/top_level.txt\n'}
+[1.552971] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/__init__.py\n'}
+[1.555302] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/_snumsg_pkg_s.ep.rosidl_typesupport_c.c\n'}
+[1.557509] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/_snumsg_pkg_s.ep.rosidl_typesupport_fastrtps_c.c\n'}
+[1.559994] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/_snumsg_pkg_s.ep.rosidl_typesupport_introspection_c.c\n'}
+[1.562482] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/libsnumsg_pkg__rosidl_generator_py.so\n'}
+[1.564773] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/msg/__init__.py\n'}
+[1.567059] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/msg/_mission_code.py\n'}
+[1.569346] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/msg/_mission_code_s.c\n'}
+[1.571631] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/msg/_sensor.py\n'}
+[1.573982] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/msg/_sensor_s.c\n'}
+[1.576493] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/snumsg_pkg_s__rosidl_typesupport_c.cpython-310-aarch64-linux-gnu.so\n'}
+[1.578769] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/snumsg_pkg_s__rosidl_typesupport_fastrtps_c.cpython-310-aarch64-linux-gnu.so\n'}
+[1.581109] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/snumsg_pkg_s__rosidl_typesupport_introspection_c.cpython-310-aarch64-linux-gnu.so\n'}
+[1.583542] (snumsg_pkg) StdoutLine: {'line': b'-- Up-to-date symlink: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/snumsg_pkg_s__rosidl_typesupport_fastrtps_c.cpython-310-aarch64-linux-gnu.so\n'}
+[1.583643] (snumsg_pkg) StdoutLine: {'line': b'-- Up-to-date symlink: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/snumsg_pkg_s__rosidl_typesupport_introspection_c.cpython-310-aarch64-linux-gnu.so\n'}
+[1.583751] (snumsg_pkg) StdoutLine: {'line': b'-- Up-to-date symlink: /root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/snumsg_pkg_s__rosidl_typesupport_c.cpython-310-aarch64-linux-gnu.so\n'}
+[1.583867] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/msg/MissionCode.idl\n'}
+[1.586151] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/msg/Sensor.idl\n'}
+[1.588495] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/msg/MissionCode.msg\n'}
+[1.590797] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/msg/Sensor.msg\n'}
+[1.593168] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/ament_index/resource_index/package_run_dependencies/snumsg_pkg\n'}
+[1.595495] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/ament_index/resource_index/parent_prefix_path/snumsg_pkg\n'}
+[1.597885] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/environment/ament_prefix_path.sh\n'}
+[1.600175] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/environment/ament_prefix_path.dsv\n'}
+[1.602453] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/environment/path.sh\n'}
+[1.604749] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/environment/path.dsv\n'}
+[1.607025] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/local_setup.bash\n'}
+[1.609328] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/local_setup.sh\n'}
+[1.611719] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/local_setup.zsh\n'}
+[1.613292] (-) TimerEvent: {}
+[1.614014] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/local_setup.dsv\n'}
+[1.616401] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/package.dsv\n'}
+[1.618738] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/ament_index/resource_index/packages/snumsg_pkg\n'}
+[1.621191] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/rosidl_cmake-extras.cmake\n'}
+[1.623568] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/ament_cmake_export_dependencies-extras.cmake\n'}
+[1.625887] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/ament_cmake_export_include_directories-extras.cmake\n'}
+[1.628283] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/ament_cmake_export_libraries-extras.cmake\n'}
+[1.630823] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/ament_cmake_export_targets-extras.cmake\n'}
+[1.633193] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake\n'}
+[1.635531] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake\n'}
+[1.637931] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkgConfig.cmake\n'}
+[1.640294] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkgConfig-version.cmake\n'}
+[1.642682] (snumsg_pkg) StdoutLine: {'line': b'-- Symlinking: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/package.xml\n'}
+[1.645103] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_generator_c.so\n'}
+[1.645256] (snumsg_pkg) StdoutLine: {'line': b'-- Set runtime path of "/root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_generator_c.so" to ""\n'}
+[1.645308] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_fastrtps_c.so\n'}
+[1.645425] (snumsg_pkg) StdoutLine: {'line': b'-- Set runtime path of "/root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_fastrtps_c.so" to ""\n'}
+[1.645495] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_fastrtps_cpp.so\n'}
+[1.645590] (snumsg_pkg) StdoutLine: {'line': b'-- Set runtime path of "/root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_fastrtps_cpp.so" to ""\n'}
+[1.645655] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_introspection_c.so\n'}
+[1.645751] (snumsg_pkg) StdoutLine: {'line': b'-- Set runtime path of "/root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_introspection_c.so" to ""\n'}
+[1.645816] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_c.so\n'}
+[1.645884] (snumsg_pkg) StdoutLine: {'line': b'-- Set runtime path of "/root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_c.so" to ""\n'}
+[1.645954] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_introspection_cpp.so\n'}
+[1.646080] (snumsg_pkg) StdoutLine: {'line': b'-- Set runtime path of "/root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_introspection_cpp.so" to ""\n'}
+[1.646109] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_cpp.so\n'}
+[1.646203] (snumsg_pkg) StdoutLine: {'line': b'-- Set runtime path of "/root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_typesupport_cpp.so" to ""\n'}
+[1.658778] (snumsg_pkg) StdoutLine: {'line': b"Listing '/root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg'...\n"}
+[1.658821] (snumsg_pkg) StdoutLine: {'line': b"Compiling '/root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/__init__.py'...\n"}
+[1.658837] (snumsg_pkg) StdoutLine: {'line': b"Listing '/root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/msg'...\n"}
+[1.658853] (snumsg_pkg) StdoutLine: {'line': b"Compiling '/root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/msg/__init__.py'...\n"}
+[1.658869] (snumsg_pkg) StdoutLine: {'line': b"Compiling '/root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/msg/_mission_code.py'...\n"}
+[1.658884] (snumsg_pkg) StdoutLine: {'line': b"Compiling '/root/snu/snuboat/ws/install/snumsg_pkg/local/lib/python3.10/dist-packages/snumsg_pkg/msg/_sensor.py'...\n"}
+[1.660710] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_generator_py.so\n'}
+[1.660846] (snumsg_pkg) StdoutLine: {'line': b'-- Set runtime path of "/root/snu/snuboat/ws/install/snumsg_pkg/lib/libsnumsg_pkg__rosidl_generator_py.so" to ""\n'}
+[1.660917] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/export_snumsg_pkg__rosidl_generator_cExport.cmake\n'}
+[1.660981] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/export_snumsg_pkg__rosidl_generator_cExport-noconfig.cmake\n'}
+[1.661057] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/export_snumsg_pkg__rosidl_typesupport_fastrtps_cExport.cmake\n'}
+[1.661088] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/export_snumsg_pkg__rosidl_typesupport_fastrtps_cExport-noconfig.cmake\n'}
+[1.661141] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/export_snumsg_pkg__rosidl_generator_cppExport.cmake\n'}
+[1.661210] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/export_snumsg_pkg__rosidl_typesupport_fastrtps_cppExport.cmake\n'}
+[1.661285] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/export_snumsg_pkg__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake\n'}
+[1.661310] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkg__rosidl_typesupport_introspection_cExport.cmake\n'}
+[1.661364] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkg__rosidl_typesupport_introspection_cExport-noconfig.cmake\n'}
+[1.661439] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkg__rosidl_typesupport_cExport.cmake\n'}
+[1.661465] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkg__rosidl_typesupport_cExport-noconfig.cmake\n'}
+[1.661507] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkg__rosidl_typesupport_introspection_cppExport.cmake\n'}
+[1.661561] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkg__rosidl_typesupport_introspection_cppExport-noconfig.cmake\n'}
+[1.661609] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkg__rosidl_typesupport_cppExport.cmake\n'}
+[1.661664] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/snumsg_pkg__rosidl_typesupport_cppExport-noconfig.cmake\n'}
+[1.661735] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/export_snumsg_pkg__rosidl_generator_pyExport.cmake\n'}
+[1.661760] (snumsg_pkg) StdoutLine: {'line': b'-- Installing: /root/snu/snuboat/ws/install/snumsg_pkg/share/snumsg_pkg/cmake/export_snumsg_pkg__rosidl_generator_pyExport-noconfig.cmake\n'}
+[1.662784] (snumsg_pkg) CommandEnded: {'returncode': 0}
+[1.669332] (snumsg_pkg) JobEnded: {'identifier': 'snumsg_pkg', 'rc': 0}
+[1.669468] (snunav_pkg) JobStarted: {'identifier': 'snunav_pkg'}
+[1.714833] (-) TimerEvent: {}
+[1.745951] (snunav_pkg) StderrLine: {'line': b'Traceback (most recent call last):\n  File "/usr/lib/python3/dist-packages/colcon_core/executor/__init__.py", line 91, in __call__\n    rc = await self.task(*args, **kwargs)\n  File "/usr/lib/python3/dist-packages/colcon_core/task/__init__.py", line 93, in __call__\n    return await task_method(*args, **kwargs)\n  File "/usr/lib/python3/dist-packages/colcon_ros/task/ament_python/build.py", line 51, in build\n    setup_py_data = get_setup_data(self.context.pkg, env)\n  File "/usr/lib/python3/dist-packages/colcon_core/task/python/__init__.py", line 20, in get_setup_data\n    return dict(pkg.metadata[key](env))\n  File "/usr/lib/python3/dist-packages/colcon_ros/package_augmentation/ros_ament_python.py", line 57, in getter\n    return get_setup_information(\n  File "/usr/lib/python3/dist-packages/colcon_python_setup_py/package_identification/python_setup_py.py", line 249, in get_setup_information\n    _setup_information_cache[hashable_env] = _get_setup_information(\n  File "/usr/lib/python3/dist-packages/colcon_python_setup_py/package_identification/python_setup_py.py", line 296, in _get_setup_information\n    result = subprocess.run(\n  File "/usr/lib/python3.10/subprocess.py", line 526, in run\n    raise CalledProcessError(retcode, process.args,\nsubprocess.CalledProcessError: Command \'[\'/usr/bin/python3\', \'-c\', \'import sys;from contextlib import suppress;exec("with suppress(ImportError):    from setuptools.extern.packaging.specifiers    import SpecifierSet");exec("with suppress(ImportError):    from packaging.specifiers import SpecifierSet");from distutils.core import run_setup;dist = run_setup(    \\\'setup.py\\\', script_args=(\\\'--dry-run\\\',), stop_after=\\\'config\\\');skip_keys = (\\\'cmdclass\\\', \\\'distclass\\\', \\\'ext_modules\\\', \\\'metadata\\\');data = {    key: value for key, value in dist.__dict__.items()     if (        not key.startswith(\\\'_\\\') and         not callable(value) and         key not in skip_keys and         key not in dist.display_option_names    )};data[\\\'metadata\\\'] = {    k: v for k, v in dist.metadata.__dict__.items()     if k not in (\\\'license_files\\\', \\\'provides_extras\\\')};sys.stdout.buffer.write(repr(data).encode(\\\'utf-8\\\'))\']\' returned non-zero exit status 1.\n'}
+[1.746213] (snunav_pkg) JobEnded: {'identifier': 'snunav_pkg', 'rc': 1}
+[1.756643] (-) EventReactorShutdown: {}

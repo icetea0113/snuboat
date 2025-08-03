@@ -26,6 +26,7 @@ class MissionDirector(Node):
 
         # 1) 파라미터 선언 (런치 파일에서 넘어오지 않을 경우를 대비한 기본값)
         self.declare_parameter('frequency', 10.0)  # [Hz]
+        self.declare_parameter('sils_mode', '0')
         self.declare_parameter('maneuver_mode', '0')
         self.declare_parameter('sub_maneuver_mode', '0')
         self.declare_parameter('subsub_maneuver_mode', '0')
@@ -43,18 +44,22 @@ class MissionDirector(Node):
         self.update_params()
         self.timer = self.create_timer(1/self.frequency, self.timer_callback)
 
-        self.status_subscriber_ = self.create_subscription(Int32, 'ctrl_status', self. status_callback, 10)
+        # self.status_subscriber_ = self.create_subscription(Int32, 'ctrl_status', self. status_callback, 10)
 
     def update_params(self):
         """현재 파라미터 서버에 설정된 값을 읽어와서 속성에 저장합니다."""
         # get_parameter().value 가 int 등이 올 수 있으므로 str()로 변환
         self.frequency         = float(self.get_parameter('frequency').value)
+        self.sils_mode         = str(self.get_parameter('sils_mode').value)
         self.maneuver_mode     = str(self.get_parameter('maneuver_mode').value)
         self.sub_maneuver_mode = str(self.get_parameter('sub_maneuver_mode').value)
         self.subsub_maneuver_mode = str(self.get_parameter('subsub_maneuver_mode').value)
         self.sensor_mode       = str(self.get_parameter('sensor_mode').value)
         self.motor_mode        = str(self.get_parameter('motor_mode').value)
         self.status            = str(self.get_parameter('status').value)
+        
+        if self.sils_mode == '1':
+            self.sensor_mode = '4'  # SILS 모드에서는 sensor_mode = 4
 
     def timer_callback(self):
         # 런타임 중에 파라미터가 바뀔 수도 있으므로, 매번 콜백마다 갱신
@@ -65,6 +70,7 @@ class MissionDirector(Node):
         msg = MissionCode()
         msg.tick = self.get_clock().now().to_msg()
         msg.mission_code = (
+            self.sils_mode +
             self.motor_mode +
             self.sensor_mode +
             self.maneuver_mode +

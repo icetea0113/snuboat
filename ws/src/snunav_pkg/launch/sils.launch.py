@@ -57,4 +57,11 @@ def generate_launch_description():
         output='screen',
     ))
     
+    ld.add_action(Node(
+        package='snunav_pkg',
+        executable='sils',
+        name='sils_node',
+        output='screen',
+    ))
+    
     return ld
