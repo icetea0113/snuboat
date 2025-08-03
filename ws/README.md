@@ -16,3 +16,5 @@ source ~/.bashrc
 
 # 4. roslaunch
 ros2 launch snunav_pkg sils.launch.py
+
+# If you want to run SILS mode, please change field named sils_mode 0 to 1 in params.yaml

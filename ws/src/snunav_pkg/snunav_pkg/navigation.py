@@ -101,7 +101,7 @@ class Navigation(Node):
     def mission_callback(self, msg):
         # motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
         self.mission_code = int(msg.mission_code, 16)
-        self.active_sensor_mode = (self.mission_code & 0x0F0000) >> 16
+        self.active_sensor_mode = (self.mission_code & 0x00F0000) >> 16
         self.get_logger().info(f'Received Mission Code: {hex(self.mission_code)}, Sensor Mode: {hex(self.active_sensor_mode)}')
 
     ## -- TODO : Implement actual sensor data processing logic

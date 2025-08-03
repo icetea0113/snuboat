@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 
 class ShipDyn():
     def __init__(self):
@@ -111,12 +111,11 @@ class ShipDyn():
         # thr_max_fwd = self.equiv_fwd_thr(ctrl, thr_max_dock, thr_gain_dp_bias)
         self.thr_max_fwd = (1/self.ratio_fwd_rvs)*self.thr_max_dock + self.idle_rpm*(self.prop_low_KPrvs-self.prop_low_KPfwd)/(self.prop_low_KPrvs*self.thr_rpm_ratio) - self.thr_gain_dp_bias
         
-    def update_ship_state(self, pos, vel, acc, ctrl_input, ctrl, wind_state, dt):
+    def update_ship_state(self, pos, vel, ctrl_input, ctrl, wind_state, dt):
         x, y, psi = pos
         u, v, r = vel
-        udot, vdot, rdot = acc
-        delP_cmd, delS_cmd, thrP_cmd, thrS_cmd = ctrl_input
-        delP, delS, thrP, thrS = ctrl
+        delP_cmd, delS_cmd, rpsP_cmd, rpsS_cmd = ctrl_input
+        delP, delS, rpsP, rpsS = ctrl
         WS, WD = wind_state
         
         # update steering
@@ -134,22 +133,10 @@ class ShipDyn():
         delPR_new = np.deg2rad(delP_new)
         delSR_new = np.deg2rad(delS_new)
         
-        # update throttle
-        if abs(thrP_cmd-thrP) < self.thr_rate*dt:
-            thrP_new = thrP_cmd
-        else:
-            thrP_new = np.sign(thrP_cmd-thrP)*self.thr_rate*dt + thrP
-        if abs(thrS_cmd-thrS) < self.thr_rate*dt:
-            thrS_new = thrS_cmd
-        else:
-            thrS_new = np.sign(thrS_cmd-thrS)*self.thr_rate*dt + thrS
-            
-        thrP_new = np.clip(thrP_new, self.thr_min, self.thr_max)
-        thrS_new = np.clip(thrS_new, self.thr_min, self.thr_max)
         
         # update rps
-        rpsP_new = 10.0*np.sign(thrP_new)+thrP_new
-        rpsS_new = 10.0*np.sign(thrS_new)+thrS_new
+        rpsP_new = rpsP_cmd
+        rpsS_new = rpsS_cmd
         
         rpsP_new = 0.0 if abs(rpsP_new) < 11.0 else rpsP_new
         rpsS_new = 0.0 if abs(rpsS_new) < 11.0 else rpsS_new
@@ -218,11 +205,10 @@ class ShipDyn():
         
         pos_new = np.array([x_new, y_new, psi_new])
         vel_new = np.array([u_new, v_new, r_new])
-        acc_new = np.array([udot_new, vdot_new, rdot_new])
-        ctrl_new = np.array([delP_new, delS_new, thrP_new, thrS_new])
+        ctrl_new = np.array([delP_new, delS_new, rpsP_new, rpsS_new])
         hull_new = np.array([XH, YH, NH])
         prop_new = np.array([XP, YP, NP])
         wind_new = np.array([WX, WY, WN])
         thrust_new = np.array([TP, TS])
         
-        return pos_new, vel_new, acc_new, ctrl_new, hull_new, prop_new, wind_new, thrust_new
+        return pos_new, vel_new, ctrl_new, hull_new, prop_new, wind_new, thrust_new

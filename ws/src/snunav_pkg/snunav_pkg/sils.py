@@ -14,9 +14,11 @@
 
 import rclpy
 from rclpy.node import Node
+
 from std_msgs.msg import String, Float32MultiArray, Int32
 from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
+from snunav_pkg.utils.ship_dyn import ShipDyn
 
 from std_msgs.msg import String
 
@@ -35,12 +37,16 @@ class SILS(Node):
         self.port_steer_fb = 0.0
         self.stbd_rps_fb = 0.0
         self.stbd_steer_fb = 0.0
+        self.ship_dyn = ShipDyn()
+        
         # Subscribers
         self.ctrl_cmd = self.create_subscription(
             Float32MultiArray,
             'ctrl_cmd_sils',
             self.sils_callback,
             10)
+        
+        # Publishers
         self.navigation_sils_pub = self.create_publisher(Float32MultiArray, 'sils_navigation_data', 10)
         self.motor_fb_sils_pub = self.create_publisher(Float32MultiArray, 'sils_motor_fb_data', 10)
 
@@ -55,12 +61,32 @@ class SILS(Node):
                                    f'Starboard RPS: {self.stbd_rps_cmd}, Starboard Steer: {self.stbd_steer_cmd}')
         else:
             self.get_logger().error('Invalid SILS control command received. Expected 4 values.')
+            
+        # mapping member variables to msg
+        pos_old = np.array([self.pos[0], self.pos[1], self.pos[5]])
+        vel_old = np.array([self.vel[0], self.vel[1], self.vel[5]])
+        ctrl_input = np.array([self.port_steer_cmd, self.stbd_steer_cmd, self.port_rps_cmd, self.stbd_rps_cmd])
+        ctrl_old = np.array([self.port_steer_fb, self.stbd_steer_fb, self.port_rps_fb, self.stbd_rps_fb])
+        wind_state = np.array([0.0, 0.0]) # TODO: Wind state should be provided or calculated
         
         # Boat Dynamics Simulation
+        pos_new, vel_new, ctrl_new, hull_new, prop_new, wind_new, thrust_new = self.ship_dyn.update_ship_state(pos_old, vel_old, ctrl_input, ctrl_old, wind_state, 0.1)
+        
+        # mapping dynamics output to msg
+        self.pos[0] = pos_new[0]
+        self.pos[1] = pos_new[1]
+        self.pos[5] = pos_new[2]
+        self.vel[0] = vel_new[0]
+        self.vel[1] = vel_new[1]
+        self.vel[5] = vel_new[2]
+        self.port_steer_fb = ctrl_new[0]
+        self.stbd_steer_fb = ctrl_new[1]
+        self.port_rps_fb = ctrl_new[2]
+        self.stbd_rps_fb = ctrl_new[3]
         
         #Publish Navigation Data
         nav_msg = Float32MultiArray()
-        nav_msg.data = [
+        nav_msg.data = [float(41),  # Status: SILS ON
             self.pos[0], self.pos[1], self.pos[2],
             self.pos[3], self.pos[4], self.pos[5],
             self.vel[0], self.vel[1], self.vel[2],
