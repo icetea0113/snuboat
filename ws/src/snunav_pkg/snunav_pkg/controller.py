@@ -34,7 +34,7 @@ class Controller(Node):
         self.ctrl = np.array([0.0, 0.0, 0.0, 0.0])
         self.status = 0                                 # 0 = init, 1 = run, 2 = pause, 3 = done
         self.mission_code = 0x00000000
-        self.tick = time.time()
+        self.tick = 0
         self.__missionCodeParser = self.create_subscription(
             MissionCode,
             'mission_code',
@@ -52,6 +52,8 @@ class Controller(Node):
             Int32,
             'ctrl_status',
             10)
+        
+        self.free_running = FreeRunning()
 
     def mission_callback(self, msg):
         self.tick = self.get_time_seconds(msg.tick)
@@ -100,19 +102,19 @@ class Controller(Node):
         state = 0
         if submaneuver_mode == 0x00:
             target_rps = 0.0
-            ctrl_cmd, state = FreeRunning.speed_mapping(target_rps, self.vel, self.ctrl)
+            ctrl_cmd, state = self.free_running.speed_mapping(target_rps, self.vel, self.ctrl)
         elif submaneuver_mode == 0x10:
-            ctrl_cmd, state = FreeRunning.turning(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.turning(self.tick, self.ctrl)
         elif submaneuver_mode == 0x20:
-            ctrl_cmd, state = FreeRunning.zigzag(self.tick, self.pos, self.ctrl)
+            ctrl_cmd, state = self.free_running.zigzag(self.tick, self.pos, self.ctrl)
         elif submaneuver_mode == 0x30:
-            ctrl_cmd, state = FreeRunning.pivot_turn(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.pivot_turn(self.tick, self.ctrl)
         elif submaneuver_mode == 0x40:
-            ctrl_cmd, state = FreeRunning.crabbing(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.crabbing(self.tick, self.ctrl)
         elif submaneuver_mode == 0x50:
-            ctrl_cmd, state = FreeRunning.pull_out(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.pull_out(self.tick, self.ctrl)
         elif submaneuver_mode == 0x60:
-            ctrl_cmd, state = FreeRunning.spiral(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.spiral(self.tick, self.ctrl)
         else:
             self.status = 2  # pause
             raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
