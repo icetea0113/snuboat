@@ -87,8 +87,8 @@ class ShipDyn():
         rpsP_new = rpsP_cmd
         rpsS_new = rpsS_cmd
         
-        rpsP_new = 0.0 if abs(rpsP_new) < 11.0 else rpsP_new
-        rpsS_new = 0.0 if abs(rpsS_new) < 11.0 else rpsS_new
+        rpsP_new = 0.0 if abs(rpsP_new) < 5.0 else rpsP_new
+        rpsS_new = 0.0 if abs(rpsS_new) < 5.0 else rpsS_new
         
         # cal wind force
         CX = -0.53*np.cos(-WD-np.pi+psi)
@@ -100,7 +100,7 @@ class ShipDyn():
         WN = CN*(0.5*1.225*WS**2*self.L*self.AL)
 
         # cal hull force
-        if(abs(u < 0.8)):
+        if(abs(u < 0.5)):
             XH = np.dot(self.uuu[:6], np.array([u, v**2, u*v**2, v**4, r**2, v*r]))/(4**3)
             YH = np.dot(self.vvv, np.array([v, u*v, v*abs(v), u*v*abs(v), r, r*abs(r), v**2*r, v*r**2]))/(4**3)
             NH = np.dot(self.rrr, np.array([v, u*v, v*abs(v), u*v*abs(v), r, r*abs(r), v**2*r, v*r**2]))/(4**3)
