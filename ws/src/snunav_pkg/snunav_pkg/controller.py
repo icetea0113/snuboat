@@ -52,6 +52,7 @@ class Controller(Node):
             10)
 
     def mission_callback(self, msg):
+        self.tick = msg.tick
         mission_code = int(msg.mission_code, 16)
         self.mission_code = (mission_code & 0x000FFF0)
         self.is_sils = (mission_code & 0xF000000) >> 24
@@ -90,25 +91,25 @@ class Controller(Node):
 
 
     def freeRunningController(self):
-        # motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
+        # sils_mode, motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
         ctrl_cmd = np.zeros(4)  # [rpsP, rpsS, delP, delS]
-        submaneuver_mode = (self.mission_code & 0x000FF0) >> 4
+        submaneuver_mode = (self.mission_code & 0x0000FF0) >> 4
         state = 0
         if submaneuver_mode == 0x00:
             target_rps = 0.0
-            ctrl_cmd, state = FreeRunning.speed_mapping(target_rps, self.vel)
+            ctrl_cmd, state = FreeRunning.speed_mapping(target_rps, self.vel, self.ctrl)
         elif submaneuver_mode == 0x10:
-            ctrl_cmd, state = FreeRunning.turning(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.turning(self.tick, self.ctrl)
         elif submaneuver_mode == 0x20:
-            ctrl_cmd, state = FreeRunning.zigzag(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.zigzag(self.tick, self.pos, self.ctrl)
         elif submaneuver_mode == 0x30:
-            ctrl_cmd, state = FreeRunning.pivot_turn(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.pivot_turn(self.tick, self.ctrl)
         elif submaneuver_mode == 0x40:
-            ctrl_cmd, state = FreeRunning.crabbing(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.crabbing(self.tick, self.ctrl)
         elif submaneuver_mode == 0x50:
-            ctrl_cmd, state = FreeRunning.pull_out(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.pull_out(self.tick, self.ctrl)
         elif submaneuver_mode == 0x60:
-            ctrl_cmd, state = FreeRunning.spiral(self.pos, self.ctrl)
+            ctrl_cmd, state = FreeRunning.spiral(self.tick, self.ctrl)
         else:
             self.status = 2  # pause
             raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
@@ -123,7 +124,7 @@ class Controller(Node):
 
 
     def dockingController(self):
-        submaneuver_mode = (self.mission_code & 0x000FF0) >> 4
+        submaneuver_mode = (self.mission_code & 0x0000FF0) >> 4
         if submaneuver_mode == 0x00:
             pass
             # self.heuristicDocking_Entering()
@@ -156,7 +157,7 @@ class Controller(Node):
             raise ValueError("Unknown docking submaneuver mode: {}".format(hex(submaneuver_mode)))
     
     def DPController(self):
-        submaneuver_mode = (self.mission_code & 0x000FF0) >> 4
+        submaneuver_mode = (self.mission_code & 0x0000FF0) >> 4
         if submaneuver_mode == 0x00:
             self.DP_controlMethod1()
         elif submaneuver_mode == 0x10:
@@ -165,7 +166,7 @@ class Controller(Node):
             raise ValueError("Unknown DP submaneuver mode: {}".format(hex(submaneuver_mode)))
     
     def PPController(self):
-        submaneuver_mode = (self.mission_code & 0x000FF0) >> 4
+        submaneuver_mode = (self.mission_code & 0x0000FF0) >> 4
         if submaneuver_mode == 0x00:
             self.PP_algorithm1()
         elif submaneuver_mode == 0x10:

@@ -79,7 +79,7 @@ class MissionDirector(Node):
             self.status
         )
         # 메시지 발행 / 000000 6자리 / 각 모드가 1자리씩
-        # motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
+        # sils_mode, motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
 
         self.publisher_.publish(msg)
         self.get_logger().info(f'Publishing mission_code: "{msg.mission_code}"')
