@@ -161,17 +161,21 @@ class Navigation(Node):
             self.vel = self.vel_qualisys
             status_suffix = str(self.status_qualisys)
         elif self.active_sensor_mode == 0x1: # SLAM
-            self.pose = self.pose_slam
-            self.vel = self.vel_slam
+            self.pose = self.pose_slam[0, 1, 5]
+            self.vel = self.vel_slam[0, 1, 5]
             status_suffix = str(self.status_slam)
         elif self.active_sensor_mode == 0x2: # GPS-RTK
-            self.pose = self.pose_gps_rtk
-            self.vel = self.vel_gps_rtk
+            self.pose = self.pose_gps_rtk[0, 1, 5]
+            self.vel = self.vel_gps_rtk[0, 1, 5]
             status_suffix = str(self.status_gps_rtk)
         elif self.active_sensor_mode == 0x3: # Marker
-            self.pose = self.pose_marker
-            self.vel = self.vel_marker
+            self.pose = self.pose_marker[0, 1, 5]
+            self.vel = self.vel_marker[0, 1, 5]
             status_suffix = str(self.status_marker)
+        elif self.active_sensor_mode == 0x4: # SILS
+            self.pose = self.pose_sils[0, 1, 5]
+            self.vel = self.vel_sils[0, 1, 5]
+            status_suffix = str(self.status_sils)
         
         status_prefix = str(self.active_sensor_mode >> 4)
         if status_prefix:
