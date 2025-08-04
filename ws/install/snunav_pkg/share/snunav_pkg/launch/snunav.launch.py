@@ -1,1 +1,0 @@
-/root/snu/snuboat/ws/build/snunav_pkg/launch/snunav.launch.py

@@ -33,6 +33,7 @@ class Controller(Node):
         self.ctrl = np.array([0.0, 0.0, 0.0, 0.0])
         self.status = 0                                 # 0 = init, 1 = run, 2 = pause, 3 = done
         self.mission_code = 0x00000000
+        self.tick = 0
         self.__missionCodeParser = self.create_subscription(
             MissionCode,
             'mission_code',
@@ -56,6 +57,7 @@ class Controller(Node):
         mission_code = int(msg.mission_code, 16)
         self.mission_code = (mission_code & 0x000FFF0)
         self.is_sils = (mission_code & 0xF000000) >> 24
+        self.get_logger().info('Received tick: %d' % self.tick)
         self.get_logger().info('SILS mode: %s' % self.is_sils)
         self.controllerMode()
         self.get_logger().info('Received maneuver code: "%s"' % hex(self.mission_code))
