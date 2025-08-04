@@ -1,0 +1,1 @@
+/root/snu/snuboat/ws/build/snumsg_pkg/rosidl_generator_c/snumsg_pkg/msg/detail/mission_code__struct.h

@@ -70,7 +70,7 @@ class SILS(Node):
         wind_state = np.array([0.0, 0.0]) # TODO: Wind state should be provided or calculated
         
         # Boat Dynamics Simulation
-        pos_new, vel_new, ctrl_new, hull_new, prop_new, wind_new, thrust_new = self.ship_dyn.update_ship_state(pos_old, vel_old, ctrl_input, ctrl_old, wind_state, 0.1)
+        pos_new, vel_new, ctrl_new = self.ship_dyn.update_ship_state(pos_old, vel_old, ctrl_input, ctrl_old, wind_state, 0.1)
         
         # mapping dynamics output to msg
         self.pos[0] = pos_new[0]

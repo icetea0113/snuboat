@@ -1,0 +1,1 @@
+/root/snu/snuboat/ws/build/snumsg_pkg/rosidl_typesupport_fastrtps_c/snumsg_pkg/msg/rosidl_typesupport_fastrtps_c__visibility_control.h

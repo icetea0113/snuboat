@@ -1,0 +1,1 @@
+/root/snu/snuboat/ws/build/snumsg_pkg/rosidl_generator_py/snumsg_pkg/msg/_mission_code.py
