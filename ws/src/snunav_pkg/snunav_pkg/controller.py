@@ -19,6 +19,7 @@ from std_msgs.msg import String, Float32MultiArray, Int32
 from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
 from snunav_pkg.utils.free_running import FreeRunning
+import time
 # from docking import heuristicDocking_Entering, DRLDocking_Entering, DRL_Approach, DRL_Turning, DRL_Entering, DRL_Pushing, heuristicDocking_Approaching, heuristicDocking_Turning, heuristicDocking_Entering, heuristicDocking_Pushing
 # from DP import DP_controlMethod1, DP_controlMethod2
 # from PP import PP_algorithm1, PP_algorithm2
@@ -33,7 +34,7 @@ class Controller(Node):
         self.ctrl = np.array([0.0, 0.0, 0.0, 0.0])
         self.status = 0                                 # 0 = init, 1 = run, 2 = pause, 3 = done
         self.mission_code = 0x00000000
-        self.tick = 0
+        self.tick = time.time()
         self.__missionCodeParser = self.create_subscription(
             MissionCode,
             'mission_code',
@@ -53,11 +54,11 @@ class Controller(Node):
             10)
 
     def mission_callback(self, msg):
-        self.tick = msg.tick
+        self.tick = self.get_time_seconds(msg.tick)
         mission_code = int(msg.mission_code, 16)
         self.mission_code = (mission_code & 0x000FFF0)
         self.is_sils = (mission_code & 0xF000000) >> 24
-        self.get_logger().info('Received tick: %d' % self.tick)
+        self.get_logger().info('Received tick: %f' % self.tick)
         self.get_logger().info('SILS mode: %s' % self.is_sils)
         self.controllerMode()
         self.get_logger().info('Received maneuver code: "%s"' % hex(self.mission_code))
@@ -176,7 +177,12 @@ class Controller(Node):
         else:
             raise ValueError("Unknown PP submaneuver mode: {}".format(hex(submaneuver_mode)))
     
+    def get_time_seconds(self, time_msg):
+            return time_msg.sec + time_msg.nanosec * 1e-9
 
+    def time_diff_seconds(self, time1, time2):
+        return self.get_time_seconds(time1) - self.get_time_seconds(time2)
+    
 def main(args=None):
     rclpy.init(args=args)
 
