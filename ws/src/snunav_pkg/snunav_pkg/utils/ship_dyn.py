@@ -87,8 +87,8 @@ class ShipDyn():
         rpsP_new = rpsP_cmd
         rpsS_new = rpsS_cmd
         
-        rpsP_new = 0.0 if abs(rpsP_new) < 5.0 else rpsP_new
-        rpsS_new = 0.0 if abs(rpsS_new) < 5.0 else rpsS_new
+        # rpsP_new = 0.0 if abs(rpsP_new) < 5.0 else rpsP_new
+        # rpsS_new = 0.0 if abs(rpsS_new) < 5.0 else rpsS_new
         
         # cal wind force
         CX = -0.53*np.cos(-WD-np.pi+psi)

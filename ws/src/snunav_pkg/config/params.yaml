@@ -23,9 +23,9 @@ mission_director:
 controller:
   ros__parameters:
     common_params:
-      del_rate: 0.1 # [deg/s]
-      rps_rate: 0.1 # [rad/s]
-      rps_max: 2.0 # [rad/s]
+      del_rate: 100.0 # [deg/s]
+      rps_rate: 10.0 
+      rps_max: 30.0 # [rad/s]
       del_max: 30.0 # [deg]
       deadzone_start: 1 # rps
       deadzone_end:   1 # rps

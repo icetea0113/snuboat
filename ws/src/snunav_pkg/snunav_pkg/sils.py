@@ -92,11 +92,11 @@ class SILS(Node):
             self.vel[0], self.vel[1], self.vel[2],
             self.vel[3], self.vel[4], self.vel[5]]
         self.navigation_sils_pub.publish(nav_msg)
-        self.get_logger().info(f'Published SILS navigation data: {nav_msg.data}')
+        # self.get_logger().info(f'Published SILS navigation data: {nav_msg.data}')
         
         #Publish Motor Feedback Data
         motor_fb_msg = Float32MultiArray()
-        motor_fb_msg.data = [self.port_rps_fb, self.port_steer_fb, self.stbd_rps_fb, self.stbd_steer_fb]
+        motor_fb_msg.data = [self.port_rps_fb, self.stbd_rps_fb, self.port_steer_fb, self.stbd_steer_fb]
         self.motor_fb_sils_pub.publish(motor_fb_msg)
         self.get_logger().info(f'Published SILS motor feedback data: {motor_fb_msg.data}')
 
