@@ -68,7 +68,7 @@ class Controller(Node):
         maneuver_mode = (self.mission_code & 0x00F000) >> 12
         if maneuver_mode == 0x1:
             # self.freeRunningController()
-            self.ctrl_cmd = np.array([15.0, 15.0, 30.0, 30.0])  # Example control command
+            self.ctrl_cmd = np.array([15.0, 15.0, -30.0, -30.0])  # Example control command
         elif maneuver_mode == 0x2:
             self.dockingController()
         elif maneuver_mode == 0x3:

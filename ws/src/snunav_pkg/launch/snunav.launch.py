@@ -57,6 +57,14 @@ def generate_launch_description():
         output='screen',
     ))
     
+    ld.add_action(Node(
+        package='snunav_pkg',
+        executable='motor_interface',
+        name='motor_interface_node',
+        output='screen',
+    ))
+    
+    
     # SLAM 모드 (sensor_mode == '1'): Ouster + KISS-ICP
     if sensor_mode == '1':
         # Ouster 센서 launch
