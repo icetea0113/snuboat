@@ -85,8 +85,8 @@ class FreeRunning(Node):
         
         if not self._speed_mapping_start:
             self._speed_mapping_start = True
-            self._speed_mapping_duration = tick.sec + self._speed_mapping_params['duration']
-        if tick.sec >= self._speed_mapping_duration:
+            self._speed_mapping_duration = tick + self._speed_mapping_params['duration']
+        if tick >= self._speed_mapping_duration:
             self.get_logger().info('Speed mapping completed.')
             self._speed_mapping_end = True
         
@@ -123,8 +123,8 @@ class FreeRunning(Node):
 
         if not self._turning_start:
             self._turning_start = True
-            self._turning_duration = tick.sec + self._turning_params['duration']
-        if tick.sec >= self._turning_duration:
+            self._turning_duration = tick + self._turning_params['duration']
+        if tick >= self._turning_duration:
             self.get_logger().info('Turning completed.')
             self._turning_end = True
             
@@ -187,8 +187,8 @@ class FreeRunning(Node):
         if not self._zigzag_start:
             self._zigzag_start = True
             self._zigzag_direction = initial_psi_direction
-            self._zigzag_duration = tick.sec + self._zigzag_params['duration']
-        if tick.sec >= self._zigzag_duration:
+            self._zigzag_duration = tick + self._zigzag_params['duration']
+        if tick >= self._zigzag_duration:
             self.get_logger().info('Zigzag completed.')
             self._zigzag_end = True
             
@@ -241,8 +241,8 @@ class FreeRunning(Node):
             self._pivot_turn_loaded = True
         if not self._pivot_turn_start:
             self._pivot_turn_start = True
-            self._pivot_turn_duration = tick.sec + self._pivot_turn_params['duration']
-        if tick.sec >= self._pivot_turn_duration:
+            self._pivot_turn_duration = tick + self._pivot_turn_params['duration']
+        if tick >= self._pivot_turn_duration:
             self.get_logger().info('Pivot turn completed.')
             self._pivot_turn_end = True
             
@@ -283,8 +283,8 @@ class FreeRunning(Node):
         
         if not self._crabbing_start:
             self._crabbing_start = True
-            self._crabbing_duration = tick.sec + self._crabbing_params['duration']
-        if tick.sec >= self._crabbing_duration:
+            self._crabbing_duration = tick + self._crabbing_params['duration']
+        if tick >= self._crabbing_duration:
             self.get_logger().info('Crabbing completed.')
             self._crabbing_end = True
             
@@ -342,13 +342,13 @@ class FreeRunning(Node):
 
         target_rps = self._pull_out_params['target_rps']
         target_del = self._pull_out_params['target_del']
-        if tick.sec >= self._pull_out_duration:
+        if tick >= self._pull_out_duration:
             self.get_logger().info('Pull out completed.')
             self._pull_out_end = True
             target_del = 0.0
         if not self._pull_out_start:
             self._pull_out_start = True
-            self._pull_out_duration = tick.sec + self._pull_out_params['duration']
+            self._pull_out_duration = tick + self._pull_out_params['duration']
         
         if abs(target_rps-rpsP) < self.rps_rate * self.dt:
             rpsP_cmd = target_rps
@@ -404,13 +404,13 @@ class FreeRunning(Node):
             
         while self._spiral_target_del_idx < len(target_del_list):
             target_del = target_del_list[self._spiral_target_del_idx]
-            if tick.sec >= self._spiral_duration:
+            if tick >= self._spiral_duration:
                 self.get_logger().info(f'Spiral angle {target_del} completed.')
                 self._spiral_target_del_idx += 1
                 self._spiral_start = False
             if not self._spiral_start:
                 self._spiral_start = True
-                self._spiral_duration = tick.sec + self._spiral_params['duration']
+                self._spiral_duration = tick + self._spiral_params['duration']
         
         if abs(target_rps-rpsP) < self.rps_rate * self.dt:
             rpsP_cmd = target_rps
