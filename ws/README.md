@@ -17,7 +17,7 @@ source ~/.bashrc
 # 4. roslaunch
 ros2 launch snunav_pkg sils.launch.py
 
-# If you want to run SILS mode, please change field named sils_mode 0 to 1 in params.yaml
+### If you want to run SILS mode, please change field named sils_mode 0 to 1 in params.yaml
 
 # 5. rosbag
 ros2 bad record -o test.bag(bag file name) /ctrl_cmd_sils /sensor (topic name)
