@@ -184,13 +184,16 @@ class FreeRunning(Node):
                 'initial_psi_direction': self.declare_parameter('free_running_mode.zigzag_mode.initial_psi_direction', 1).get_parameter_value().integer_value,
                 'duration': self.declare_parameter('free_running_mode.zigzag_mode.duration', 0.0).get_parameter_value().double_value
             }
+            self.target_del = (30) * self._zigzag_params['initial_psi_direction']
             self._zigzag_loaded = True
         
         rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
-        psi = np.rad2deg(pos[2])  # pos[2]는 yaw 또는 heading을 나타낸다고 가정
+        psi = (pos[2])  # pos[2]는 yaw 또는 heading을 나타낸다고 가정
+        self.get_logger().info(f'pos: {pos}, psi: {psi}, rpsP: {rpsP}, rpsS: {rpsS}, delP: {delP}, delS: {delS}')
         target_rps = self._zigzag_params['target_rps']
-        target_psi = self._zigzag_params['target_psi']
+        
         initial_psi_direction = self._zigzag_params['initial_psi_direction']
+        
         
         if not self._zigzag_start:
             self._zigzag_start = True
@@ -203,8 +206,11 @@ class FreeRunning(Node):
         if self._zigzag_direction == 0:
             self._zigzag_direction = initial_psi_direction
 
+        target_psi = np.deg2rad(self._zigzag_params['target_psi']) * self._zigzag_direction
+        self.get_logger().info(f'Zigzag direction: {self._zigzag_direction}, Current psi: {psi}, Target psi: {target_psi}')
         if abs(psi) - abs(target_psi) >= 0 and psi * target_psi > 0:
             self._zigzag_direction *= -1  # 방향 전환
+            self.target_del *= -1
             direction_message = "left" if self._zigzag_direction < 0 else "right"
             self.get_logger().info(f'Zigzag direction changed to {direction_message}. Current psi: {psi}, Target psi: {target_psi}')
         
@@ -222,16 +228,17 @@ class FreeRunning(Node):
 
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
         
-        target_del = self.del_max * self._zigzag_direction
-        if abs(target_del-delP) < self.del_rate * self.dt:
-            delP_cmd = target_del
+        
+        self.get_logger().info(f'Target DEL: {self.target_del}, Current DELP: {delP}, Current DELS: {delS}')
+        if abs(self.target_del-delP) < self.del_rate * self.dt:
+            delP_cmd = self.target_del
         else:
-            delP_cmd = delP + np.sign(target_del-delP)*self.del_rate*self.dt
+            delP_cmd = delP + np.sign(self.target_del-delP)*self.del_rate*self.dt
         delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
-        if abs(target_del-delS) < self.del_rate * self.dt:
-            delS_cmd = target_del
+        if abs(self.target_del-delS) < self.del_rate * self.dt:
+            delS_cmd = self.target_del
         else:
-            delS_cmd = delS + np.sign(target_del-delS)*self.del_rate*self.dt
+            delS_cmd = delS + np.sign(self.target_del-delS)*self.del_rate*self.dt
         delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
                 
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]

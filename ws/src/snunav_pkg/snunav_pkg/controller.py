@@ -45,6 +45,11 @@ class Controller(Node):
             'sils_motor_fb_data',
             self.sils_callback,
             10)
+        self.__sensor_subscriber = self.create_subscription(
+            Sensor,
+            'sensor',
+            self.sensor_callback,
+            10)
         self.__ctrlcmdboatPublisher = self.create_publisher(
             Float32MultiArray,
             'ctrl_cmd_boat',
@@ -81,6 +86,15 @@ class Controller(Node):
         self.controllerMode()
         self.get_logger().info('Received maneuver code: "%s"' % hex(self.mission_code))
 
+    def sensor_callback(self, msg):
+            self.pos[0] = float(msg.pose[0])
+            self.pos[1] = float(msg.pose[1])
+            self.pos[2] = float(msg.pose[2])
+            self.vel[0] = float(msg.vel[0])
+            self.vel[1] = float(msg.vel[1])
+            self.vel[2] = float(msg.vel[2])
+            # self.get_logger().info(f'Sensor data received: '
+            #                           f'Position: {self.pos}, Velocity: {self.vel}')
     def controllerMode(self):
         maneuver_mode = (self.mission_code & 0x00F000) >> 12
         if maneuver_mode == 0x1:
@@ -123,6 +137,7 @@ class Controller(Node):
         elif submaneuver_mode == 0x10:
             ctrl_cmd, state = self.free_running.turning(self.tick, self.ctrl)
         elif submaneuver_mode == 0x20:
+            self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
             ctrl_cmd, state = self.free_running.zigzag(self.tick, self.pos, self.ctrl)
         elif submaneuver_mode == 0x30:
             ctrl_cmd, state = self.free_running.pivot_turn(self.tick, self.ctrl)

@@ -13,7 +13,7 @@ mission_director:
       # TBD
     # 4: Navigation
       # TBD
-    sub_maneuver_mode: '1'
+    sub_maneuver_mode: '2'
 
     subsub_maneuver_mode: '0' # 0: Approaching stage, 1: Turning stage, 2: Entering stage, 3: Pushing stage
     sensor_mode: '1' # 0: Qualisys, 1: SLAM, 2: GPS-RTK, 3: Marker, 4: SILS
@@ -23,10 +23,10 @@ mission_director:
 controller:
   ros__parameters:
     common_params:
-      del_rate: 12.0 # [deg/s]
+      del_rate: 100.0 # [deg/s]
       rps_rate: 60.0 
       rps_max: 30.0 # [rad/s]
-      del_max: 30.0 # [deg]
+      del_max: 35.0 # [deg]
       deadzone_start: 1 # rps
       deadzone_end:   1 # rps
       frequency: 10.0 # [Hz]
@@ -45,10 +45,10 @@ controller:
         duration : 1000.0 # [s]
 
       zigzag_mode:
-        target_rps : 0.0
-        target_psi : 0.0
+        target_rps : 20.0
+        target_psi : 10.0
         initial_psi_direction : 1 # 1: Right, -1: Left
-        duration : 0.0 # [s]
+        duration : 300.0 # [s]
 
       pivot_turn_mode:
         target_rpsP : 0.0

@@ -16,7 +16,7 @@ class ShipDyn():
         # Thruster parameters
         self.rps_max = 30
         self.rps_min = -30
-        self.del_rate = 15
+        self.del_rate = 30
         self.del_max = 30
         self.del_min = -30
         self.rps_dead = 10
