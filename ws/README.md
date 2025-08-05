@@ -17,4 +17,13 @@ source ~/.bashrc
 # 4. roslaunch
 ros2 launch snunav_pkg sils.launch.py
 
-# If you want to run SILS mode, please change field named sils_mode 0 to 1 in params.yaml
+### If you want to run SILS mode, please change field named sils_mode 0 to 1 in params.yaml
+
+# 5. rosbag
+ros2 bad record -o test.bag(bag file name) /ctrl_cmd_sils /sensor (topic name)
+
+# 6. rosbag to csv
+## 6.1 ros2bag-convert install
+  sudo pip install git+https://github.com/fishros/ros2bag_convert.git
+## 6.2 rosbag to csv command
+ros2bag-convert test.bag_0.db3 (bag file name)

@@ -40,6 +40,11 @@ class Controller(Node):
             'mission_code',
             self.mission_callback,
             10)
+        self.__silscontrol_subscriber = self.create_subscription(
+            Float32MultiArray,
+            'sils_motor_fb_data',
+            self.sils_callback,
+            10)
         self.__ctrlcmdboatPublisher = self.create_publisher(
             Float32MultiArray,
             'ctrl_cmd_boat',
@@ -54,7 +59,19 @@ class Controller(Node):
             10)
         
         self.free_running = FreeRunning()
-
+    
+    def sils_callback(self, msg):
+        if len(msg.data) == 4:
+            self.ctrl[0] = float(msg.data[0])
+            self.ctrl[1] = float(msg.data[1])
+            self.ctrl[2] = float(msg.data[2])
+            self.ctrl[3] = float(msg.data[3])
+            self.get_logger().info(f'SILS control feedback received: '
+                                      f'Port RPS: {self.ctrl[0]}, Stbd RPS: {self.ctrl[1]}, '
+                                      f'Port Steer: {self.ctrl[2]}, Stbd Steer: {self.ctrl[3]}')
+        else:
+            self.get_logger().error('Invalid SILS control command received. Expected 4 values.')
+            
     def mission_callback(self, msg):
         self.tick = self.get_time_seconds(msg.tick)
         mission_code = int(msg.mission_code, 16)
@@ -67,8 +84,8 @@ class Controller(Node):
     def controllerMode(self):
         maneuver_mode = (self.mission_code & 0x00F000) >> 12
         if maneuver_mode == 0x1:
-            # self.freeRunningController()
-            self.ctrl_cmd = np.array([15.0, 15.0, -30.0, -30.0])  # Example control command
+            self.freeRunningController()
+            # self.ctrl_cmd = np.array([15.0, 15.0, 30.0, 30.0])  # Example control command
         elif maneuver_mode == 0x2:
             self.dockingController()
         elif maneuver_mode == 0x3:
@@ -98,6 +115,7 @@ class Controller(Node):
         # sils_mode, motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
         ctrl_cmd = np.zeros(4)  # [rpsP, rpsS, delP, delS]
         submaneuver_mode = (self.mission_code & 0x0000FF0) >> 4
+
         state = 0
         if submaneuver_mode == 0x00:
             target_rps = 0.0
@@ -117,7 +135,7 @@ class Controller(Node):
         else:
             self.status = 2  # pause
             raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
-        
+
         if self.status == 0:  # init
             self.status = 1
         if state == 1:

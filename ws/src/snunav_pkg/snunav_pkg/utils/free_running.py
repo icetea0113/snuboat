@@ -120,29 +120,32 @@ class FreeRunning(Node):
                 'duration': self.declare_parameter('free_running_mode.turning_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._turning_loaded = True
-
         if not self._turning_start:
             self._turning_start = True
             self._turning_duration = tick + self._turning_params['duration']
+            self.get_logger().info(f'Turning started with duration: {self._turning_params["duration"]} seconds')
         if tick >= self._turning_duration:
             self.get_logger().info('Turning completed.')
             self._turning_end = True
             
         rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
-
         target_rps = self._turning_params['target_rps']
 
         if abs(target_rps-rpsP) < self.rps_rate * self.dt:
             rpsP_cmd = target_rps
+            self.get_logger().info(f'Target RPS reached: {target_rps}')
         else:
             rpsP_cmd = rpsP + np.sign(target_rps-rpsP)*self.rps_rate*self.dt
+            self.get_logger().info(f'RPSP command updated: {rpsP_cmd}, Target RPS: {rpsP}')
             
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
             
         if abs(target_rps-rpsS) < self.rps_rate * self.dt:
             rpsS_cmd = target_rps
+            self.get_logger().info(f'Target RPS reached: {target_rps}')
         else:
             rpsS_cmd = rpsS + np.sign(target_rps-rpsS)*self.rps_rate*self.dt
+            self.get_logger().info(f'RPSS command updated: {rpsS_cmd}, Target RPS: {rpsS}')
             
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max) 
         
@@ -152,19 +155,24 @@ class FreeRunning(Node):
 
         if abs(target_del-delP) < self.del_rate * self.dt:
             delP_cmd = target_del
+            self.get_logger().info(f'Target DEL reached: {target_del}')
         else:
             delP_cmd = delP + np.sign(target_del-delP)*self.del_rate*self.dt
+            self.get_logger().info(f'DELP command updated: {delP_cmd}, Target DEL: {delP}')
 
         delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
 
         if abs(target_del-delS) < self.del_rate * self.dt:
             delS_cmd = target_del
+            self.get_logger().info(f'Target DEL reached: {target_del}')
         else:
             delS_cmd = delS + np.sign(target_del-delS)*self.del_rate*self.dt
+        self.get_logger().info(f'DELS command updated: {delS_cmd}, Target DEL: {delS}')
 
         delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
 
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
+        self.get_logger().info(f'Turning control command: {ctrl_cmd}')
         return ctrl_cmd, self._turning_end
 
     def zigzag(self, tick, pos, ctrl):
