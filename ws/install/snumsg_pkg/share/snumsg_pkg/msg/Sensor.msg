@@ -1,1 +1,1 @@
-/root/snu/snuboat/ws/src/snumsg_pkg/msg/Sensor.msg
+/root/snuboat/ws/src/snumsg_pkg/msg/Sensor.msg

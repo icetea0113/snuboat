@@ -1,1 +1,1 @@
-/root/snu/snuboat/ws/build/snumsg_pkg/rosidl_generator_cpp/snumsg_pkg/msg/mission_code.hpp
+/root/snuboat/ws/build/snumsg_pkg/rosidl_generator_cpp/snumsg_pkg/msg/mission_code.hpp

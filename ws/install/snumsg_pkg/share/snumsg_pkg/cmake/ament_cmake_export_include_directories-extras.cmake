@@ -1,1 +1,1 @@
-/root/snu/snuboat/ws/build/snumsg_pkg/ament_cmake_export_include_directories/ament_cmake_export_include_directories-extras.cmake
+/root/snuboat/ws/build/snumsg_pkg/ament_cmake_export_include_directories/ament_cmake_export_include_directories-extras.cmake

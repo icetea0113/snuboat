@@ -1,1 +1,1 @@
-/root/snu/snuboat/ws/build/snumsg_pkg/rosidl_cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+/root/snuboat/ws/build/snumsg_pkg/rosidl_cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake

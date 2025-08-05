@@ -1,1 +1,1 @@
-/root/snu/snuboat/ws/src/snumsg_pkg/msg/MissionCode.msg
+/root/snuboat/ws/src/snumsg_pkg/msg/MissionCode.msg

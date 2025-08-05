@@ -1,1 +1,1 @@
-/root/snu/snuboat/ws/build/snumsg_pkg/ament_cmake_core/snumsg_pkgConfig-version.cmake
+/root/snuboat/ws/build/snumsg_pkg/ament_cmake_core/snumsg_pkgConfig-version.cmake

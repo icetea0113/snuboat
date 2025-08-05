@@ -1,1 +1,1 @@
-/root/snu/snuboat/ws/build/snumsg_pkg/rosidl_generator_py/snumsg_pkg/_snumsg_pkg_s.ep.rosidl_typesupport_fastrtps_c.c
+/root/snuboat/ws/build/snumsg_pkg/rosidl_generator_py/snumsg_pkg/_snumsg_pkg_s.ep.rosidl_typesupport_fastrtps_c.c

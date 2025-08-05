@@ -1,1 +1,1 @@
-/root/snu/snuboat/ws/build/snumsg_pkg/rosidl_generator_c/snumsg_pkg/msg/detail/sensor__type_support.h
+/root/snuboat/ws/build/snumsg_pkg/rosidl_generator_c/snumsg_pkg/msg/detail/sensor__type_support.h
