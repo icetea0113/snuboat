@@ -1,1 +1,0 @@
-/root/snuboat/ws/src/snumsg_pkg/msg/MissionCode.msg

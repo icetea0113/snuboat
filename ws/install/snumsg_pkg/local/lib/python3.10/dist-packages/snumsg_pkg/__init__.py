@@ -1,1 +1,0 @@
-/root/snuboat/ws/build/snumsg_pkg/rosidl_generator_py/snumsg_pkg/__init__.py

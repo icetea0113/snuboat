@@ -1,1 +1,0 @@
-/root/snuboat/ws/build/snumsg_pkg/rosidl_typesupport_fastrtps_cpp/snumsg_pkg/msg/detail/sensor__rosidl_typesupport_fastrtps_cpp.hpp
