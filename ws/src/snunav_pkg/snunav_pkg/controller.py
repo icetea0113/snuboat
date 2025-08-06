@@ -89,10 +89,10 @@ class Controller(Node):
     def sensor_callback(self, msg):
             self.pos[0] = float(msg.pose[0])
             self.pos[1] = float(msg.pose[1])
-            self.pos[2] = float(msg.pose[2])
+            self.pos[2] = float(msg.pose[5])
             self.vel[0] = float(msg.vel[0])
             self.vel[1] = float(msg.vel[1])
-            self.vel[2] = float(msg.vel[2])
+            self.vel[2] = float(msg.vel[5])
             # self.get_logger().info(f'Sensor data received: '
             #                           f'Position: {self.pos}, Velocity: {self.vel}')
     def controllerMode(self):

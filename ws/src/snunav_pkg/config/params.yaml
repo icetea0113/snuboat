@@ -12,7 +12,7 @@ mission_director:
         # TBD
       # 4: Navigation
         # TBD
-    sub_maneuver_mode: '5'
+    sub_maneuver_mode: '1'
       # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral
 
     subsub_maneuver_mode: '0' # 0: Approaching stage, 1: Turning stage, 2: Entering stage, 3: Pushing stage
