@@ -94,17 +94,11 @@ class FreeRunning(Node):
         
         target_rps = self._speed_mapping_params['target_rps']
 
-        if abs(target_rps-rpsP) < self.rps_rate * self.dt:
-            rpsP_cmd = target_rps
-        else:
-            rpsP_cmd = rpsP + np.sign(target_rps-rpsP)*self.rps_rate*self.dt
+        rpsP_cmd = target_rps
             
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
             
-        if abs(target_rps-rpsS) < self.rps_rate * self.dt:
-            rpsS_cmd = target_rps
-        else:
-            rpsS_cmd = rpsS + np.sign(target_rps-rpsS)*self.rps_rate*self.dt
+        rpsS_cmd = target_rps
             
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)    
         
@@ -131,21 +125,11 @@ class FreeRunning(Node):
         rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
         target_rps = self._turning_params['target_rps']
 
-        if abs(target_rps-rpsP) < self.rps_rate * self.dt:
-            rpsP_cmd = target_rps
-            self.get_logger().info(f'Target RPS reached: {target_rps}')
-        else:
-            rpsP_cmd = rpsP + np.sign(target_rps-rpsP)*self.rps_rate*self.dt
-            self.get_logger().info(f'RPSP command updated: {rpsP_cmd}, Target RPS: {rpsP}')
+        rpsP_cmd = target_rps
             
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
-            
-        if abs(target_rps-rpsS) < self.rps_rate * self.dt:
-            rpsS_cmd = target_rps
-            self.get_logger().info(f'Target RPS reached: {target_rps}')
-        else:
-            rpsS_cmd = rpsS + np.sign(target_rps-rpsS)*self.rps_rate*self.dt
-            self.get_logger().info(f'RPSS command updated: {rpsS_cmd}, Target RPS: {rpsS}')
+
+        rpsS_cmd = target_rps
             
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max) 
         
@@ -153,21 +137,11 @@ class FreeRunning(Node):
         
         target_del = self._turning_params['target_del']
 
-        if abs(target_del-delP) < self.del_rate * self.dt:
-            delP_cmd = target_del
-            self.get_logger().info(f'Target DEL reached: {target_del}')
-        else:
-            delP_cmd = delP + np.sign(target_del-delP)*self.del_rate*self.dt
-            self.get_logger().info(f'DELP command updated: {delP_cmd}, Target DEL: {delP}')
+        delP_cmd = target_del
 
         delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
 
-        if abs(target_del-delS) < self.del_rate * self.dt:
-            delS_cmd = target_del
-            self.get_logger().info(f'Target DEL reached: {target_del}')
-        else:
-            delS_cmd = delS + np.sign(target_del-delS)*self.del_rate*self.dt
-        self.get_logger().info(f'DELS command updated: {delS_cmd}, Target DEL: {delS}')
+        delS_cmd = target_del
 
         delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
 
@@ -211,29 +185,16 @@ class FreeRunning(Node):
             direction_message = "left" if self._zigzag_direction < 0 else "right"
             self.get_logger().info(f'Zigzag direction changed to {direction_message}. Current psi: {psi}, Target psi: {target_psi}')
         
-        if abs(target_rps-rpsP) < self.rps_rate * self.dt:
-            rpsP_cmd = target_rps
-        else:
-            rpsP_cmd = rpsP + np.sign(target_rps-rpsP)*self.rps_rate*self.dt
-
+        rpsP_cmd = target_rps
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
-        if abs(target_rps-rpsS) < self.rps_rate * self.dt:
-            rpsS_cmd = target_rps
-        else:
-            rpsS_cmd = rpsS + np.sign(target_rps-rpsS)*self.rps_rate*self.dt
-
+        rpsS_cmd = target_rps
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
         
-        if abs(self.target_del-delP) < self.del_rate * self.dt:
-            delP_cmd = self.target_del
-        else:
-            delP_cmd = delP + np.sign(self.target_del-delP)*self.del_rate*self.dt
+        delP_cmd = self.target_del
         delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
-        if abs(self.target_del-delS) < self.del_rate * self.dt:
-            delS_cmd = self.target_del
-        else:
-            delS_cmd = delS + np.sign(self.target_del-delS)*self.del_rate*self.dt
+        
+        delS_cmd = self.target_del
         delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
                 
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
@@ -261,18 +222,10 @@ class FreeRunning(Node):
         target_rpsP = self._pivot_turn_params['target_rpsP']
         target_rpsS = self._pivot_turn_params['target_rpsS']
 
-        if abs(target_rpsP-rpsP) < self.rps_rate * self.dt:
-            rpsP_cmd = target_rpsP
-        else:
-            rpsP_cmd = rpsP + np.sign(target_rpsP-rpsP)*self.rps_rate*self.dt
-
+        rpsP_cmd = target_rpsP
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
-        if abs(target_rpsS-rpsS) < self.rps_rate * self.dt:
-            rpsS_cmd = target_rpsS
-        else:
-            rpsS_cmd = rpsS + np.sign(target_rpsS-rpsS)*self.rps_rate*self.dt
-
+        rpsS_cmd = target_rpsS
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
 
         # deadzone_start, deadzone_end를 고려한 pivot turn 로직
@@ -304,33 +257,20 @@ class FreeRunning(Node):
         target_rpsS = self._crabbing_params['target_rpsS']
         target_delP = self._crabbing_params['target_delP']
         target_delS = self._crabbing_params['target_delS']
-        
-        if abs(target_rpsP-rpsP) < self.rps_rate * self.dt:
-            rpsP_cmd = target_rpsP
-        else:
-            rpsP_cmd = rpsP + np.sign(target_rpsP-rpsP)*self.rps_rate*self.dt
 
+        rpsP_cmd = target_rpsP
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
-        if abs(target_rpsS-rpsS) < self.rps_rate * self.dt:
-            rpsS_cmd = target_rpsS
-        else:
-            rpsS_cmd = rpsS + np.sign(target_rpsS-rpsS)*self.rps_rate*self.dt
 
+        rpsS_cmd = target_rpsS
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
 
         ##
 
-        if abs(target_delP-delP) < self.del_rate * self.dt:
-            delP_cmd = target_delP
-        else:
-            delP_cmd = delP + np.sign(target_delP-delP)*self.del_rate*self.dt
+        delP_cmd = target_delP
         delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
 
-        if abs(target_delS-delS) < self.del_rate * self.dt:
-            delS_cmd = target_delS
-        else:
-            delS_cmd = delS + np.sign(target_delS-delS)*self.del_rate*self.dt
+        delS_cmd = target_delS
         delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
 
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
@@ -367,29 +307,16 @@ class FreeRunning(Node):
             target_del = 0.0
             target_rps = 0.0
         
-        if abs(target_rps-rpsP) < self.rps_rate * self.dt:
-            rpsP_cmd = target_rps
-        else:
-            rpsP_cmd = rpsP + np.sign(target_rps-rpsP)*self.rps_rate*self.dt
-
+        rpsP_cmd = target_rps
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
-        if abs(target_rps-rpsS) < self.rps_rate * self.dt:
-            rpsS_cmd = target_rps
-        else:
-            rpsS_cmd = rpsS + np.sign(target_rps-rpsS)*self.rps_rate*self.dt
-
+        rpsS_cmd = target_rps
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
-        
-        if abs(target_del-delP) < self.del_rate * self.dt:
-            delP_cmd = target_del
-        else:
-            delP_cmd = delP + np.sign(target_del-delP)*self.del_rate*self.dt
+
+        delP_cmd = target_delP
         delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
-        if abs(target_del-delS) < self.del_rate * self.dt:
-            delS_cmd = target_del
-        else:
-            delS_cmd = delS + np.sign(target_del-delS)*self.del_rate*self.dt
+
+        delS_cmd = target_del
         delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
                 
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
@@ -429,29 +356,24 @@ class FreeRunning(Node):
                 self._spiral_duration = tick + self._spiral_params['duration']
                 self.get_logger().info(f'Spiral started with target delta: {target_del}, duration: {self._spiral_params["duration"]} seconds')
         
-        if abs(target_rps-rpsP) < self.rps_rate * self.dt:
-            rpsP_cmd = target_rps
-        else:
-            rpsP_cmd = rpsP + np.sign(target_rps-rpsP)*self.rps_rate*self.dt
-
+        rpsP_cmd = target_rps
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
-        if abs(target_rps-rpsS) < self.rps_rate * self.dt:
-            rpsS_cmd = target_rps
-        else:
-            rpsS_cmd = rpsS + np.sign(target_rps-rpsS)*self.rps_rate*self.dt
-
+        rpsS_cmd = target_rps
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
-        
-        if abs(target_del-delP) < self.del_rate * self.dt:
-            delP_cmd = target_del
-        else:
-            delP_cmd = delP + np.sign(target_del-delP)*self.del_rate*self.dt
+
+        delP_cmd = target_delP
         delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
-        if abs(target_del-delS) < self.del_rate * self.dt:
-            delS_cmd = target_del
-        else:
-            delS_cmd = delS + np.sign(target_del-delS)*self.del_rate*self.dt
+
+        delS_cmd = target_delS
+        delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
+
+        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
+
+        delP_cmd = delP + np.sign(target_del-delP)*self.del_rate*self.dt
+        delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
+
+        delS_cmd = delS + np.sign(target_del-delS)*self.del_rate*self.dt
         delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
         
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]

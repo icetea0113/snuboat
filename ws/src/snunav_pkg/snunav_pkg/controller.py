@@ -93,8 +93,8 @@ class Controller(Node):
             self.vel[0] = float(msg.vel[0])
             self.vel[1] = float(msg.vel[1])
             self.vel[2] = float(msg.vel[5])
-            # self.get_logger().info(f'Sensor data received: '
-            #                           f'Position: {self.pos}, Velocity: {self.vel}')
+            self.get_logger().info(f'Sensor data received: '
+                                      f'Position: {self.pos}, Velocity: {self.vel}')
     def controllerMode(self):
         maneuver_mode = (self.mission_code & 0x00F000) >> 12
         if maneuver_mode == 0x1:
@@ -116,12 +116,8 @@ class Controller(Node):
 
         ctrl_msg = Float32MultiArray()
         ctrl_msg.data = self.ctrl_cmd.tolist()
-        if self.is_sils:
-            self.__ctrlcmdsilsPublisher.publish(ctrl_msg)
-            # self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
-        else:
-            self.__ctrlcmdboatPublisher.publish(ctrl_msg)
-            # self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
+        self.__ctrlcmdsilsPublisher.publish(ctrl_msg)
+        # self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
         
 
 
