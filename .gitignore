@@ -4,3 +4,7 @@ ws/src/snunav_pkg/snunav_pkg/test.py
 /ws/log
 *.pyc
 ws/src/*.bag
+ws/src/FREE*
+ws/src/DOCKING*
+ws/src/DP*
+ws/src/NAVIGATION*

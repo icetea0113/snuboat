@@ -113,7 +113,7 @@ def generate_launch_description():
                 )
             ),
             launch_arguments={
-                'sensor_hostname': '192.168.1.3',
+                'sensor_hostname': '192.168.1.5',
                 'viz': 'false'  # rviz 비활성화 (필요시 수정)
             }.items()
         )
