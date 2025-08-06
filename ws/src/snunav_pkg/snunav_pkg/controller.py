@@ -124,8 +124,8 @@ class Controller(Node):
         else:
             self.__ctrlcmdboatPublisher.publish(ctrl_msg)
             self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
-        self.__ctrlcmdboatPublisher.publish(ctrl_msg)
-        self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
+        # self.__ctrlcmdboatPublisher.publish(ctrl_msg)
+        # self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
 
 
 
