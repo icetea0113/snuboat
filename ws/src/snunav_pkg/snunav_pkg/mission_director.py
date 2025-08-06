@@ -82,7 +82,7 @@ class MissionDirector(Node):
         # sils_mode, motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
 
         self.publisher_.publish(msg)
-        self.get_logger().info(f'Publishing mission_code: "{msg.mission_code}"')
+        # self.get_logger().info(f'Publishing mission_code: "{msg.mission_code}"')
 
     def status_callback(self, msg):
         self.status = msg.data

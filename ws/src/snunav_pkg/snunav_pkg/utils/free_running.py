@@ -189,11 +189,9 @@ class FreeRunning(Node):
         
         rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
         psi = (pos[2])  # pos[2]는 yaw 또는 heading을 나타낸다고 가정
-        self.get_logger().info(f'pos: {pos}, psi: {psi}, rpsP: {rpsP}, rpsS: {rpsS}, delP: {delP}, delS: {delS}')
         target_rps = self._zigzag_params['target_rps']
         
         initial_psi_direction = self._zigzag_params['initial_psi_direction']
-        
         
         if not self._zigzag_start:
             self._zigzag_start = True
@@ -207,7 +205,6 @@ class FreeRunning(Node):
             self._zigzag_direction = initial_psi_direction
 
         target_psi = np.deg2rad(self._zigzag_params['target_psi']) * self._zigzag_direction
-        self.get_logger().info(f'Zigzag direction: {self._zigzag_direction}, Current psi: {psi}, Target psi: {target_psi}')
         if abs(psi) - abs(target_psi) >= 0 and psi * target_psi > 0:
             self._zigzag_direction *= -1  # 방향 전환
             self.target_del *= -1
@@ -228,8 +225,6 @@ class FreeRunning(Node):
 
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
         
-        
-        self.get_logger().info(f'Target DEL: {self.target_del}, Current DELP: {delP}, Current DELS: {delS}')
         if abs(self.target_del-delP) < self.del_rate * self.dt:
             delP_cmd = self.target_del
         else:
@@ -349,21 +344,28 @@ class FreeRunning(Node):
             self._pull_out_params = {
                 'target_rps': self.declare_parameter('free_running_mode.pull_out_mode.target_rps', 0.0).get_parameter_value().double_value,
                 'target_del': self.declare_parameter('free_running_mode.pull_out_mode.target_del', 0.0).get_parameter_value().double_value,
-                'duration': self.declare_parameter('free_running_mode.pull_out_mode.duration', 0.0).get_parameter_value().double_value
+                'duration_turning': self.declare_parameter('free_running_mode.pull_out_mode.duration_turning', 0.0).get_parameter_value().double_value,
+                'duration_neutral': self.declare_parameter('free_running_mode.pull_out_mode.duration_neutral', 0.0).get_parameter_value().double_value
             }
             self._pull_out_loaded = True
+            self._pull_out_duration_turning = tick + self._pull_out_params['duration_turning']
+        if not self._pull_out_start:
+            self._pull_out_start = True
+            self._pull_out_duration_turning = tick + self._pull_out_params['duration_turning']
+            self._pull_out_duration_neutral = self._pull_out_duration_turning + self._pull_out_params['duration_neutral']
         
         rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
 
         target_rps = self._pull_out_params['target_rps']
         target_del = self._pull_out_params['target_del']
-        if tick >= self._pull_out_duration:
+        if tick >= self._pull_out_duration_turning:
             self.get_logger().info('Pull out completed.')
+            target_del = 0.0
+        if tick >= self._pull_out_duration_neutral:
+            self.get_logger().info('Pull out neutral phase started.')
             self._pull_out_end = True
             target_del = 0.0
-        if not self._pull_out_start:
-            self._pull_out_start = True
-            self._pull_out_duration = tick + self._pull_out_params['duration']
+            target_rps = 0.0
         
         if abs(target_rps-rpsP) < self.rps_rate * self.dt:
             rpsP_cmd = target_rps
@@ -402,14 +404,13 @@ class FreeRunning(Node):
                 'target_del': self.declare_parameter('free_running_mode.spiral_mode.target_del', [20.0, 10.0, 5.0]).get_parameter_value().double_array_value,
                 'duration': self.declare_parameter('free_running_mode.spiral_mode.duration', 0.0).get_parameter_value().double_value
             }
+            self._spiral_duration = tick + self._spiral_params['duration']
             self._spiral_loaded = True
             
         rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
-
-        target_rps = self._turning_params['target_rps']
         
         target_del_list = self._spiral_params['target_del']
-        target_rps = self._pull_out_params['target_rps']
+        target_rps = self._spiral_params['target_rps']
         
         if self._spiral_target_del_idx == len(target_del_list):
             self.get_logger().info('Spiral completed.')
@@ -417,7 +418,7 @@ class FreeRunning(Node):
             target_del = 0.0
             target_rps = 0.0
             
-        while self._spiral_target_del_idx < len(target_del_list):
+        if self._spiral_target_del_idx < len(target_del_list):
             target_del = target_del_list[self._spiral_target_del_idx]
             if tick >= self._spiral_duration:
                 self.get_logger().info(f'Spiral angle {target_del} completed.')
@@ -426,6 +427,7 @@ class FreeRunning(Node):
             if not self._spiral_start:
                 self._spiral_start = True
                 self._spiral_duration = tick + self._spiral_params['duration']
+                self.get_logger().info(f'Spiral started with target delta: {target_del}, duration: {self._spiral_params["duration"]} seconds')
         
         if abs(target_rps-rpsP) < self.rps_rate * self.dt:
             rpsP_cmd = target_rps
