@@ -59,6 +59,13 @@ def generate_launch_description():
     
     ld.add_action(Node(
         package='snunav_pkg',
+        executable='motor_interface',
+        name='motor_interface_node',
+        output='screen',
+    ))
+        
+    ld.add_action(Node(
+        package='snunav_pkg',
         executable='sils',
         name='sils_node',
         output='screen',

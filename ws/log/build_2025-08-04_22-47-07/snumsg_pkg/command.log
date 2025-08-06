@@ -1,0 +1,4 @@
+Invoking command in '/root/snu/snuboat/ws/build/snumsg_pkg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /root/snu/snuboat/ws/build/snumsg_pkg -- -j10 -l10
+Invoked command in '/root/snu/snuboat/ws/build/snumsg_pkg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /root/snu/snuboat/ws/build/snumsg_pkg -- -j10 -l10
+Invoking command in '/root/snu/snuboat/ws/build/snumsg_pkg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /root/snu/snuboat/ws/build/snumsg_pkg
+Invoked command in '/root/snu/snuboat/ws/build/snumsg_pkg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /root/snu/snuboat/ws/build/snumsg_pkg
