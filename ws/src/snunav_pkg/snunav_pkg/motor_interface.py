@@ -33,9 +33,9 @@ class MotorInterface(Node):
             Float32MultiArray, 'ctrl_fb_boat', 10)
 
         # 피드백 수신 스레드 --------------------------------------------------
-        self.recv_thread = threading.Thread(
-            target=self._udp_feedback_loop, daemon=True)
-        self.recv_thread.start()
+        # self.recv_thread = threading.Thread(
+        #     target=self._udp_feedback_loop, daemon=True)
+        # self.recv_thread.start()
 
         self.get_logger().info('MotorInterface node started')
 
@@ -55,6 +55,7 @@ class MotorInterface(Node):
             self.get_logger().info(f'Sent: {frame.strip()}')
         except OSError as e:
             self.get_logger().error(f'UDP send error: {e}')
+
 
     # ──────────────────────────────────────────────────────────────────
     #  UDP → ROS : FB 피드백 수신

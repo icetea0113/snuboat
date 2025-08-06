@@ -98,8 +98,8 @@ class Controller(Node):
     def controllerMode(self):
         maneuver_mode = (self.mission_code & 0x00F000) >> 12
         if maneuver_mode == 0x1:
-            # self.freeRunningController()
-            self.ctrl_cmd = np.array([0.0, 0.0, 0.0, 0.0])  # Example control command
+            self.freeRunningController()
+            #self.ctrl_cmd = np.array([15.0, 15.0, 30.0, 30.0])  # Example control command
         elif maneuver_mode == 0x2:
             self.dockingController()
         elif maneuver_mode == 0x3:
@@ -116,9 +116,15 @@ class Controller(Node):
 
         ctrl_msg = Float32MultiArray()
         ctrl_msg.data = self.ctrl_cmd.tolist()
-        self.__ctrlcmdsilsPublisher.publish(ctrl_msg)
-        # self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
-        
+        if self.is_sils == 1:
+            self.__ctrlcmdsilsPublisher.publish(ctrl_msg)
+            self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
+        else:
+            self.__ctrlcmdboatPublisher.publish(ctrl_msg)
+            self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
+        self.__ctrlcmdboatPublisher.publish(ctrl_msg)
+        self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
+
 
 
     def freeRunningController(self):
