@@ -18,8 +18,8 @@ class MotorInterface(Node):
         super().__init__('motor_interface')
 
         # UDP 설정 -----------------------------------------------------------
-        self.DEST = ('127.0.0.1', 7777)   # MCU IP, port
-        self.BIND = ('127.0.0.1', 7777)   # 수신(IP,port) – PC(Nvidia Jetson) 주소
+        self.DEST = ('192.168.1.100', 7777)   # MCU IP, port
+        self.BIND = ('192.168.1.2', 7777)   # 수신(IP,port) – PC(Nvidia Jetson) 주소
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(self.BIND)
         self.sock.settimeout(0.05)            # non-blocking recv
@@ -65,13 +65,14 @@ class MotorInterface(Node):
                 data, _ = self.sock.recvfrom(256)
             except socket.timeout:
                 continue
+            self.get_logger().error(f'received data: {data}')
 
             try:
                 line = data.decode('ascii').strip()
             except UnicodeDecodeError:
                 continue
 
-            if not line.startswith('$ FB'):
+            if not line.startswith('$FB'):
                 continue
 
             parts = line.split(',')
@@ -81,12 +82,12 @@ class MotorInterface(Node):
             try:
                 # ['$ FB', n, a, b, c, d, e]
                 fb = Float32MultiArray()
-                fb.data = [float(parts[1]),  # mode (int지만 float로 전달)
+                fb.data = [  # mode (int지만 float로 전달)
                            float(parts[2]),  # L_rps
                            float(parts[3]),  # R_rps
                            float(parts[4]),  # L_deg
-                           float(parts[5]),  # R_deg
-                           float(parts[6])]  # err code
+                           float(parts[5])]  # R_deg
+                           
                 # 스레드-세이프 게시
                 rclpy.executors.call_soon_threadsafe(
                     self.get_executor(), self.fb_pub.publish, fb)
