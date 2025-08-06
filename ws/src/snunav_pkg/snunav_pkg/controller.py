@@ -45,6 +45,11 @@ class Controller(Node):
             'sils_motor_fb_data',
             self.sils_callback,
             10)
+        self.__sensor_subscriber = self.create_subscription(
+            Sensor,
+            'sensor',
+            self.sensor_callback,
+            10)
         self.__ctrlcmdboatPublisher = self.create_publisher(
             Float32MultiArray,
             'ctrl_cmd_boat',
@@ -66,9 +71,9 @@ class Controller(Node):
             self.ctrl[1] = float(msg.data[1])
             self.ctrl[2] = float(msg.data[2])
             self.ctrl[3] = float(msg.data[3])
-            self.get_logger().info(f'SILS control feedback received: '
-                                      f'Port RPS: {self.ctrl[0]}, Stbd RPS: {self.ctrl[1]}, '
-                                      f'Port Steer: {self.ctrl[2]}, Stbd Steer: {self.ctrl[3]}')
+            # self.get_logger().info(f'SILS control feedback received: '
+            #                           f'Port RPS: {self.ctrl[0]}, Stbd RPS: {self.ctrl[1]}, '
+            #                           f'Port Steer: {self.ctrl[2]}, Stbd Steer: {self.ctrl[3]}')
         else:
             self.get_logger().error('Invalid SILS control command received. Expected 4 values.')
             
@@ -77,10 +82,19 @@ class Controller(Node):
         mission_code = int(msg.mission_code, 16)
         self.mission_code = (mission_code & 0x000FFF0)
         self.is_sils = (mission_code & 0xF000000) >> 24
-        self.get_logger().info('SILS mode: %s' % self.is_sils)
+        # self.get_logger().info('SILS mode: %s' % self.is_sils)
         self.controllerMode()
-        self.get_logger().info('Received maneuver code: "%s"' % hex(self.mission_code))
+        # self.get_logger().info('Received maneuver code: "%s"' % hex(self.mission_code))
 
+    def sensor_callback(self, msg):
+            self.pos[0] = float(msg.pose[0])
+            self.pos[1] = float(msg.pose[1])
+            self.pos[2] = float(msg.pose[5])
+            self.vel[0] = float(msg.vel[0])
+            self.vel[1] = float(msg.vel[1])
+            self.vel[2] = float(msg.vel[5])
+            # self.get_logger().info(f'Sensor data received: '
+            #                           f'Position: {self.pos}, Velocity: {self.vel}')
     def controllerMode(self):
         maneuver_mode = (self.mission_code & 0x00F000) >> 12
         if maneuver_mode == 0x1:
@@ -104,10 +118,10 @@ class Controller(Node):
         ctrl_msg.data = self.ctrl_cmd.tolist()
         if self.is_sils:
             self.__ctrlcmdsilsPublisher.publish(ctrl_msg)
-            self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
+            # self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
         else:
             self.__ctrlcmdboatPublisher.publish(ctrl_msg)
-            self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
+            # self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
         
 
 
@@ -123,6 +137,7 @@ class Controller(Node):
         elif submaneuver_mode == 0x10:
             ctrl_cmd, state = self.free_running.turning(self.tick, self.ctrl)
         elif submaneuver_mode == 0x20:
+            self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
             ctrl_cmd, state = self.free_running.zigzag(self.tick, self.pos, self.ctrl)
         elif submaneuver_mode == 0x30:
             ctrl_cmd, state = self.free_running.pivot_turn(self.tick, self.ctrl)
@@ -131,6 +146,7 @@ class Controller(Node):
         elif submaneuver_mode == 0x50:
             ctrl_cmd, state = self.free_running.pull_out(self.tick, self.ctrl)
         elif submaneuver_mode == 0x60:
+            self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
             ctrl_cmd, state = self.free_running.spiral(self.tick, self.ctrl)
         else:
             self.status = 2  # pause

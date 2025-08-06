@@ -56,9 +56,9 @@ class SILS(Node):
             self.stbd_rps_cmd = float(msg.data[1])
             self.port_steer_cmd = float(msg.data[2])
             self.stbd_steer_cmd = float(msg.data[3])
-            self.get_logger().info(f'SILS control command received: '
-                                   f'Port RPS: {self.port_rps_cmd}, Stbd RPS: {self.stbd_rps_cmd}, '
-                                   f'Port Steer: {self.port_steer_cmd}, Stbd Steer: {self.stbd_steer_cmd}')
+            # self.get_logger().info(f'SILS control command received: '
+            #                        f'Port RPS: {self.port_rps_cmd}, Stbd RPS: {self.stbd_rps_cmd}, '
+            #                        f'Port Steer: {self.port_steer_cmd}, Stbd Steer: {self.stbd_steer_cmd}')
         else:
             self.get_logger().error('Invalid SILS control command received. Expected 4 values.')
             

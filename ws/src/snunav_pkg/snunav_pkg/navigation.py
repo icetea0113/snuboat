@@ -102,7 +102,7 @@ class Navigation(Node):
         # motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
         self.mission_code = int(msg.mission_code, 16)
         self.active_sensor_mode = (self.mission_code & 0x00F0000) >> 16
-        self.get_logger().info(f'Received Mission Code: {hex(self.mission_code)}, Sensor Mode: {hex(self.active_sensor_mode)}')
+        # self.get_logger().info(f'Received Mission Code: {hex(self.mission_code)}, Sensor Mode: {hex(self.active_sensor_mode)}')
 
     ## -- TODO : Implement actual sensor data processing logic
     # For now, we will just simulate the data reception and processing
@@ -111,7 +111,8 @@ class Navigation(Node):
             self.status_qualisys = int(msg.data[0])
             self.pose_qualisys = np.array(msg.data[1:7], dtype=np.float32)
             self.vel_qualisys = np.array(msg.data[7:13], dtype=np.float32)
-
+        self.timer_callback()
+        
     def slam_callback(self, msg):
         self.status_slam = STATUS_SLAM_ON
         
@@ -163,22 +164,22 @@ class Navigation(Node):
             self.vel = self.vel_qualisys
             status_suffix = str(self.status_qualisys)
         elif self.active_sensor_mode == 0x1: # SLAM
-            self.pose = np.array([self.pose_slam[0], self.pose_slam[1], self.pose_slam[5]])
-            self.vel = np.array([self.vel_slam[0], self.vel_slam[1], self.vel_slam[5]])
+            self.pose = np.array(self.pose_slam)
+            self.vel = np.array(self.vel_slam)
             status_suffix = str(self.status_slam)
         elif self.active_sensor_mode == 0x2: # GPS-RTK
-            self.pose = np.array([self.pose_gps_rtk[0], self.pose_gps_rtk[1], self.pose_gps_rtk[5]])
-            self.vel = np.array([self.vel_gps_rtk[0], self.vel_gps_rtk[1], self.vel_gps_rtk[5]])
+            self.pose = np.array(self.pose_gps_rtk)
+            self.vel = np.array(self.vel_gps_rtk)
             status_suffix = str(self.status_gps_rtk)
         elif self.active_sensor_mode == 0x3: # Marker
-            self.pose = np.array([self.pose_marker[0], self.pose_marker[1], self.pose_marker[5]])
-            self.vel = np.array([self.vel_marker[0], self.vel_marker[1], self.vel_marker[5]])
+            self.pose = np.array(self.pose_marker)
+            self.vel = np.array(self.vel_marker)
             status_suffix = str(self.status_marker)
         elif self.active_sensor_mode == 0x4: # SILS
-            self.pose = np.array([self.pose_sils[0], self.pose_sils[1], self.pose_sils[5]])
-            self.vel = np.array([self.vel_sils[0], self.vel_sils[1], self.vel_sils[5]])
+            self.pose = np.array(self.pose_sils)
+            self.vel = np.array(self.vel_sils)
             status_suffix = str(self.status_sils)
-        self.get_logger().info(f'SILS Pose at timer: {self.pose}, Velocity: {self.vel}')
+        # self.get_logger().info(f'SILS Pose at timer: {self.pose}, Velocity: {self.vel}')
         
         status_prefix = str(self.active_sensor_mode >> 4)
         if status_prefix:
