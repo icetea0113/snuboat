@@ -16,7 +16,7 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import String, Float32MultiArray, Int32
-from snumsg_pkg.msg import MissionCode, Sensor
+from snumsg_pkg.msg import MissionCode, Sensor, Control
 import numpy as np
 from snunav_pkg.utils.ship_dyn import ShipDyn
 
@@ -41,21 +41,21 @@ class SILS(Node):
         
         # Subscribers
         self.ctrl_cmd = self.create_subscription(
-            Float32MultiArray,
+            Control,
             'ctrl_cmd_sils',
             self.sils_callback,
             10)
         
         # Publishers
         self.navigation_sils_pub = self.create_publisher(Float32MultiArray, 'sils_navigation_data', 10)
-        self.motor_fb_sils_pub = self.create_publisher(Float32MultiArray, 'sils_motor_fb_data', 10)
+        self.motor_fb_sils_pub = self.create_publisher(Control, 'sils_motor_fb_data', 10)
 
     def sils_callback(self, msg):
-        if len(msg.data) == 4:
-            self.port_rps_cmd = float(msg.data[0])
-            self.stbd_rps_cmd = float(msg.data[1])
-            self.port_steer_cmd = float(msg.data[2])
-            self.stbd_steer_cmd = float(msg.data[3])
+        if len(msg.ctrl) == 4:
+            self.port_rps_cmd = float(msg.ctrl[0])
+            self.stbd_rps_cmd = float(msg.ctrl[1])
+            self.port_steer_cmd = float(msg.ctrl[2])
+            self.stbd_steer_cmd = float(msg.ctrl[3])
             # self.get_logger().info(f'SILS control command received: '
             #                        f'Port RPS: {self.port_rps_cmd}, Stbd RPS: {self.stbd_rps_cmd}, '
             #                        f'Port Steer: {self.port_steer_cmd}, Stbd Steer: {self.stbd_steer_cmd}')
@@ -95,10 +95,11 @@ class SILS(Node):
         # self.get_logger().info(f'Published SILS navigation data: {nav_msg.data}')
         
         #Publish Motor Feedback Data
-        motor_fb_msg = Float32MultiArray()
-        motor_fb_msg.data = [self.port_rps_fb, self.stbd_rps_fb, self.port_steer_fb, self.stbd_steer_fb]
+        motor_fb_msg = Control()
+        motor_fb_msg.ctrl = [self.port_rps_fb, self.stbd_rps_fb, self.port_steer_fb, self.stbd_steer_fb]
+        motor_fb_msg.tick = self.get_clock().now().to_msg()
         self.motor_fb_sils_pub.publish(motor_fb_msg)
-        self.get_logger().info(f'Published SILS motor feedback data: {motor_fb_msg.data}')
+        self.get_logger().info(f'Published SILS motor feedback data: {motor_fb_msg.ctrl}')
 
 def main(args=None):
     rclpy.init(args=args)

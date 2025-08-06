@@ -9,6 +9,7 @@ ROS 2 MotorInterface node
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
+from snumsg_pkg.msg import Control  # 변경: Float32MultiArray → Control
 import socket
 import threading
 import time
@@ -26,11 +27,11 @@ class MotorInterface(Node):
         
         # ROS I/O ------------------------------------------------------------
         self.cmd_sub = self.create_subscription(
-            Float32MultiArray, 'ctrl_cmd_boat',
+            Control, 'ctrl_cmd_boat',
             self.motor_interface_callback, 10)
 
         self.fb_pub = self.create_publisher(
-            Float32MultiArray, 'ctrl_fb_boat', 10)
+            Control, 'ctrl_fb_boat', 10)
 
         # 피드백 수신 스레드 --------------------------------------------------
         # self.recv_thread = threading.Thread(
@@ -42,13 +43,13 @@ class MotorInterface(Node):
     # ──────────────────────────────────────────────────────────────────
     #  ROS → UDP : CTRL 명령 전송
     # ──────────────────────────────────────────────────────────────────
-    def motor_interface_callback(self, msg: Float32MultiArray):
-        if len(msg.data) != 4:
+    def motor_interface_callback(self, msg: Control):
+        if not msg.ctrl or len(msg.ctrl) != 4:
             self.get_logger().warn(
                 'ctrl_cmd_boat expects 4 elements [L_rps, R_rps, L_deg, R_deg]')
             return
 
-        l_rps, r_rps, l_deg, r_deg = msg.data
+        l_rps, r_rps, l_deg, r_deg = msg.ctrl
         frame = (f"$CTRL,{l_rps},{r_rps},{l_deg},{r_deg}\r\n")
         try:
             self.sock.sendto(frame.encode('ascii'), self.DEST)
@@ -82,8 +83,9 @@ class MotorInterface(Node):
 
             try:
                 # ['$ FB', n, a, b, c, d, e]
-                fb = Float32MultiArray()
-                fb.data = [  # mode (int지만 float로 전달)
+                fb = Control()
+                fb.tick = self.get_clock().now().to_msg()  # 현재 시간
+                fb.ctrl = [  # mode (int지만 float로 전달)
                            float(parts[2]),  # L_rps
                            float(parts[3]),  # R_rps
                            float(parts[4]),  # L_deg

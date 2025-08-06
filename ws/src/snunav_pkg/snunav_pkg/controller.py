@@ -16,7 +16,7 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import String, Float32MultiArray, Int32
-from snumsg_pkg.msg import MissionCode, Sensor
+from snumsg_pkg.msg import MissionCode, Sensor, Control
 import numpy as np
 from snunav_pkg.utils.free_running import FreeRunning
 import time
@@ -41,7 +41,7 @@ class Controller(Node):
             self.mission_callback,
             10)
         self.__silscontrol_subscriber = self.create_subscription(
-            Float32MultiArray,
+            Control,
             'sils_motor_fb_data',
             self.sils_callback,
             10)
@@ -51,11 +51,11 @@ class Controller(Node):
             self.sensor_callback,
             10)
         self.__ctrlcmdboatPublisher = self.create_publisher(
-            Float32MultiArray,
+            Control,
             'ctrl_cmd_boat',
             10)
         self.__ctrlcmdsilsPublisher = self.create_publisher(
-            Float32MultiArray,
+            Control,
             'ctrl_cmd_sils',
             10)
         self.status_publisher = self.create_publisher(
@@ -66,11 +66,11 @@ class Controller(Node):
         self.free_running = FreeRunning()
     
     def sils_callback(self, msg):
-        if len(msg.data) == 4:
-            self.ctrl[0] = float(msg.data[0])
-            self.ctrl[1] = float(msg.data[1])
-            self.ctrl[2] = float(msg.data[2])
-            self.ctrl[3] = float(msg.data[3])
+        if len(msg.ctrl) == 4:
+            self.ctrl[0] = float(msg.ctrl[0])
+            self.ctrl[1] = float(msg.ctrl[1])
+            self.ctrl[2] = float(msg.ctrl[2])
+            self.ctrl[3] = float(msg.ctrl[3])
             # self.get_logger().info(f'SILS control feedback received: '
             #                           f'Port RPS: {self.ctrl[0]}, Stbd RPS: {self.ctrl[1]}, '
             #                           f'Port Steer: {self.ctrl[2]}, Stbd Steer: {self.ctrl[3]}')
@@ -114,8 +114,10 @@ class Controller(Node):
         self.status_publisher.publish(status_msg)
         self.get_logger().info(f'Published status command: {self.status}')
 
-        ctrl_msg = Float32MultiArray()
-        ctrl_msg.data = self.ctrl_cmd.tolist()
+        ctrl_msg = Control()
+        ctrl_msg.ctrl = self.ctrl_cmd.tolist()
+        ctrl_msg.tick = self.get_clock().now().to_msg()
+        
         if self.is_sils == 1:
             self.__ctrlcmdsilsPublisher.publish(ctrl_msg)
             self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
