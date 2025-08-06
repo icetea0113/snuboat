@@ -2,3 +2,5 @@
 ws/src/snunav_pkg/snunav_pkg/test.py
 /ws/install
 /ws/log
+*.pyc
+ws/src/*.bag

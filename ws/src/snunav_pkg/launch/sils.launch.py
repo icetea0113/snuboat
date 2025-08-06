@@ -75,7 +75,7 @@ def generate_launch_description():
     sub_name  = sub_maneuver_mode_map.get(man_code, {}).get(sub_code, str(sub_code))
 
     # 4. bag 이름 생성
-    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    ts = datetime.now().strftime('%m%d_%H%M%S')
     bag_name = os.path.expanduser(f"~/snuboat/ws/src/{man_name}_{sub_name}_{ts}")
 
     # sensor_mode 값 가져오기
