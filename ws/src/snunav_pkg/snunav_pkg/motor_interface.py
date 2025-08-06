@@ -34,9 +34,9 @@ class MotorInterface(Node):
             Control, 'ctrl_fb_boat', 10)
 
         # 피드백 수신 스레드 --------------------------------------------------
-        # self.recv_thread = threading.Thread(
-        #     target=self._udp_feedback_loop, daemon=True)
-        # self.recv_thread.start()
+        self.recv_thread = threading.Thread(
+            target=self._udp_feedback_loop, daemon=True)
+        self.recv_thread.start()
 
         self.get_logger().info('MotorInterface node started')
 
@@ -82,18 +82,19 @@ class MotorInterface(Node):
                 continue  # malformed
 
             try:
-                # ['$ FB', n, a, b, c, d, e]
                 fb = Control()
-                fb.tick = self.get_clock().now().to_msg()  # 현재 시간
+                fb.tick = self.get_clock().now().to_msg()
                 fb.ctrl = [  # mode (int지만 float로 전달)
                            float(parts[2]),  # L_rps
                            float(parts[3]),  # R_rps
                            float(parts[4]),  # L_deg
                            float(parts[5])]  # R_deg
+                
+                self.get_logger().info(f'Feedback received: {fb.ctrl}')
                            
                 # 스레드-세이프 게시
-                rclpy.executors.call_soon_threadsafe(
-                    self.get_executor(), self.fb_pub.publish, fb)
+                self.fb_pub.publish(fb)
+
             except ValueError:
                 continue  # number conversion fail
 
