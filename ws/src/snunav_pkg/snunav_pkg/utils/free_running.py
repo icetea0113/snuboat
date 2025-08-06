@@ -24,6 +24,8 @@ class FreeRunning(Node):
         self._pull_out_loaded = False
         self._spiral_loaded = False
 
+        self._steady_state_time = -1
+        
         # 각 함수별 파라미터 저장 변수들
         self._speed_mapping_params = {}
         self._speed_mapping_start = False
@@ -71,6 +73,18 @@ class FreeRunning(Node):
         self.get_logger().info(f'  deadzone_start: {self.deadzone_start}')
         self.get_logger().info(f'  deadzone_end: {self.deadzone_end}')
 
+    def to_steady_state(self, tick, target_rps):
+        if self._steady_state_time == -1:
+            duration = 10
+            self._steady_state_time = tick + duration
+        if tick < self._steady_state_time:
+            rpsP_cmd = target_rps  
+            rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max) 
+            rpsS_cmd = target_rps  
+            rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)    
+            ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])
+        return ctrl_cmd
+    
     def speed_mapping(self, tick, ctrl):
         # 한 번만 파라미터 로드
         if not self._speed_mapping_loaded:
@@ -114,39 +128,40 @@ class FreeRunning(Node):
                 'duration': self.declare_parameter('free_running_mode.turning_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._turning_loaded = True
-        if not self._turning_start:
-            self._turning_start = True
-            self._turning_duration = tick + self._turning_params['duration']
-            self.get_logger().info(f'Turning started with duration: {self._turning_params["duration"]} seconds')
-        if tick >= self._turning_duration:
-            self.get_logger().info('Turning completed.')
-            self._turning_end = True
+
+        if self._steady_state_time == -1 or self._steady_state_time > tick:
+            ctrl_cmd = self.to_steady_state(tick, self._turning_params['target_rps'])
+            self.get_logger().info('Transitioning to steady state before turning.')
+        else:
+            if not self._turning_start:
+                self._turning_start = True
+                self._turning_duration = tick + self._turning_params['duration']
+                self.get_logger().info(f'Turning started with duration: {self._turning_params["duration"]} seconds')
+            if tick >= self._turning_duration:
+                self.get_logger().info('Turning completed.')
+                self._turning_end = True
+                
+            rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
+            target_rps = self._turning_params['target_rps']
+
+            rpsP_cmd = target_rps       
+            rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
+
+            rpsS_cmd = target_rps          
+            rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max) 
             
-        rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
-        target_rps = self._turning_params['target_rps']
-
-        rpsP_cmd = target_rps
+            ##
             
-        rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
+            target_del = self._turning_params['target_del']
 
-        rpsS_cmd = target_rps
-            
-        rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max) 
-        
-        ##
-        
-        target_del = self._turning_params['target_del']
+            delP_cmd = target_del
+            delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
 
-        delP_cmd = target_del
+            delS_cmd = target_del
+            delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
 
-        delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
-
-        delS_cmd = target_del
-
-        delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
-
-        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
-        self.get_logger().info(f'Turning control command: {ctrl_cmd}')
+            ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
+            self.get_logger().info(f'Turning control command: {ctrl_cmd}')
         return ctrl_cmd, self._turning_end
 
     def zigzag(self, tick, pos, ctrl):
@@ -161,44 +176,48 @@ class FreeRunning(Node):
             self.target_del = (30) * self._zigzag_params['initial_psi_direction']
             self._zigzag_loaded = True
         
-        rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
-        psi = (pos[2])  # pos[2]는 yaw 또는 heading을 나타낸다고 가정
-        target_rps = self._zigzag_params['target_rps']
-        
-        initial_psi_direction = self._zigzag_params['initial_psi_direction']
-        
-        if not self._zigzag_start:
-            self._zigzag_start = True
-            self._zigzag_direction = initial_psi_direction
-            self._zigzag_duration = tick + self._zigzag_params['duration']
-        if tick >= self._zigzag_duration:
-            self.get_logger().info('Zigzag completed.')
-            self._zigzag_end = True
+        if self._steady_state_time == -1 or self._steady_state_time > tick:
+            ctrl_cmd = self.to_steady_state(tick, self._zigzag_params['target_rps'])
+            self.get_logger().info('Transitioning to steady state before zigzag.')
+        else:
+            rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
+            psi = (pos[2])  # pos[2]는 yaw 또는 heading을 나타낸다고 가정
+            target_rps = self._zigzag_params['target_rps']
             
-        if self._zigzag_direction == 0:
-            self._zigzag_direction = initial_psi_direction
-
-        target_psi = np.deg2rad(self._zigzag_params['target_psi']) * self._zigzag_direction
-        if abs(psi) - abs(target_psi) >= 0 and psi * target_psi > 0:
-            self._zigzag_direction *= -1  # 방향 전환
-            self.target_del *= -1
-            direction_message = "left" if self._zigzag_direction < 0 else "right"
-            self.get_logger().info(f'Zigzag direction changed to {direction_message}. Current psi: {psi}, Target psi: {target_psi}')
-        
-        rpsP_cmd = target_rps
-        rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
-
-        rpsS_cmd = target_rps
-        rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
-        
-        delP_cmd = self.target_del
-        delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
-        
-        delS_cmd = self.target_del
-        delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
+            initial_psi_direction = self._zigzag_params['initial_psi_direction']
+            
+            if not self._zigzag_start:
+                self._zigzag_start = True
+                self._zigzag_direction = initial_psi_direction
+                self._zigzag_duration = tick + self._zigzag_params['duration']
+            if tick >= self._zigzag_duration:
+                self.get_logger().info('Zigzag completed.')
+                self._zigzag_end = True
                 
-        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
-        # del_rate를 사용한 zigzag 로직 구현
+            if self._zigzag_direction == 0:
+                self._zigzag_direction = initial_psi_direction
+
+            target_psi = np.deg2rad(self._zigzag_params['target_psi']) * self._zigzag_direction
+            if abs(psi) - abs(target_psi) >= 0 and psi * target_psi > 0:
+                self._zigzag_direction *= -1  # 방향 전환
+                self.target_del *= -1
+                direction_message = "left" if self._zigzag_direction < 0 else "right"
+                self.get_logger().info(f'Zigzag direction changed to {direction_message}. Current psi: {psi}, Target psi: {target_psi}')
+            
+            rpsP_cmd = target_rps
+            rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
+
+            rpsS_cmd = target_rps
+            rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
+            
+            delP_cmd = self.target_del
+            delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
+            
+            delS_cmd = self.target_del
+            delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
+                    
+            ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
+            # del_rate를 사용한 zigzag 로직 구현
         return ctrl_cmd, self._zigzag_end
 
     def pivot_turn(self, tick, ctrl):
@@ -210,26 +229,30 @@ class FreeRunning(Node):
                 'duration': self.declare_parameter('free_running_mode.pivot_turn_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._pivot_turn_loaded = True
-        if not self._pivot_turn_start:
-            self._pivot_turn_start = True
-            self._pivot_turn_duration = tick + self._pivot_turn_params['duration']
-        if tick >= self._pivot_turn_duration:
-            self.get_logger().info('Pivot turn completed.')
-            self._pivot_turn_end = True
+        if self._steady_state_time == -1 or self._steady_state_time > tick:
+            ctrl_cmd = self.to_steady_state(tick, self._pivot_turn_params['target_rps'])
+            self.get_logger().info('Transitioning to steady state before pivot turn.')
+        else:
+            if not self._pivot_turn_start:
+                self._pivot_turn_start = True
+                self._pivot_turn_duration = tick + self._pivot_turn_params['duration']
+            if tick >= self._pivot_turn_duration:
+                self.get_logger().info('Pivot turn completed.')
+                self._pivot_turn_end = True
+                
+            rpsP, rpsS = ctrl[0], ctrl[1]
             
-        rpsP, rpsS = ctrl[0], ctrl[1]
-        
-        target_rpsP = self._pivot_turn_params['target_rpsP']
-        target_rpsS = self._pivot_turn_params['target_rpsS']
+            target_rpsP = self._pivot_turn_params['target_rpsP']
+            target_rpsS = self._pivot_turn_params['target_rpsS']
 
-        rpsP_cmd = target_rpsP
-        rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
+            rpsP_cmd = target_rpsP
+            rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
-        rpsS_cmd = target_rpsS
-        rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
+            rpsS_cmd = target_rpsS
+            rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
 
-        # deadzone_start, deadzone_end를 고려한 pivot turn 로직
-        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])  # [rpsP, rpsS, delP, delS]
+            # deadzone_start, deadzone_end를 고려한 pivot turn 로직
+            ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd, self._pivot_turn_end
 
     def crabbing(self, tick, ctrl):
@@ -243,39 +266,40 @@ class FreeRunning(Node):
                 'duration': self.declare_parameter('free_running_mode.crabbing_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._crabbing_loaded = True
-        
-        if not self._crabbing_start:
-            self._crabbing_start = True
-            self._crabbing_duration = tick + self._crabbing_params['duration']
-        if tick >= self._crabbing_duration:
-            self.get_logger().info('Crabbing completed.')
-            self._crabbing_end = True
+        if self._steady_state_time == -1 or self._steady_state_time > tick:
+            ctrl_cmd = self.to_steady_state(tick, self._crabbing_params['target_rps'])
+            self.get_logger().info('Transitioning to steady state before crabbing.')
+        else:
+            if not self._crabbing_start:
+                self._crabbing_start = True
+                self._crabbing_duration = tick + self._crabbing_params['duration']
+            if tick >= self._crabbing_duration:
+                self.get_logger().info('Crabbing completed.')
+                self._crabbing_end = True
+                
+            rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
             
-        rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
-        
-        target_rpsP = self._crabbing_params['target_rpsP']
-        target_rpsS = self._crabbing_params['target_rpsS']
-        target_delP = self._crabbing_params['target_delP']
-        target_delS = self._crabbing_params['target_delS']
+            target_rpsP = self._crabbing_params['target_rpsP']
+            target_rpsS = self._crabbing_params['target_rpsS']
+            target_delP = self._crabbing_params['target_delP']
+            target_delS = self._crabbing_params['target_delS']
 
-        rpsP_cmd = target_rpsP
-        rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
+            rpsP_cmd = target_rpsP
+            rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
 
-        rpsS_cmd = target_rpsS
-        rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
+            rpsS_cmd = target_rpsS
+            rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
 
-        ##
+            delP_cmd = target_delP
+            delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
 
-        delP_cmd = target_delP
-        delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
+            delS_cmd = target_delS
+            delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
 
-        delS_cmd = target_delS
-        delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
-
-        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
-        
-        # Implement the crabbing logic here
+            ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
+            
+            # Implement the crabbing logic here
         return ctrl_cmd, self._crabbing_end
 
     def pull_out(self, tick, ctrl):
@@ -289,38 +313,43 @@ class FreeRunning(Node):
             }
             self._pull_out_loaded = True
             self._pull_out_duration_turning = tick + self._pull_out_params['duration_turning']
-        if not self._pull_out_start:
-            self._pull_out_start = True
-            self._pull_out_duration_turning = tick + self._pull_out_params['duration_turning']
-            self._pull_out_duration_neutral = self._pull_out_duration_turning + self._pull_out_params['duration_neutral']
-        
-        rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
+            
+        if self._steady_state_time == -1 or self._steady_state_time > tick:
+            ctrl_cmd = self.to_steady_state(tick, self._pull_out_params['target_rps'])
+            self.get_logger().info('Transitioning to steady state before pull out.')
+        else:
+            if not self._pull_out_start:
+                self._pull_out_start = True
+                self._pull_out_duration_turning = tick + self._pull_out_params['duration_turning']
+                self._pull_out_duration_neutral = self._pull_out_duration_turning + self._pull_out_params['duration_neutral']
+            
+            rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
 
-        target_rps = self._pull_out_params['target_rps']
-        target_del = self._pull_out_params['target_del']
-        if tick >= self._pull_out_duration_turning:
-            self.get_logger().info('Pull out completed.')
-            target_del = 0.0
-        if tick >= self._pull_out_duration_neutral:
-            self.get_logger().info('Pull out neutral phase started.')
-            self._pull_out_end = True
-            target_del = 0.0
-            target_rps = 0.0
-        
-        rpsP_cmd = target_rps
-        rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
+            target_rps = self._pull_out_params['target_rps']
+            target_del = self._pull_out_params['target_del']
+            if tick >= self._pull_out_duration_turning:
+                self.get_logger().info('Pull out completed.')
+                target_del = 0.0
+            if tick >= self._pull_out_duration_neutral:
+                self.get_logger().info('Pull out neutral phase started.')
+                self._pull_out_end = True
+                target_del = 0.0
+                target_rps = 0.0
+            
+            rpsP_cmd = target_rps
+            rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
-        rpsS_cmd = target_rps
-        rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
+            rpsS_cmd = target_rps
+            rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
 
-        delP_cmd = target_delP
-        delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
+            delP_cmd = target_del
+            delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
 
-        delS_cmd = target_del
-        delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
-                
-        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
-        # Implement the pull out logic here
+            delS_cmd = target_del
+            delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
+                    
+            ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
+            # Implement the pull out logic here
         return ctrl_cmd, self._pull_out_end
 
     def spiral(self, tick, ctrl):
@@ -333,52 +362,46 @@ class FreeRunning(Node):
             }
             self._spiral_duration = tick + self._spiral_params['duration']
             self._spiral_loaded = True
+        
+        if self._steady_state_time == -1 or self._steady_state_time > tick:
+            ctrl_cmd = self.to_steady_state(tick, self._spiral_params['target_rps'])
+            self.get_logger().info('Transitioning to steady state before spiral.')
+        else:
+            rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
             
-        rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
-        
-        target_del_list = self._spiral_params['target_del']
-        target_rps = self._spiral_params['target_rps']
-        
-        if self._spiral_target_del_idx == len(target_del_list):
-            self.get_logger().info('Spiral completed.')
-            self._spiral_end = True
-            target_del = 0.0
-            target_rps = 0.0
+            target_del_list = self._spiral_params['target_del']
+            target_rps = self._spiral_params['target_rps']
             
-        if self._spiral_target_del_idx < len(target_del_list):
-            target_del = target_del_list[self._spiral_target_del_idx]
-            if tick >= self._spiral_duration:
-                self.get_logger().info(f'Spiral angle {target_del} completed.')
-                self._spiral_target_del_idx += 1
-                self._spiral_start = False
-            if not self._spiral_start:
-                self._spiral_start = True
-                self._spiral_duration = tick + self._spiral_params['duration']
-                self.get_logger().info(f'Spiral started with target delta: {target_del}, duration: {self._spiral_params["duration"]} seconds')
-        
-        rpsP_cmd = target_rps
-        rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
+            if self._spiral_target_del_idx == len(target_del_list):
+                self.get_logger().info('Spiral completed.')
+                self._spiral_end = True
+                target_del = 0.0
+                target_rps = 0.0
+                
+            if self._spiral_target_del_idx < len(target_del_list):
+                target_del = target_del_list[self._spiral_target_del_idx]
+                if tick >= self._spiral_duration:
+                    self.get_logger().info(f'Spiral angle {target_del} completed.')
+                    self._spiral_target_del_idx += 1
+                    self._spiral_start = False
+                if not self._spiral_start:
+                    self._spiral_start = True
+                    self._spiral_duration = tick + self._spiral_params['duration']
+                    self.get_logger().info(f'Spiral started with target delta: {target_del}, duration: {self._spiral_params["duration"]} seconds')
+            
+            rpsP_cmd = target_rps
+            rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
-        rpsS_cmd = target_rps
-        rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
+            rpsS_cmd = target_rps
+            rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
 
-        delP_cmd = target_delP
-        delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
+            delP_cmd = target_del
+            delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
 
-        delS_cmd = target_delS
-        delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
+            delS_cmd = target_del
+            delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
 
-        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
-
-        delP_cmd = delP + np.sign(target_del-delP)*self.del_rate*self.dt
-        delP_cmd = np.clip(delP_cmd, -self.del_max, self.del_max)
-
-        delS_cmd = delS + np.sign(target_del-delS)*self.del_rate*self.dt
-        delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
-        
-        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
-            # Implement the spiral logic here
-        # Implement the spiral logic here
+            ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd, self._spiral_end
 
 def main(args=None):
