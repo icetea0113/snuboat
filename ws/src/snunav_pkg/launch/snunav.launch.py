@@ -152,7 +152,8 @@ def generate_launch_description():
     ld.add_action(
         ExecuteProcess(
             cmd=['ros2', 'bag', 'record',
-                 '/sensor', '/ctrl_cmd_sils',
+                 '/sensor', '/ctrl_cmd_boat',
+                 '/ctrl_fb_boat'
                  '-o', bag_name],
             output='screen'
         )

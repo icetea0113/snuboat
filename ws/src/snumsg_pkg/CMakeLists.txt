@@ -13,6 +13,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MissionCode.msg"
   "msg/Sensor.msg"
+  "msg/Control.msg"
   DEPENDENCIES
     geometry_msgs
     builtin_interfaces                              # ← 이 줄 추가
