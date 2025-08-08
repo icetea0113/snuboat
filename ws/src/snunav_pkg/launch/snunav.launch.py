@@ -44,6 +44,18 @@ sub_maneuver_mode_map = {
     }
 }
 
+subsub_mode_map_freerunning = {
+    '0': '3321',
+    '1': '3211',
+}
+
+subsub_mode_map_docking = {
+    '0': 'APPROACHING',
+    '1': 'TURNING',
+    '2': 'DOCKING',
+    '3': 'PUSHING'
+}
+
 def generate_launch_description():
     ld = LaunchDescription()
     
@@ -60,12 +72,36 @@ def generate_launch_description():
     # 파라미터 추출
     mission_params = {}
     controller_params = {}
-    
+    udp_params = {}
+
     if 'mission_director' in config:
         mission_params = config.get('mission_director', {}).get('ros__parameters', {})
     if 'controller' in config:
         controller_params = config.get('controller', {}).get('ros__parameters', {})
-    
+    if 'qualisys_udp' in config:
+        udp_params = config.get('qualisys_udp', {}).get('ros__parameters', {})
+        
+    # 2. 코드 추출
+    man_code = mission_params.get('maneuver_mode', '-1')
+    sub_code = mission_params.get('sub_maneuver_mode', '-1')
+
+    # 3. 코드 → 이름 변환
+    man_name  = maneuver_mode_map.get(man_code, str(man_code))
+    sub_name  = sub_maneuver_mode_map.get(man_code, {}).get(sub_code, str(sub_code))
+
+    if sub_name == 'RANDOM':
+        # RANDOM 모드의 경우 subsub_maneuver_mode를 가져와서 이름 설정
+        subsub_code = mission_params.get('subsub_maneuver_mode', '-1')
+        subsub_name = subsub_mode_map_freerunning.get(subsub_code, str(subsub_code))
+
+    # 4. bag 이름 생성
+    ts = datetime.now().strftime('%m%d_%H%M%S')
+
+    if sub_name == 'RANDOM':
+        bag_name = os.path.expanduser(f"~/snuboat/ws/src/{man_name}_{sub_name}_{subsub_name}_{ts}")
+    else:
+        bag_name = os.path.expanduser(f"~/snuboat/ws/src/{man_name}_{sub_name}_{ts}")
+
     # sensor_mode 값 가져오기
     sensor_mode = mission_params.get('sensor_mode', '0')
     
@@ -102,7 +138,17 @@ def generate_launch_description():
     
     
     # SLAM 모드 (sensor_mode == '1'): Ouster + KISS-ICP
-    if sensor_mode == '1':
+    if sensor_mode == '0':
+        # Qualisys UDP Receiver
+        ld.add_action(Node(
+            package='snunav_pkg',
+            executable='udp_receiver',
+            name='udp_curmc_node',
+            output='screen',
+            parameters=[udp_params],
+        ))
+        
+    elif sensor_mode == '1':
         # Ouster 센서 launch
         ouster_launch = IncludeLaunchDescription(
             FrontendLaunchDescriptionSource(

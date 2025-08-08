@@ -102,3 +102,7 @@ controller:
           duration : 5.0 # [s]
           repeat: 4
 ##################################################################################
+qualisys_udp:
+  ros__parameters:
+    port: 56001
+    bind_address: '0.0.0.0'
