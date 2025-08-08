@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 import numpy as np
+from scipy.interpolate import interp1d
 
 class FreeRunning(Node):
     def __init__(self):
@@ -14,6 +15,11 @@ class FreeRunning(Node):
         self.deadzone_end = self.declare_parameter('common_params.deadzone_end', 1).get_parameter_value().integer_value
         self.frequency = self.declare_parameter('common_params.frequency', 10.0).get_parameter_value().double_value
         self.dt = 1/self.frequency
+        self.U_tol = self.declare_parameter('common_params.U_tol', 0.05).get_parameter_value().double_value
+        self.U_queue_len = self.declare_parameter('common_params.U_queue_len', 10).get_parameter_value().integer_value
+        self.target_rps_set = self.declare_parameter('common_params.target_rps_set', [10.0, 20.0, 30.0, 40.0, 50.0]).get_parameter_value().double_array_value
+        self.target_U_set = self.declare_parameter('common_params.target_U_set', [0.2, 0.4, 0.5, 0.6, 0.7]).get_parameter_value().double_array_value
+        self._interp_rps_U = interp1d(self.target_rps_set, self.target_U_set, bounds_error=False, fill_value='extrapolate', kind='linear')
 
         # 각 함수별 파라미터 로드 상태 추적
         self._speed_mapping_loaded = False
@@ -28,7 +34,10 @@ class FreeRunning(Node):
         self._random_3211_loaded = False
 
         self._steady_state_time = -1
-        
+        self._steady_state_status = False
+
+        self.U_queue = np.array([], dtype=np.float64)  # Control command queue for averaging
+
         # 각 함수별 파라미터 저장 변수들
         self._speed_mapping_params = {}
         self._speed_mapping_start = False
@@ -94,19 +103,33 @@ class FreeRunning(Node):
         self.get_logger().info(f'  deadzone_start: {self.deadzone_start}')
         self.get_logger().info(f'  deadzone_end: {self.deadzone_end}')
 
+    # def to_steady_state(self, tick, vel, target_rps):
+    #     if self._steady_state_time == -1:
+    #         duration = 10
+    #         self._steady_state_time = tick + duration
+    #     if tick < self._steady_state_time:
+    #         rpsP_cmd = target_rps  
+    #         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max) 
+    #         rpsS_cmd = target_rps  
+    #         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)    
+    #         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])
+    #     return ctrl_cmd
+
     def to_steady_state(self, tick, target_rps):
-        if self._steady_state_time == -1:
-            duration = 10
-            self._steady_state_time = tick + duration
-        if tick < self._steady_state_time:
-            rpsP_cmd = target_rps  
-            rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max) 
-            rpsS_cmd = target_rps  
-            rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)    
-            ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])
+        U_mean = np.mean(self.U_queue) if len(self.U_queue) > 0 else 0.0
+        target_U = self._interp_rps_U(target_rps)
+        if abs(U_mean - target_U) < self.U_tol:
+            self._steady_state_status = True
+            print(f'Steady state achieved at tick {tick} with U_mean: {U_mean}, target_U: {target_U}')
+        rpsP_cmd = target_rps
+        rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
+        rpsS_cmd = target_rps
+        rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
+        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])  # [rpsP, rpsS, delP, delS]
+          
         return ctrl_cmd
     
-    def speed_mapping(self, tick, ctrl):
+    def speed_mapping(self, tick, pos, vel, ctrl):
         # 한 번만 파라미터 로드
         if not self._speed_mapping_loaded:
             self._speed_mapping_params = {
@@ -117,7 +140,16 @@ class FreeRunning(Node):
                 'duration': self.declare_parameter('free_running_mode.speed_mapping_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._speed_mapping_loaded = True
-        
+
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
+
         if not self._speed_mapping_start:
             self._speed_mapping_start = True
             self._speed_mapping_duration = tick + self._speed_mapping_params['duration']
@@ -141,7 +173,7 @@ class FreeRunning(Node):
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd, self._speed_mapping_end
 
-    def turning(self, tick, ctrl):
+    def turning(self, tick, pos, vel, ctrl):
         # 한 번만 파라미터 로드
         if not self._turning_loaded:
             self._turning_params = {
@@ -151,9 +183,20 @@ class FreeRunning(Node):
             }
             self._turning_loaded = True
 
-        if self._steady_state_time == -1 or self._steady_state_time > tick:
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
+
+        # if self._steady_state_time == -1 or self._steady_state_time > tick:
+        #     ctrl_cmd = self.to_steady_state(tick, self._turning_params['target_rps'])
+        #     self.get_logger().info('Transitioning to steady state before turning.')
+        if self._steady_state_status == False:
             ctrl_cmd = self.to_steady_state(tick, self._turning_params['target_rps'])
-            self.get_logger().info('Transitioning to steady state before turning.')
         else:
             if not self._turning_start:
                 self._turning_start = True
@@ -188,7 +231,7 @@ class FreeRunning(Node):
             self.get_logger().info(f'Turning control command: {ctrl_cmd}')
         return ctrl_cmd, self._turning_end
 
-    def zigzag(self, tick, pos, ctrl):
+    def zigzag(self, tick, pos, vel, ctrl):
         # 한 번만 파라미터 로드
         if not self._zigzag_loaded:
             self._zigzag_params = {
@@ -199,10 +242,21 @@ class FreeRunning(Node):
             }
             self.target_del = (30) * self._zigzag_params['initial_psi_direction']
             self._zigzag_loaded = True
+
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
         
-        if self._steady_state_time == -1 or self._steady_state_time > tick:
+        # if self._steady_state_time == -1 or self._steady_state_time > tick:
+        #     ctrl_cmd = self.to_steady_state(tick, self._zigzag_params['target_rps'])
+        #     self.get_logger().info('Transitioning to steady state before zigzag.')
+        if self._steady_state_status == False:
             ctrl_cmd = self.to_steady_state(tick, self._zigzag_params['target_rps'])
-            self.get_logger().info('Transitioning to steady state before zigzag.')
         else:
             rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
             psi = (pos[2])  # pos[2]는 yaw 또는 heading을 나타낸다고 가정
@@ -246,7 +300,7 @@ class FreeRunning(Node):
             # del_rate를 사용한 zigzag 로직 구현
         return ctrl_cmd, self._zigzag_end
 
-    def pivot_turn(self, tick, ctrl):
+    def pivot_turn(self, tick, pos, vel, ctrl):
         # 한 번만 파라미터 로드
         if not self._pivot_turn_loaded:
             self._pivot_turn_params = {
@@ -255,9 +309,21 @@ class FreeRunning(Node):
                 'duration': self.declare_parameter('free_running_mode.pivot_turn_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._pivot_turn_loaded = True
-        if self._steady_state_time == -1 or self._steady_state_time > tick:
-            ctrl_cmd = self.to_steady_state(tick, self._pivot_turn_params['target_rps'])
-            self.get_logger().info('Transitioning to steady state before pivot turn.')
+
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
+
+        # if self._steady_state_time == -1 or self._steady_state_time > tick:
+        #     ctrl_cmd = self.to_steady_state(tick, self._pivot_turn_params['target_rps'])
+        #     self.get_logger().info('Transitioning to steady state before pivot turn.')
+        if self._steady_state_status == False:
+            ctrl_cmd = self.to_steady_state(tick, self._pivot_turn_params['target_rpsP'])
         else:
             if not self._pivot_turn_start:
                 self._pivot_turn_start = True
@@ -285,7 +351,7 @@ class FreeRunning(Node):
             ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd, self._pivot_turn_end
 
-    def crabbing(self, tick, ctrl):
+    def crabbing(self, tick, pos, vel, ctrl):
         # 한 번만 파라미터 로드
         if not self._crabbing_loaded:
             self._crabbing_params = {
@@ -296,9 +362,21 @@ class FreeRunning(Node):
                 'duration': self.declare_parameter('free_running_mode.crabbing_mode.duration', 0.0).get_parameter_value().double_value
             }
             self._crabbing_loaded = True
-        if self._steady_state_time == -1 or self._steady_state_time > tick:
-            ctrl_cmd = self.to_steady_state(tick, self._crabbing_params['target_rps'])
-            self.get_logger().info('Transitioning to steady state before crabbing.')
+
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
+
+        # if self._steady_state_time == -1 or self._steady_state_time > tick:
+        #     ctrl_cmd = self.to_steady_state(tick, self._crabbing_params['target_rps'])
+        #     self.get_logger().info('Transitioning to steady state before crabbing.')
+        if self._steady_state_status == False:
+            ctrl_cmd = self.to_steady_state(tick, self._crabbing_params['target_rpsP'])
         else:
             if not self._crabbing_start:
                 self._crabbing_start = True
@@ -336,7 +414,7 @@ class FreeRunning(Node):
             # Implement the crabbing logic here
         return ctrl_cmd, self._crabbing_end
 
-    def pull_out(self, tick, ctrl):
+    def pull_out(self, tick, pos, vel, ctrl):
         # 한 번만 파라미터 로드
         if not self._pull_out_loaded:
             self._pull_out_params = {
@@ -347,10 +425,21 @@ class FreeRunning(Node):
             }
             self._pull_out_loaded = True
             self._pull_out_duration_turning = tick + self._pull_out_params['duration_turning']
+
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
             
-        if self._steady_state_time == -1 or self._steady_state_time > tick:
+        # if self._steady_state_time == -1 or self._steady_state_time > tick:
+        #     ctrl_cmd = self.to_steady_state(tick, self._pull_out_params['target_rps'])
+        #     self.get_logger().info('Transitioning to steady state before pull out.')
+        if self._steady_state_status == False:
             ctrl_cmd = self.to_steady_state(tick, self._pull_out_params['target_rps'])
-            self.get_logger().info('Transitioning to steady state before pull out.')
         else:
             if not self._pull_out_start:
                 self._pull_out_start = True
@@ -386,7 +475,7 @@ class FreeRunning(Node):
             # Implement the pull out logic here
         return ctrl_cmd, self._pull_out_end
 
-    def spiral(self, tick, ctrl):
+    def spiral(self, tick, pos, vel, ctrl):
         # 한 번만 파라미터 로드
         if not self._spiral_loaded:
             self._spiral_params = {
@@ -396,10 +485,21 @@ class FreeRunning(Node):
             }
             self._spiral_duration = tick + self._spiral_params['duration']
             self._spiral_loaded = True
+
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
         
-        if self._steady_state_time == -1 or self._steady_state_time > tick:
+        # if self._steady_state_time == -1 or self._steady_state_time > tick:
+        #     ctrl_cmd = self.to_steady_state(tick, self._spiral_params['target_rps'])
+        #     self.get_logger().info('Transitioning to steady state before spiral.')
+        if self._steady_state_status == False:
             ctrl_cmd = self.to_steady_state(tick, self._spiral_params['target_rps'])
-            self.get_logger().info('Transitioning to steady state before spiral.')
         else:
             rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
             
@@ -438,7 +538,7 @@ class FreeRunning(Node):
             ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd, self._spiral_end
 
-    def random_bangbang(self, tick, ctrl):
+    def random_bangbang(self, tick, pos, vel, ctrl):
         # 1) 파라미터 로드
         if not self._random_bangbang_loaded:
             p = self.declare_parameter
@@ -453,16 +553,28 @@ class FreeRunning(Node):
             self._random_bangbang_loaded = True
             self.get_logger().info(f'Random bangbang parameters loaded: {self._random_bangbang_params}')
 
-        if self._steady_state_time == -1 or tick < self._steady_state_time:
-            ctrl_cmd = self.to_steady_state(tick,
-                             self._random_bangbang_params['target_rps'])
-            self.get_logger().info(
-                'Transitioning to steady state before random_bangbang.'
-            )
-            return ctrl_cmd, False
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
 
         if self._random_bangbang_end:
             return np.zeros(4), True
+
+        # if self._steady_state_time == -1 or tick < self._steady_state_time:
+        #     ctrl_cmd = self.to_steady_state(tick, vel,
+        #                      self._random_bangbang_params['target_rps'])
+        #     self.get_logger().info(
+        #         'Transitioning to steady state before random_bangbang.'
+        #     )
+        #     return ctrl_cmd, False
+
+        if self._steady_state_status == False:
+            ctrl_cmd = self.to_steady_state(tick, self._random_bangbang_params['target_rps'])
 
         # 2) 초기화 (첫 사이클 시작)
         if not self._random_bangbang_start:
@@ -495,7 +607,7 @@ class FreeRunning(Node):
         ctrl_cmd = np.array([rps_cmd, rps_cmd, del_cmd, del_cmd])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd, False
 
-    def random_3321(self, tick, ctrl):
+    def random_3321(self, tick, pos, vel, ctrl):
         # 1) 파라미터 로드
         if not self._random_3321_loaded:
             p = self.declare_parameter
@@ -510,13 +622,25 @@ class FreeRunning(Node):
             self._random_3321_loaded = True
             self.get_logger().info(f'Random 3321 parameters loaded: {self._random_3321_params}')
 
-        if self._steady_state_time == -1 or tick < self._steady_state_time:
-            ctrl_cmd = self.to_steady_state(tick,
-                             self._random_3321_params['target_rps'])
-            self.get_logger().info(
-                'Transitioning to steady state before random_3321.'
-            )
-            return ctrl_cmd, False
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
+
+        # if self._steady_state_time == -1 or tick < self._steady_state_time:
+        #     ctrl_cmd = self.to_steady_state(tick, vel,
+        #                      self._random_3321_params['target_rps'])
+        #     self.get_logger().info(
+        #         'Transitioning to steady state before random_3321.'
+        #     )
+        #     return ctrl_cmd, False
+
+        if self._steady_state_status == False:
+            ctrl_cmd = self.to_steady_state(tick, self._random_3321_params['target_rps'])
 
         if self._random_3321_end:
             return np.zeros(4), True
@@ -555,7 +679,7 @@ class FreeRunning(Node):
         ctrl_cmd = np.array([rps_cmd, rps_cmd, del_cmd, del_cmd])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd, False
 
-    def random_3211(self, tick, ctrl):
+    def random_3211(self, tick, pos, vel, ctrl):
         # 1) 파라미터 로드
         if not self._random_3321_loaded:
             p = self.declare_parameter
@@ -570,13 +694,25 @@ class FreeRunning(Node):
             self._random_3211_loaded = True
             self.get_logger().info(f'Random 3211 parameters loaded: {self._random_3211_params}')
 
-        if self._steady_state_time == -1 or tick < self._steady_state_time:
-            ctrl_cmd = self.to_steady_state(tick,
-                             self._random_3211_params['target_rps'])
-            self.get_logger().info(
-                'Transitioning to steady state before random_3211.'
-            )
-            return ctrl_cmd, False
+        # update U_queue
+        U = np.sqrt(vel[0]**2 + vel[1]**2)
+
+        if len(self.U_queue) < self.U_queue_len:
+            self.U_queue = np.append(self.U_queue, U)
+        else:
+            self.U_queue = np.roll(self.U_queue, -1)
+            self.U_queue[-1] = U
+
+        if self._steady_state_status == False:
+            ctrl_cmd = self.to_steady_state(tick, self._random_3211_params['target_rps'])
+
+        # if self._steady_state_time == -1 or tick < self._steady_state_time:
+        #     ctrl_cmd = self.to_steady_state(tick, vel,
+        #                      self._random_3211_params['target_rps'])
+        #     self.get_logger().info(
+        #         'Transitioning to steady state before random_3211.'
+        #     )
+        #     return ctrl_cmd, False
 
         if self._random_3211_end:
             return np.zeros(4), True

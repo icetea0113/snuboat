@@ -138,31 +138,31 @@ class Controller(Node):
 
         state = 0
         if submaneuver_mode == 0x0:
-            ctrl_cmd, state = self.free_running.speed_mapping(self.vel, self.ctrl)
+            ctrl_cmd, state = self.free_running.speed_mapping(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x1:
-            ctrl_cmd, state = self.free_running.turning(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.turning(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x2:
             self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
-            ctrl_cmd, state = self.free_running.zigzag(self.tick, self.pos, self.ctrl)
+            ctrl_cmd, state = self.free_running.zigzag(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x3:
-            ctrl_cmd, state = self.free_running.pivot_turn(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.pivot_turn(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x4:
-            ctrl_cmd, state = self.free_running.crabbing(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.crabbing(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x5:
-            ctrl_cmd, state = self.free_running.pull_out(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.pull_out(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x6:
             self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
-            ctrl_cmd, state = self.free_running.spiral(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.spiral(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x7:
             self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
-            ctrl_cmd, state = self.free_running.random_bangbang(self.tick, self.ctrl)
+            ctrl_cmd, state = self.free_running.random_bangbang(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x8:
             if subsub_maneuver_mode == 0x0:
                 self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
-                ctrl_cmd, state = self.free_running.random_3321(self.tick, self.ctrl)
+                ctrl_cmd, state = self.free_running.random_3321(self.tick, self.pos, self.vel, self.ctrl)
             elif subsub_maneuver_mode == 0x1:
                 self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
-                ctrl_cmd, state = self.free_running.random_3211(self.tick, self.ctrl)
+                ctrl_cmd, state = self.free_running.random_3211(self.tick, self.pos, self.vel, self.ctrl)
             else:
                 self.get_logger().error(f'Unknown subsub maneuver mode: {subsub_maneuver_mode}')
                 raise ValueError("Unknown subsub maneuver mode: {}".format(hex(subsub_maneuver_mode)))

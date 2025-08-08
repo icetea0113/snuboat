@@ -103,7 +103,7 @@ class ShipDyn():
         if(abs(u < 0.5)):
             XH = np.dot(self.uuu[:6], np.array([u, v**2, u*v**2, v**4, r**2, v*r]))/(4**3)
             YH = np.dot(self.vvv, np.array([v, u*v, v*abs(v), u*v*abs(v), r, r*abs(r), v**2*r, v*r**2]))/(4**3)
-            NH = np.dot(self.rrr, np.array([v, u*v, v*abs(v), u*v*abs(v), r, r*abs(r), v**2*r, v*r**2]))/(4**3)
+            NH = np.dot(self.rrr, np.array([v, u*v, v*abs(v), u*v*abs(v), r, r*abs(r), v**2*r, v*r**2]))/(4**4)
             
             # cal PR force
             if np.sign(rpsP_new) >= 0:
@@ -124,7 +124,7 @@ class ShipDyn():
             udot_new = (XH+XP+WX+v*r)/self.M
             vdot_new = (YH+YP+WY-u*r)/self.M
             rdot_new = (NH+NP+WN)/self.Izz
-        else:
+        else: # TODO: refine 
             rpm = rpsP_new*60
             Mu = (-5.8590E-03)*abs(delP_new)+(8.6759E-05)*abs(rpm)+3
             Mv = 3.4616E-01

@@ -12,9 +12,9 @@ mission_director:
         # TBD
       # 4: Navigation
         # TBD
-    sub_maneuver_mode: '8'
+    sub_maneuver_mode: '1'
       # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Bangbang, 8: RANDOM
-    subsub_maneuver_mode: '1' 
+    subsub_maneuver_mode: '0' 
       # 1: Free running
         # 8: RANDOM
           # 0: 3321, 1: 3211
@@ -34,14 +34,18 @@ controller:
       deadzone_start: 1 # rps
       deadzone_end:   1 # rps
       frequency: 10.0 # [Hz]
+      U_tol: 0.05 # [m/s]
+      U_queue_len: 10 # Length of the U queue for averaging control commands
+      target_rps_set: [10.0, 20.0, 30.0, 40.0, 50.0] # [rps]
+      target_U_set: [0.2, 0.4, 0.5, 0.6, 0.7] # [m/s]
 
     free_running_mode : 
       speed_mapping_mode:
         len_timeseries: 100
-        target_rps : 0.0
+        target_rps : 40.0
         target_del : 0.0
         conv_u_tol : 0.05 # [m/s]
-        duration : 10.0 # [s]
+        duration : 50.0 # [s]
 
       turning_mode:
         target_rps : 30.0
