@@ -469,7 +469,7 @@ class FreeRunning(Node):
         if tick >= self._random_bangbang_duration:
             self._random_bangbang_repeat_count += 1
             self.get_logger().info(f'Random bangbang cycle {self._random_bangbang_repeat_count} completed')
-            if self._random_bangbang_repeat_count <= self._random_bangbang_params['repeat']:
+            if self._random_bangbang_repeat_count < self._random_bangbang_params['repeat']:
                 # 방향 전환
                 self._random_bangbang_direction *= -1
                 self._random_bangbang_duration = tick + self._random_bangbang_params['duration']
