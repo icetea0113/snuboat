@@ -9,6 +9,8 @@ from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 from launch.actions import ExecuteProcess
 from datetime import datetime
+from launch.actions import ExecuteProcess, RegisterEventHandler
+from launch.event_handlers import OnProcessStart
 
 maneuver_mode_map = {
     '1': 'FREE_RUNNING',
@@ -128,21 +130,30 @@ def generate_launch_description():
         output='screen',
     ))
     
-    ld.add_action(Node(
+    sils_node = Node(
         package='snunav_pkg',
         executable='sils',
         name='sils_node',
         output='screen',
-    ))
-    
-    
+    )
+
+    recorder = ExecuteProcess(
+        cmd=[
+            'ros2', 'bag', 'record',
+            '-o', bag_name,                      # 옵션 먼저
+            '/sensor', '/ctrl_cmd_sils', '/sils_motor_fb_data',
+            # 필요시: '--include-hidden-topics'
+        ],
+        output='screen'
+    )
+    ld.add_action(sils_node)
     ld.add_action(
-        ExecuteProcess(
-            cmd=['ros2', 'bag', 'record',
-                 '/sensor', '/ctrl_cmd_sils',
-                 '-o', bag_name],
-            output='screen'
+        RegisterEventHandler(
+            OnProcessStart(
+                target_action=sils_node,
+                on_start=[recorder],
+            )
         )
     )
-    
+
     return ld
