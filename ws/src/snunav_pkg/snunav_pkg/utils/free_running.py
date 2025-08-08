@@ -404,6 +404,102 @@ class FreeRunning(Node):
             ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd, self._spiral_end
 
+    def random_bangbang(self, tick, ctrl):
+        # 1) 파라미터 로드
+        if not self._random_bangbang_loaded:
+            p = self.declare_parameter
+            self._random_bangbang_params = {
+                'target_rps': p('free_running_mode.random_mode.bangbang_mode.target_rps', 0.0).get_parameter_value().double_value,
+                'target_del': p('free_running_mode.random_mode.bangbang_mode.target_del', 0.0).get_parameter_value().double_value,
+                'initial_direction': p('free_running_mode.random_mode.bangbang_mode.initial_psi_direction', 1).get_parameter_value().integer_value,
+                'duration': p('free_running_mode.random_mode.bangbang_mode.duration', 0.0).get_parameter_value().double_value,
+                'repeat': p('free_running_mode.random_mode.bangbang_mode.repeat', 1).get_parameter_value().integer_value
+            }
+            self._random_bangbang_direction = self._random_bangbang_params['initial_direction']
+            self._random_bangbang_loaded = True
+            self.get_logger().info(f'Random bangbang parameters loaded: {self._random_bangbang_params}')
+
+        # 2) 초기화 (첫 사이클 시작)
+        if not self._random_bangbang_start:
+            self._random_bangbang_start = True
+            self._random_bangbang_end = False
+            self._random_bangbang_repeat_count = 0
+            self._random_bangbang_duration = tick + self._random_bangbang_params['duration']
+            self.get_logger().info(f'Random bangbang started: duration={self._random_bangbang_params["duration"]}, repeat={self._random_bangbang_params["repeat"]}, direction={self._random_bangbang_direction}')
+
+        # 3) 사이클 완료 여부 확인
+        if tick >= self._random_bangbang_duration:
+            self._random_bangbang_repeat_count += 1
+            self.get_logger().info(f'Random bangbang cycle {self._random_bangbang_repeat_count} completed')
+            if self._random_bangbang_repeat_count < self._random_bangbang_params['repeat']:
+                # 방향 전환
+                self._random_bangbang_direction *= -1
+                self._random_bangbang_duration = tick + self._random_bangbang_params['duration']
+                self.get_logger().info(f'Random bangbang direction changed to {self._random_bangbang_direction}')
+            else:
+                self._random_bangbang_end = True
+                self._random_bangbang_start = False
+                self.get_logger().info('Random bangbang completed all repeats')
+                return np.zeros(4), True
+
+        # 4) 제어 명령 생성
+        target_rps = self._random_bangbang_params['target_rps']
+        target_del = self._random_bangbang_params['target_del'] * self._random_bangbang_direction
+        rps_cmd = np.clip(target_rps, -self.rps_max, self.rps_max)
+        del_cmd = np.clip(target_del, -self.del_max, self.del_max)
+        ctrl_cmd = np.array([rps_cmd, rps_cmd, del_cmd, del_cmd])  # [rpsP, rpsS, delP, delS]
+        return ctrl_cmd, False
+
+    def random_3321(self, tick, ctrl):
+        # 1) 파라미터 로드
+        if not self._random_3321_loaded:
+            p = self.declare_parameter
+            self._random_3321_params = {
+                'target_rps': p('free_running_mode.random_mode.3321_mode.target_rps', 0.0).get_parameter_value().double_value,
+                'target_del': p('free_running_mode.random_mode.3321_mode.target_del', 0.0).get_parameter_value().double_value,
+                'initial_direction': p('free_running_mode.random_mode.3321_mode.initial_psi_direction', 1).get_parameter_value().integer_value,
+                'duration': p('free_running_mode.random_mode.3321_mode.duration', 0.0).get_parameter_value().double_value,
+                'repeat': p('free_running_mode.random_mode.3321_mode.repeat', 1).get_parameter_value().integer_value
+            }
+            self._random_3321_direction = self._random_3321_params['initial_direction']
+            self._random_3321_loaded = True
+            self.get_logger().info(f'Random 3321 parameters loaded: {self._random_3321_params}')
+
+        # 2) 초기화 (첫 사이클 시작)
+        if not self._random_3321_start:
+            self._random_3321_start = True
+            self._random_3321_end = False
+            self._random_3321_repeat_count = 0
+            # 첫 3T duration
+            self._random_3321_duration = tick + self._random_3321_params['duration'] * 3
+            self.get_logger().info(f'Random 3321 started: repeat={self._random_3321_params["repeat"]}, direction={self._random_3321_direction}')
+
+        # 3) 사이클 완료 여부 확인
+        if tick >= self._random_3321_duration:
+            self._random_3321_repeat_count += 1
+            self.get_logger().info(f'Random 3321 cycle {self._random_3321_repeat_count} completed')
+            if self._random_3321_repeat_count < self._random_3321_params['repeat']:
+                # 다음 기간 설정(3T→2T→1T)
+                mult = {1: 3, 2: 2}.get(self._random_3321_repeat_count, 1)
+                self._random_3321_duration = tick + self._random_3321_params['duration'] * mult
+                # 방향 전환
+                self._random_3321_direction *= -1
+                self.get_logger().info(f'Random 3321 direction changed to {self._random_3321_direction}, next duration multiplier={mult}')
+            else:
+                self._random_3321_end = True
+                self._random_3321_start = False
+                self.get_logger().info('Random 3321 completed all repeats')
+                return np.zeros(4), True
+
+        # 4) 제어 명령 생성
+        target_rps = self._random_3321_params['target_rps']
+        target_del = self._random_3321_params['target_del'] * self._random_3321_direction
+        rps_cmd = np.clip(target_rps, -self.rps_max, self.rps_max)
+        del_cmd = np.clip(target_del, -self.del_max, self.del_max)
+        ctrl_cmd = np.array([rps_cmd, rps_cmd, del_cmd, del_cmd])  # [rpsP, rpsS, delP, delS]
+        return ctrl_cmd, False
+
+
 def main(args=None):
     rclpy.init(args=args)
     free_running = FreeRunning()
