@@ -26,7 +26,9 @@ sub_maneuver_mode_map = {
         '3': 'PIVOT_TURN',
         '4': 'CRABBING',
         '5': 'PULL_OUT',
-        '6': 'SPIRAL'
+        '6': 'SPIRAL',
+        '7': 'BANGBANG',
+        '8': '3321'
     },
     '2': {  # Docking
         '0': 'HEUR_ENTER',
@@ -111,13 +113,7 @@ def generate_launch_description():
         name='sils_node',
         output='screen',
     ))
-    ld.add_action(Node(
-        package='snunav_pkg',
-        executable='motor_interface',
-        name='motor_interfacee_node',
-        output='screen',
-    )              
-    )
+    
     
     ld.add_action(
         ExecuteProcess(

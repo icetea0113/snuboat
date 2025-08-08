@@ -23,6 +23,8 @@ class FreeRunning(Node):
         self._crabbing_loaded = False
         self._pull_out_loaded = False
         self._spiral_loaded = False
+        self._random_bangbang_loaded = False
+        self._random_3321_loaded = False
 
         self._steady_state_time = -1
         
@@ -64,6 +66,18 @@ class FreeRunning(Node):
         self._spiral_duration = 0.0
         self._spiral_end = False
 
+        self._random_bangbang_params = {}
+        self._random_bangbang_duration = 0.0
+        self._random_bangbang_start = False
+        self._random_bangbang_end = False
+        self._random_bangbang_repeat_count = 0
+
+        self._random_3321_params = {}
+        self._random_3321_duration = 0.0
+        self._random_3321_start = False
+        self._random_3321_end = False
+        self._random_3321_repeat_count = 0
+
         self.get_logger().info(f'FreeRunning initialized with common_params:')
         
         self.get_logger().info(f'  del_rate: {self.del_rate}')
@@ -103,6 +117,7 @@ class FreeRunning(Node):
         if tick >= self._speed_mapping_duration:
             self.get_logger().info('Speed mapping completed.')
             self._speed_mapping_end = True
+            target_rps = 0.0
         
         rpsP, rpsS = ctrl[0], ctrl[1]
         
@@ -140,6 +155,8 @@ class FreeRunning(Node):
             if tick >= self._turning_duration:
                 self.get_logger().info('Turning completed.')
                 self._turning_end = True
+                target_rps = 0.0
+                target_del = 0.0
                 
             rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
             target_rps = self._turning_params['target_rps']
@@ -193,6 +210,8 @@ class FreeRunning(Node):
             if tick >= self._zigzag_duration:
                 self.get_logger().info('Zigzag completed.')
                 self._zigzag_end = True
+                target_rps = 0.0
+                self.target_del = 0.0
                 
             if self._zigzag_direction == 0:
                 self._zigzag_direction = initial_psi_direction
@@ -239,6 +258,10 @@ class FreeRunning(Node):
             if tick >= self._pivot_turn_duration:
                 self.get_logger().info('Pivot turn completed.')
                 self._pivot_turn_end = True
+                rpsP_cmd = 0.0
+                rpsS_cmd = 0.0
+                delP_cmd = 0.0
+                delS_cmd = 0.0
                 
             rpsP, rpsS = ctrl[0], ctrl[1]
             
@@ -276,6 +299,10 @@ class FreeRunning(Node):
             if tick >= self._crabbing_duration:
                 self.get_logger().info('Crabbing completed.')
                 self._crabbing_end = True
+                target_delP = 0.0
+                target_delS = 0.0
+                target_rpsP = 0.0
+                target_rpsS = 0.0
                 
             rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
             
@@ -403,6 +430,123 @@ class FreeRunning(Node):
 
             ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd, self._spiral_end
+
+    def random_bangbang(self, tick, ctrl):
+        # 1) 파라미터 로드
+        if not self._random_bangbang_loaded:
+            p = self.declare_parameter
+            self._random_bangbang_params = {
+                'target_rps': p('free_running_mode.bangbang_mode.target_rps', 0.0).get_parameter_value().double_value,
+                'target_del': p('free_running_mode.bangbang_mode.target_del', 0.0).get_parameter_value().double_value,
+                'initial_direction': p('free_running_mode.bangbang_mode.initial_psi_direction', 1).get_parameter_value().integer_value,
+                'duration': p('free_running_mode.bangbang_mode.duration', 0.0).get_parameter_value().double_value,
+                'repeat': p('free_running_mode.bangbang_mode.repeat', 1).get_parameter_value().integer_value
+            }
+            self._random_bangbang_direction = self._random_bangbang_params['initial_direction']
+            self._random_bangbang_loaded = True
+            self.get_logger().info(f'Random bangbang parameters loaded: {self._random_bangbang_params}')
+
+        if self._steady_state_time == -1 or tick < self._steady_state_time:
+            ctrl_cmd = self.to_steady_state(tick,
+                             self._random_bangbang_params['target_rps'])
+            self.get_logger().info(
+                'Transitioning to steady state before random_bangbang.'
+            )
+            return ctrl_cmd, False
+
+        if self._random_bangbang_end:
+            return np.zeros(4), True
+
+        # 2) 초기화 (첫 사이클 시작)
+        if not self._random_bangbang_start:
+            self._random_bangbang_start = True
+            self._random_bangbang_end = False
+            self._random_bangbang_repeat_count = 0
+            self._random_bangbang_duration = tick + self._random_bangbang_params['duration']
+            self.get_logger().info(f'Random bangbang started: duration={self._random_bangbang_params["duration"]}, repeat={self._random_bangbang_params["repeat"]}, direction={self._random_bangbang_direction}')
+
+        # 3) 사이클 완료 여부 확인
+        if tick >= self._random_bangbang_duration:
+            self._random_bangbang_repeat_count += 1
+            self.get_logger().info(f'Random bangbang cycle {self._random_bangbang_repeat_count} completed')
+            if self._random_bangbang_repeat_count <= self._random_bangbang_params['repeat']:
+                # 방향 전환
+                self._random_bangbang_direction *= -1
+                self._random_bangbang_duration = tick + self._random_bangbang_params['duration']
+                self.get_logger().info(f'Random bangbang direction changed to {self._random_bangbang_direction}')
+            else:
+                self._random_bangbang_end = True
+                self._random_bangbang_start = False
+                self.get_logger().info('Random bangbang completed all repeats')
+                return np.zeros(4), True
+
+        # 4) 제어 명령 생성
+        target_rps = self._random_bangbang_params['target_rps']
+        target_del = self._random_bangbang_params['target_del'] * self._random_bangbang_direction
+        rps_cmd = np.clip(target_rps, -self.rps_max, self.rps_max)
+        del_cmd = np.clip(target_del, -self.del_max, self.del_max)
+        ctrl_cmd = np.array([rps_cmd, rps_cmd, del_cmd, del_cmd])  # [rpsP, rpsS, delP, delS]
+        return ctrl_cmd, False
+
+    def random_3321(self, tick, ctrl):
+        # 1) 파라미터 로드
+        if not self._random_3321_loaded:
+            p = self.declare_parameter
+            self._random_3321_params = {
+                'target_rps': p('free_running_mode.3321_mode.target_rps', 0.0).get_parameter_value().double_value,
+                'target_del': p('free_running_mode.3321_mode.target_del', 0.0).get_parameter_value().double_value,
+                'initial_direction': p('free_running_mode.3321_mode.initial_psi_direction', 1).get_parameter_value().integer_value,
+                'duration': p('free_running_mode.3321_mode.duration', 0.0).get_parameter_value().double_value,
+                'repeat': p('free_running_mode.3321_mode.repeat', 1).get_parameter_value().integer_value
+            }
+            self._random_3321_direction = self._random_3321_params['initial_direction']
+            self._random_3321_loaded = True
+            self.get_logger().info(f'Random 3321 parameters loaded: {self._random_3321_params}')
+
+        if self._steady_state_time == -1 or tick < self._steady_state_time:
+            ctrl_cmd = self.to_steady_state(tick,
+                             self._random_3321_params['target_rps'])
+            self.get_logger().info(
+                'Transitioning to steady state before random_3321.'
+            )
+            return ctrl_cmd, False
+
+        if self._random_3321_end:
+            return np.zeros(4), True
+
+        # 2) 초기화 (첫 사이클 시작)
+        if not self._random_3321_start:
+            self._random_3321_start = True
+            self._random_3321_end = False
+            self._random_3321_repeat_count = 0
+            # 첫 3T duration
+            self._random_3321_duration = tick + self._random_3321_params['duration'] * 3
+            self.get_logger().info(f'Random 3321 started: repeat={self._random_3321_params["repeat"]}, direction={self._random_3321_direction}')
+
+        # 3) 사이클 완료 여부 확인
+        if tick >= self._random_3321_duration:
+            self._random_3321_repeat_count += 1
+            self.get_logger().info(f'Random 3321 cycle {self._random_3321_repeat_count} completed')
+            if self._random_3321_repeat_count < self._random_3321_params['repeat']:
+                # 다음 기간 설정(3T→2T→1T)
+                mult = {1: 3, 2: 2}.get(self._random_3321_repeat_count, 1)
+                self._random_3321_duration = tick + self._random_3321_params['duration'] * mult
+                # 방향 전환
+                self._random_3321_direction *= -1
+                self.get_logger().info(f'Random 3321 direction changed to {self._random_3321_direction}, next duration multiplier={mult}')
+            else:
+                self._random_3321_end = True
+                self._random_3321_start = False
+                self.get_logger().info('Random 3321 completed all repeats')
+                return np.zeros(4), True
+
+        # 4) 제어 명령 생성
+        target_rps = self._random_3321_params['target_rps']
+        target_del = self._random_3321_params['target_del'] * self._random_3321_direction
+        rps_cmd = np.clip(target_rps, -self.rps_max, self.rps_max)
+        del_cmd = np.clip(target_del, -self.del_max, self.del_max)
+        ctrl_cmd = np.array([rps_cmd, rps_cmd, del_cmd, del_cmd])  # [rpsP, rpsS, delP, delS]
+        return ctrl_cmd, False
 
 def main(args=None):
     rclpy.init(args=args)
