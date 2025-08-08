@@ -127,8 +127,6 @@ class Controller(Node):
         # self.__ctrlcmdboatPublisher.publish(ctrl_msg)
         # self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
 
-
-
     def freeRunningController(self):
         # sils_mode, motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
         ctrl_cmd = np.zeros(4)  # [rpsP, rpsS, delP, delS]
@@ -152,6 +150,13 @@ class Controller(Node):
         elif submaneuver_mode == 0x60:
             self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
             ctrl_cmd, state = self.free_running.spiral(self.tick, self.ctrl)
+        elif submaneuver_mode == 0x70:
+            if subsub_maneuver_mode == 0x01:
+                self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
+                ctrl_cmd, state = self.free_running.random_bangbang(self.tick, self.ctrl)
+            elif subsub_maneuver_mode == 0x02:
+                self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
+                ctrl_cmd, state = self.free_running.random_3321(self.tick, self.ctrl)
         else:
             self.status = 2  # pause
             raise ValueError("Unknown submaneuver mode: {}".format(hex(submaneuver_mode)))
@@ -163,7 +168,6 @@ class Controller(Node):
             ctrl_cmd = np.zeros(4)  # Stop the controller
             
         self.ctrl_cmd = ctrl_cmd
-
 
     def dockingController(self):
         submaneuver_mode = (self.mission_code & 0x0000FF0) >> 4
