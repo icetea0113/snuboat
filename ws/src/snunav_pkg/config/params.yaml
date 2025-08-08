@@ -5,17 +5,21 @@ mission_director:
     sils_mode: '1' # 0: Normal, 1: SILS
     maneuver_mode: '1' # 1: Free running, 2: Docking, 3: DP, 4: Navigation
       # 1: Free running
-        # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral
+        # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Random
       # 2: Docking
         # 0: Heuristic (Entering), 1: Deep-RL (Entering), 2: Heuristic (Multi-stage), 3 : Deep-RL (Multi-stage)
       # 3: DP
         # TBD
       # 4: Navigation
         # TBD
-    sub_maneuver_mode: '6'
-      # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral
-
-    subsub_maneuver_mode: '0' # 0: Approaching stage, 1: Turning stage, 2: Entering stage, 3: Pushing stage
+    sub_maneuver_mode: '7'
+      # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Random
+    subsub_maneuver_mode: '0' 
+      # 1: Free Running 
+        # 7: Random
+          # 0: Bangbang, 1: 3321
+      # 2: Docking
+        # 0: Approaching stage, 1: Turning stage, 2: Entering stage, 3: Pushing stage
     sensor_mode: '1' # 0: Qualisys, 1: SLAM, 2: GPS-RTK, 3: Marker, 4: SILS
     motor_mode: '0' # 0: Manual, 1: Auto
     status: '0' # Initializing, 1: Running, 2: Stop, 3: Standby, 4: Complete
@@ -72,4 +76,18 @@ controller:
         target_rps : 20.0
         target_del : [20.0, 10.0, 5.0]
         duration : 20.0 # [s]
+
+      random_mode:
+        bangbang_mode:
+          target_rps : 20.0
+          target_del : 20.0
+          initial_psi_direction : 1 # 1: Right, -1: Left
+          duration : 10.0 # [s]
+          repeat: 3
+        3321_mode:
+          target_rps : 20.0
+          target_del : 20.0
+          initial_psi_direction : 1 # 1: Right, -1: Left
+          duration : 10.0 # [s]
+          repeat: 4
 ##################################################################################
