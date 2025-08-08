@@ -64,6 +64,18 @@ class FreeRunning(Node):
         self._spiral_duration = 0.0
         self._spiral_end = False
 
+        self._random_bangbang_params = {}
+        self._random_bangbang_duration = 0.0
+        self._random_bangbang_start = False
+        self._random_bangbang_end = False
+        self._random_bangbang_repeat_count = 0
+
+        self._random_3321_params = {}
+        self._random_3321_duration = 0.0
+        self._random_3321_start = False
+        self._random_3321_end = False
+        self._random_3321_repeat_count = 0
+
         self.get_logger().info(f'FreeRunning initialized with common_params:')
         
         self.get_logger().info(f'  del_rate: {self.del_rate}')
