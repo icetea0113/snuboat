@@ -7,7 +7,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource, Fro
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, DeclareLaunchArgument
 from datetime import datetime
 
 maneuver_mode_map = {
@@ -135,7 +135,6 @@ def generate_launch_description():
         name='motor_interface_node',
         output='screen',
     ))
-    
     
     # SLAM 모드 (sensor_mode == '1'): Ouster + KISS-ICP
     if sensor_mode == '0':

@@ -54,11 +54,12 @@ def load_data(
     prefix: str = "FREE_RUNNING",
 ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
     """
-    - run_name이 None이면 base_dir/src 아래에서 prefix로 시작하는 실행 폴더 중
+    - run_name이 None이면 base_dir 아래에서 prefix로 시작하는 실행 폴더 중
       숫자 토큰 기준 '가장 최신' 폴더 선택.
-    - filename이 None이면 (df1, df2) 튜플 반환:
-        df1 = sensor.csv
-        df2 = ctrl_cmd_sils.csv
+    - filename이 None이면 (df_sensor, df_ctrl, df_motor) 튜플 반환:
+        df_sensor = sensor.csv
+        df_ctrl   = ctrl_cmd_sils.csv
+        df_motor  = sils_motor_fb_data.csv
     - filename이 str이면 해당 파일만 DataFrame 반환 (.csv 자동 보정)
     - filename이 list면 해당 순서대로 튜플 반환
     """
@@ -71,7 +72,7 @@ def load_data(
         raise FileNotFoundError(f"실행 폴더가 없습니다: {run_dir}")
 
     if filename is None:
-        targets = ["sensor.csv", "ctrl_cmd_sils.csv"]  # 반환 순서 고정: (sensor, ctrl_cmd_sils)
+        targets = ["sensor.csv", "ctrl_cmd_sils.csv", "sils_motor_fb_data.csv"]
         dfs = tuple(_load_one(run_dir, t) for t in targets)
         return dfs
     else:
@@ -83,13 +84,12 @@ def load_data(
             dfs = tuple(_load_one(run_dir, t) for t in targets)
             return dfs
 
-# 사용 예시
 def main():
-    df1, df2 = load_data()  # df1=sensor.csv, df2=ctrl_cmd_sils.csv
-    print("sensor.csv head:")
-    print(df1.head())
-    print("\nctrl_cmd_sils.csv head:")
-    print(df2.head())
+    df_sensor, df_ctrl, df_motor = load_data()  # 기본: (sensor, ctrl_cmd_sils, sils_motor_fb_data)
+    print("sensor.csv head:");          print(df_sensor.head())
+    print("\nctrl_cmd_sils.csv head:"); print(df_ctrl.head())
+    print("\nsils_motor_fb_data.csv head:"); print(df_motor.head())
+
 
 if __name__ == "__main__":
     main()
