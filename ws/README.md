@@ -27,3 +27,4 @@ ros2 bad record -o test.bag(bag file name) /ctrl_cmd_sils /sensor (topic name)
   sudo pip install git+https://github.com/fishros/ros2bag_convert.git
 ## 6.2 rosbag to csv command
 ros2bag-convert test.bag_0.db3 (bag file name)
+python3 ~/snuboat/ws/src/snunav_pkg/snunav_pkg/utils/data.py
