@@ -225,23 +225,50 @@ def main():
     df_sensor = df_sensor.sort_values(by=tick)
 
     use_mmss = False
+    # if "time" in df_sensor.columns:
+    #     t = pd.to_datetime(df_sensor["time"], errors="coerce")
+    #     if t.notna().any():
+    #         # time 기준 재정렬(샘플처럼 out-of-order일 수 있음)
+    #         order = t.argsort(kind="mergesort")
+    #         df_sensor = df_sensor.iloc[order].reset_index(drop=True)
+    #         t = t.iloc[order].reset_index(drop=True)
+    #         # 0초 기준 상대시간(초)
+    #         x = (t - t.iloc[0]).dt.total_seconds().to_numpy()
+    #         x_label = "time [mm:ss.sss]"
+    #         def mmss_formatter(val, _pos):
+    #             m, s = divmod(val, 60.0)
+    #             return f"{int(m):02d}:{s:06.3f}"
+    #         fmt = FuncFormatter(mmss_formatter)
+    #         use_mmss = True
+
+        # 항상 '초' 단위로 통일
     if "time" in df_sensor.columns:
         t = pd.to_datetime(df_sensor["time"], errors="coerce")
         if t.notna().any():
-            # time 기준 재정렬(샘플처럼 out-of-order일 수 있음)
             order = t.argsort(kind="mergesort")
             df_sensor = df_sensor.iloc[order].reset_index(drop=True)
             t = t.iloc[order].reset_index(drop=True)
-            # 0초 기준 상대시간(초)
             x = (t - t.iloc[0]).dt.total_seconds().to_numpy()
-            x_label = "time [mm:ss.sss]"
-            def mmss_formatter(val, _pos):
-                m, s = divmod(val, 60.0)
-                return f"{int(m):02d}:{s:06.3f}"
-            fmt = FuncFormatter(mmss_formatter)
-            use_mmss = True
+            x_label = "time [s]"
+            fmt = None
+        else:
+            t = None
+            fmt = None
+    else:
+        t = None
+        fmt = None
 
-    if not use_mmss:
+    # if not use_mmss:
+    #     # tick 기반(이미 위에서 tick 선택/보정됨)
+    #     x_raw = pd.to_numeric(df_sensor[tick], errors="coerce").to_numpy()
+    #     if str(tick).endswith(("nsecs","nsec","ns")):
+    #         x = (x_raw - x_raw[0]) * 1e-9  # ns -> s
+    #     else:
+    #         x = x_raw - x_raw[0]
+    #     x_label = "time [s]"
+    #     fmt = None
+
+    if t is None:
         # tick 기반(이미 위에서 tick 선택/보정됨)
         x_raw = pd.to_numeric(df_sensor[tick], errors="coerce").to_numpy()
         if str(tick).endswith(("nsecs","nsec","ns")):
@@ -249,7 +276,8 @@ def main():
         else:
             x = x_raw - x_raw[0]
         x_label = "time [s]"
-        fmt = None
+
+    sec_formatter = FuncFormatter(lambda val, _pos: f"{val:.3f}")
 
     # 1) status key의 마지막 자리가 1인 인덱스만 골라 trajectory (pose_1 vs pose_0)
     if status_col is not None:
@@ -285,34 +313,44 @@ def main():
             ax.set_ylabel(lab)
         else:
             ax.text(0.5, 0.5, f"{col} missing", ha="center", va="center")
-    if fmt: 
-        for ax in axes2: ax.xaxis.set_major_formatter(fmt)
-    axes2[-1].set_xlabel(x_label)
+    # if fmt: 
+    #     for ax in axes2: ax.xaxis.set_major_formatter(fmt)
+    # axes2[-1].set_xlabel(x_label)
+    for ax in axes2:
+        ax.xaxis.set_major_formatter(sec_formatter)
+
+    axes2[-1].set_xlabel(x_label)  # "time [s]"
+
     fig2.savefig(run_dir / "fig2_pose_timeseries.png", dpi=300)
     plt.close(fig2)
 
-    # ---- Fig 3: vel_0, vel_1, vel_6(deg/s) vs tick ----
+    # ---- Fig 3: vel_0, vel_1, vel_5(deg/s) vs tick ----
     fig3, axes3 = plt.subplots(3, 1, figsize=(10, 7), sharex=True, tight_layout=True)
-    if "vel_6" in df_sensor.columns:
-        vel6_deg = df_sensor["vel_6"].to_numpy() * (180.0/np.pi)
+    if "vel_5" in df_sensor.columns:
+        vel5_deg = df_sensor["vel_5"].to_numpy() * (180.0/np.pi)
     else:
-        vel6_deg = None
+        vel5_deg = None
 
     series_list = [("vel_0", "vel_0 [m/s]"),
                 ("vel_1", "vel_1 [m/s]"),
-                ("vel_6", "vel_6 [deg/s]")]
+                ("vel_5", "vel_5 [deg/s]")]
     for i, (col, lab) in enumerate(series_list):
-        if col == "vel_6" and vel6_deg is not None:
-            axes3[i].plot(x, vel6_deg, linewidth=1)
+        if col == "vel_5" and vel5_deg is not None:
+            axes3[i].plot(x, vel5_deg, linewidth=1)
         elif col in df_sensor.columns:
             axes3[i].plot(x, df_sensor[col].to_numpy(), linewidth=1)
         else:
             axes3[i].text(0.5, 0.5, f"{col} missing", ha="center", va="center")
         axes3[i].set_ylabel(lab)
 
-    if fmt:
-        for ax in axes3: ax.xaxis.set_major_formatter(fmt)
-    axes3[-1].set_xlabel(x_label)
+    # if fmt:
+    #     for ax in axes3: ax.xaxis.set_major_formatter(fmt)
+    # axes3[-1].set_xlabel(x_label)
+
+    for ax in axes3:
+        ax.xaxis.set_major_formatter(sec_formatter)
+        axes3[-1].set_xlabel(x_label)  # "time [s]"
+
     fig3.savefig(run_dir / "fig3_velocity_timeseries.png", dpi=300)
     plt.close(fig3)
 
@@ -366,12 +404,16 @@ def main():
     if c3_fb  is not None: axes4[1].plot(t_fb,  c3_fb,  linewidth=1.2, color="b", linestyle="--", label="fb STBD")
     axes4[1].set_ylabel("ctrl_2 / ctrl_3")
 
-    # x축 포맷(mm:ss.sss) 재사용
-    def _fmt_mmss(val, _pos):
-        m, s = divmod(val, 60.0); return f"{int(m):02d}:{s:06.3f}"
+    # # x축 포맷(mm:ss.sss) 재사용
+    # def _fmt_mmss(val, _pos):
+    #     m, s = divmod(val, 60.0); return f"{int(m):02d}:{s:06.3f}"
+    # for ax in axes4:
+    #     ax.xaxis.set_major_formatter(FuncFormatter(_fmt_mmss))
+    # axes4[-1].set_xlabel("time [mm:ss.sss]")
+
     for ax in axes4:
-        ax.xaxis.set_major_formatter(FuncFormatter(_fmt_mmss))
-    axes4[-1].set_xlabel("time [mm:ss.sss]")
+        ax.xaxis.set_major_formatter(sec_formatter)
+        axes4[-1].set_xlabel("time [s]")
 
     fig4.suptitle("ctrl_cmd (solid) vs ctrl_fb (dashed)", y=1.02)
     fig4.savefig(run_dir / "fig4_ctrl_timeseries.png", dpi=300)
