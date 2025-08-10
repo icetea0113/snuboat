@@ -60,8 +60,10 @@ def parse_curmc(line: str) -> Optional[CurmcMsg]:
     """
     line = line.strip()
     if not line.startswith('$CURMC'):
+        print(f"Invalid line format: {line}")
         return None
     if '*' in line and not nmea_checksum_ok(line):
+        print(f"Invalid checksum in line: {line}")
         return None
 
     core = line.split('*')[0]
@@ -93,7 +95,6 @@ class UdpCurmcNode(Node):
 
         self.pub = self.create_publisher(Float32MultiArray, 'qualisys_data', 10)
 
-        # 상태 저장용
         self.prev_t = None
         self.prev_x = None
         self.prev_y = None
@@ -101,7 +102,6 @@ class UdpCurmcNode(Node):
         self.prev_roll = None
         self.prev_pitch = None
 
-        # UDP 준비
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.bind_address, self.port))
         self.sock.settimeout(1.0)
@@ -122,6 +122,7 @@ class UdpCurmcNode(Node):
 
             for sentence in data.decode(errors='ignore').strip().splitlines():
                 msg = parse_curmc(sentence)
+                self.get_logger().debug(f"Received: {sentence}")
                 if msg:
                     self._handle_curmc(msg)
 
@@ -133,7 +134,7 @@ class UdpCurmcNode(Node):
 
         # u,v 계산
         u_calc, v_calc = None, None
-        if (not self.use_raw_speed and self.prev_t is not None
+        if (self.prev_t is not None
             and m.x is not None and m.y is not None
             and self.prev_x is not None and self.prev_y is not None
             and psi is not None):
@@ -143,11 +144,9 @@ class UdpCurmcNode(Node):
                 vy = (m.y - self.prev_y) / dt
                 u_calc = math.cos(psi) * vx + math.sin(psi) * vy
                 v_calc = -math.sin(psi) * vx + math.cos(psi) * vy
-
         u_out = m.u if (self.use_raw_speed and m.u is not None) else (u_calc if u_calc is not None else float('nan'))
         v_out = v_calc if v_calc is not None else float('nan')
-
-        # r, p, q 계산
+        z_out = m.z if m.z is not None else float('nan')
         r_out, p_out, q_out = float('nan'), float('nan'), float('nan')
         if psi is not None and self.prev_psi is not None and self.prev_t is not None:
             dt = now - self.prev_t
@@ -162,7 +161,6 @@ class UdpCurmcNode(Node):
             if dt > 1e-3:
                 q_out = (pitch_rad - self.prev_pitch) / dt
 
-        # 메시지 구성: status, x, y, z, roll_deg, pitch_deg, psi_rad, u, v, p, q, r
         arr = Float32MultiArray()
         arr.data = [
             1.0 if m.status == 'A' else (0.0 if m.status == 'V' else float('nan')),
@@ -174,12 +172,13 @@ class UdpCurmcNode(Node):
             psi if psi is not None else float('nan'),
             u_out,
             v_out,
+            z_out,
             p_out,
             q_out,
             r_out,
         ]
         self.pub.publish(arr)
-
+        self.get_logger().info(f"Published: {arr.data}")
         # 상태 업데이트
         self.prev_t = now
         if m.x is not None: self.prev_x = m.x
