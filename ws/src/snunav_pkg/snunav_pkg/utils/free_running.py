@@ -118,9 +118,10 @@ class FreeRunning(Node):
     def to_steady_state(self, tick, target_rps):
         U_mean = np.mean(self.U_queue) if len(self.U_queue) > 0 else 0.0
         target_U = self._interp_rps_U(target_rps)
+        self.get_logger().info(f'To steady state: tick={tick}, U_mean={U_mean}, target_U={target_U}, target_rps={target_rps}')
         if abs(U_mean - target_U) < self.U_tol:
             self._steady_state_status = True
-            print(f'Steady state achieved at tick {tick} with U_mean: {U_mean}, target_U: {target_U}')
+            self.get_logger().info(f'##### Steady state achieved at tick {tick} with U_mean: {U_mean}, target_U: {target_U} #####')
         rpsP_cmd = target_rps
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
         rpsS_cmd = target_rps
