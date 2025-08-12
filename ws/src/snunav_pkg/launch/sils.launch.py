@@ -106,6 +106,17 @@ def generate_launch_description():
     # sensor_mode 값 가져오기
     sensor_mode = mission_params.get('sensor_mode', '0')
     
+    microstrain_launch = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory('microstrain_inertial_driver'),
+                    'launch',
+                    'microstrain_launch.py'
+                )
+            )
+        )
+    ld.add_action(microstrain_launch)
+        
     # 기존 노드들
     ld.add_action(Node(
         package='snunav_pkg',
@@ -142,6 +153,7 @@ def generate_launch_description():
             'ros2', 'bag', 'record',
             '-o', bag_name,                      # 옵션 먼저
             '/sensor', '/ctrl_cmd_sils', '/sils_motor_fb_data',
+            '/imu/data'
             # 필요시: '--include-hidden-topics'
         ],
         output='screen'

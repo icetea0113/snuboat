@@ -134,6 +134,7 @@ def generate_launch_description():
         executable='motor_interface',
         name='motor_interface_node',
         output='screen',
+        parameters=[controller_params]
     ))
     
     # SLAM 모드 (sensor_mode == '1'): Ouster + KISS-ICP
@@ -198,7 +199,7 @@ def generate_launch_description():
         ExecuteProcess(
             cmd=['ros2', 'bag', 'record',
                  '/sensor', '/ctrl_cmd_boat',
-                 '/ctrl_fb_boat'
+                 '/ctrl_fb_boat', '/imu/data',
                  '-o', bag_name],
             output='screen'
         )

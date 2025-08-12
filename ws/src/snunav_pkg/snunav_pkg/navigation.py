@@ -80,7 +80,11 @@ class Navigation(Node):
         self.status_qualisys = STATUS_QUALISYS_OFF
         self.pose_qualisys = np.zeros(6, dtype=np.float32)
         self.vel_qualisys = np.zeros(6, dtype=np.float32)
-        
+        self.pose_qualisys_queue = np.zeros((5, 6), dtype=np.float32)
+        self.vel_qualisys_queue = np.zeros((5, 6), dtype=np.float32)
+        self.pose_qualisys_filt = np.zeros(6, dtype=np.float32)
+        self.vel_qualisys_filt = np.zeros(6, dtype=np.float32)
+
         self.status_slam = STATUS_SLAM_OFF
         self.pose_slam = np.zeros(6, dtype=np.float32)
         self.vel_slam = np.zeros(6, dtype=np.float32)
@@ -111,6 +115,21 @@ class Navigation(Node):
             self.status_qualisys = int(msg.data[0])
             self.pose_qualisys = np.array(msg.data[1:7], dtype=np.float32)
             self.vel_qualisys = np.array(msg.data[7:13], dtype=np.float32)
+
+            # unit translation
+            self.pose_qualisys[:4] *= 0.001
+            self.vel_qualisys[:4] *= 0.001 
+            self.pose_qualisys[4:] *= np.pi/180
+            self.vel_qualisys[4:] *= np.pi/180 
+
+            self.pose_qualisys_queue = np.roll(self.pose_qualisys_queue, -1, axis=0)
+            self.pose_qualisys_queue[-1] = self.pose_qualisys
+            self.vel_qualisys_queue = np.roll(self.vel_qualisys_queue, -1, axis=0)
+            self.vel_qualisys_queue[-1] = self.vel_qualisys
+
+            self.pose_qualisys_filt = np.mean(self.pose_qualisys_queue, axis=0)
+            self.vel_qualisys_filt = np.mean(self.vel_qualisys_queue, axis=0)
+
         self.timer_callback()
         
     def slam_callback(self, msg):
@@ -160,8 +179,10 @@ class Navigation(Node):
         status_suffix = ""
 
         if self.active_sensor_mode == 0x0: # Qualisys
-            self.pose = self.pose_qualisys
-            self.vel = self.vel_qualisys
+            # self.pose = self.pose_qualisys
+            # self.vel = self.vel_qualisys
+            self.pose = np.array(self.pose_qualisys_filt)
+            self.vel = np.array(self.vel_qualisys_filt)
             status_suffix = str(self.status_qualisys)
         elif self.active_sensor_mode == 0x1: # SLAM
             self.pose = np.array(self.pose_slam)

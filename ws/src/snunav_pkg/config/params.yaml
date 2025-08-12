@@ -2,7 +2,7 @@
 mission_director:
   ros__parameters:
     frequency: 10.0 # [Hz]
-    sils_mode: '1' # 0: Normal, 1: SILS
+    sils_mode: '0' # 0: Normal, 1: SILS
     maneuver_mode: '1' # 1: Free running, 2: Docking, 3: DP, 4: Navigation
       # 1: Free running
         # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Bangbang, 8: 3321
@@ -27,7 +27,7 @@ mission_director:
 controller:
   ros__parameters:
     common_params:
-      del_rate: 100.0 # [deg/s]
+      del_rate: 10.0 # [deg/s]
       rps_rate: 60.0 
       rps_max: 30.0 # [rad/s]
       del_max: 35.0 # [deg]
