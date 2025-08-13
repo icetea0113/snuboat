@@ -58,9 +58,9 @@ controller:
         duration : 300.0 # [s]
 
       zigzag_mode:
-        target_rps : 21.6
-        target_psi : 10.0
-        initial_psi_direction : -1 # -1: Left, 1: Right
+        target_rps : 31.8
+        target_psi : 20.0
+        initial_psi_direction : 1 # -1: Left, 1: Right
         duration : 300.0 # [s]
 
       pivot_turn_mode:
