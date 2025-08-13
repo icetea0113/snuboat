@@ -2,7 +2,7 @@
 mission_director:
   ros__parameters:
     frequency: 10.0 # [Hz]
-    sils_mode: '0' # 0: Normal, 1: SILS
+    sils_mode: '1' # 0: Normal, 1: SILS
     maneuver_mode: '1' # 1: Free running, 2: Docking, 3: DP, 4: Navigation
       # 1: Free running
         # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Bangbang, 8: 3321
@@ -12,7 +12,7 @@ mission_director:
         # TBD
       # 4: Navigation
         # TBD
-    sub_maneuver_mode: '1'
+    sub_maneuver_mode: '2'
       # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Bangbang, 8: RANDOM
     subsub_maneuver_mode: '0' 
       # 1: Free running
@@ -20,8 +20,8 @@ mission_director:
           # 0: 3321, 1: 3211
       # 2: Docking
         # 0: Approaching stage, 1: Turning stage, 2: Entering stage, 3: Pushing stage
-    sensor_mode: '1' # 0: Qualisys, 1: SLAM, 2: GPS-RTK, 3: Marker, 4: SILS
-    motor_mode: '0' # 0: Manual, 1: Auto
+    sensor_mode: '0' # 0: Qualisys, 1: SLAM, 2: GPS-RTK, 3: Marker, 4: SILS
+    motor_mode: '1' # 0: Manual, 1: Auto
     status: '0' # Initializing, 1: Running, 2: Stop, 3: Standby, 4: Complete
 ################################################################################
 controller:
@@ -29,34 +29,39 @@ controller:
     common_params:
       del_rate: 10.0 # [deg/s]
       rps_rate: 60.0 
-      rps_max: 30.0 # [rad/s]
+      rps_max: 50.0 # [rad/s]
       del_max: 35.0 # [deg]
       deadzone_start: 1 # rps
       deadzone_end:   1 # rps
       frequency: 10.0 # [Hz]
-      U_tol: 0.05 # [m/s]
+      U_tol: 0.02 # [m/s]
       U_queue_len: 10 # Length of the U queue for averaging control commands
-      target_rps_set: [10.0, 20.0, 30.0, 40.0, 50.0] # [rps]
-      target_U_set: [0.2, 0.4, 0.5, 0.6, 0.7] # [m/s]
+      target_rps_set: [10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0] # [rps]
+      # target_U_set: [0.18, 0.27, 0.38, 0.5, 0.61, 0.7, 0.8, 0.9, 1] # [m/s] LC1
+      # target_U_set: [0.15, 0.25, 0.34, 0.45, 0.54, 0.63, 0.72, 0.83, 0.91] # [m/s] LC2
+      target_U_set: [0.14, 0.22, 0.31, 0.41, 0.5, 0.6, 0.68, 0.76, 0.86] # [m/s] LC3
 
     free_running_mode : 
       speed_mapping_mode:
         len_timeseries: 100
-        target_rps : 40.0
+        target_rps : 10.0
         target_del : 0.0
         conv_u_tol : 0.05 # [m/s]
-        duration : 50.0 # [s]
+        duration : 300.0 # [s]
 
       turning_mode:
-        target_rps : 30.0
-        target_del : 30.0
-        duration : 30.0 # [s]
+        # LC1: 21.6, 31.8 rps
+        # LC2: 23.9, 34.9 rps
+        # LC3: 25.7, 37.3 rps
+        target_rps : 21.6
+        target_del : -20.0
+        duration : 300.0 # [s]
 
       zigzag_mode:
-        target_rps : 20.0
+        target_rps : 21.6
         target_psi : 10.0
-        initial_psi_direction : 1 # 1: Right, -1: Left
-        duration : 30.0 # [s]
+        initial_psi_direction : -1 # -1: Left, 1: Right
+        duration : 300.0 # [s]
 
       pivot_turn_mode:
         target_rpsP : 0.0

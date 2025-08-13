@@ -24,8 +24,8 @@ class MotorInterface(Node):
         self.del_rate = self.declare_parameter('common_params.del_rate', 0.1).get_parameter_value().double_value
         self.get_logger().info(f'Declared del_rate: {self.del_rate} deg/s')
         # UDP 설정 -----------------------------------------------------------
-        self.DEST = ('127.0.0.1', 7777)   # MCU IP, port
-        self.BIND = ('127.0.0.1', 7777)   # 수신(IP,port) – PC(Nvidia Jetson) 주소
+        self.DEST = ('192.168.1.100', 7777)   # MCU IP, port
+        self.BIND = ('192.168.1.2', 7777)   # 수신(IP,port) – PC(Nvidia Jetson) 주소
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(self.BIND)
         self.sock.settimeout(0.05)            # non-blocking recv
@@ -66,11 +66,11 @@ class MotorInterface(Node):
         self.ctrl_cmd = msg.ctrl  # 저장 (추후 사용 가능)
         self.motor_worker_cmd()
         l_rps, r_rps, l_deg, r_deg = self.ctrl_cmd
-        # frame = (f"$CTRL,{l_rps},{r_rps},{l_deg},{r_deg}\r\n")
-        frame = (f"$FB,1,{l_rps},{r_rps},{l_deg},{r_deg},0\r\n")
+        frame = (f"$CTRL,{l_rps},{r_rps},{l_deg},{r_deg}\r\n")
+        # frame = (f"$CTR,1,{l_rps},{r_rps},{l_deg},{r_deg},0\r\n")
         try:
             self.sock.sendto(frame.encode('ascii'), self.DEST)
-            self.get_logger().info(f'Sent: {frame.strip()}')
+            # self.get_logger().info(f'Sent: {frame.strip()}')
         except OSError as e:
             self.get_logger().error(f'UDP send error: {e}')
 
@@ -107,7 +107,7 @@ class MotorInterface(Node):
                            float(parts[5])]  # R_deg
                 
                 fb.ctrl = self.motor_worker_fb(fb)
-                self.get_logger().info(f'Feedback received: {fb.ctrl}')
+                # self.get_logger().info(f'Feedback received: {fb.ctrl}')
                 self.fb_pub.publish(fb)
 
             except ValueError:

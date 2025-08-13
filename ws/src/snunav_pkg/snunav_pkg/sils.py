@@ -27,7 +27,7 @@ class SILS(Node):
 
     def __init__(self):
         super().__init__('sils')
-        self.pos = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])  # [x, y, z, roll, pitch, yaw]
+        self.pos = np.array([0.0, 0.0, 0.0, 0.0, 0.0, np.deg2rad(45)])  # [x, y, z, roll, pitch, yaw]
         self.vel = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])  # [vx, vy, vz, vroll, vpitch, vyaw]
         self.port_rps_cmd = 0.0
         self.port_steer_cmd = 0.0

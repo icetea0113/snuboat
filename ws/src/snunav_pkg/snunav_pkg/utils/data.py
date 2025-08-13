@@ -205,6 +205,8 @@ def main():
     # print("\nctrl_cmd_sils.csv head:"); print(df_ctrl.head())
     # print("\nsils_motor_fb_data.csv head:"); print(df_motor.head())
 
+    df_sensor = df_sensor[11:] # filter로 인해서 앞에 초기화된 부분 자르기
+
     run_dir = _get_run_dir_for_save(base_dir="~/snuboat/ws/src", prefix="FREE_RUNNING", run_name=None)
 
     # 컬럼 확인/정리
@@ -292,11 +294,11 @@ def main():
     # ---- Fig 1: Trajectory (pose_1, pose_0) ----
     fig1, ax1 = plt.subplots(1, 1, figsize=(6, 6), tight_layout=True)
     if {"pose_0","pose_1"}.issubset(cols):
-        ax1.plot(df_traj["pose_0"].to_numpy(),
-         df_traj["pose_1"].to_numpy(),
+        ax1.plot(df_traj["pose_1"].to_numpy(),
+         df_traj["pose_0"].to_numpy(),
          linewidth=1)
-        ax1.set_xlabel("pose_0 [m]")
-        ax1.set_ylabel("pose_1 [m]")
+        ax1.set_xlabel("Y [m]")
+        ax1.set_ylabel("X [m]")
         ax1.set_title("Trajectory (filtered by status%10==1)" if status_col else "Trajectory")
         ax1.axis("equal")
     else:
@@ -306,10 +308,13 @@ def main():
 
     # ---- Fig 2: pose_0, pose_1, pose_5 vs tick ----
     fig2, axes2 = plt.subplots(3, 1, figsize=(10, 7), sharex=True, tight_layout=True)
-    labels_pose = ["pose_0 [m]", "pose_1 [m]", "pose_5 [rad]"]
+    labels_pose = ["X [m]", "Y [m]", "psi [deg]"]
     for ax, col, lab in zip(axes2, pose_cols, labels_pose):
         if col in df_sensor.columns:
-            ax.plot(x, df_sensor[col].to_numpy(), linewidth=1)
+            if lab == "psi [deg]":
+                ax.plot(x, df_sensor[col].to_numpy()*180/np.pi, linewidth=1)
+            else:
+                ax.plot(x, df_sensor[col].to_numpy(), linewidth=1)
             ax.set_ylabel(lab)
         else:
             ax.text(0.5, 0.5, f"{col} missing", ha="center", va="center")
@@ -327,13 +332,13 @@ def main():
     # ---- Fig 3: vel_0, vel_1, vel_5(deg/s) vs tick ----
     fig3, axes3 = plt.subplots(3, 1, figsize=(10, 7), sharex=True, tight_layout=True)
     if "vel_5" in df_sensor.columns:
-        vel5_deg = df_sensor["vel_5"].to_numpy() * (180.0/np.pi)
+        vel5_deg = df_sensor["vel_5"].to_numpy() 
     else:
         vel5_deg = None
 
-    series_list = [("vel_0", "vel_0 [m/s]"),
-                ("vel_1", "vel_1 [m/s]"),
-                ("vel_5", "vel_5 [deg/s]")]
+    series_list = [("vel_0", "u [m/s]"),
+                ("vel_1", "v [m/s]"),
+                ("vel_5", "r [rad/s]")]
     for i, (col, lab) in enumerate(series_list):
         if col == "vel_5" and vel5_deg is not None:
             axes3[i].plot(x, vel5_deg, linewidth=1)
@@ -394,7 +399,7 @@ def main():
     if c0_fb  is not None: axes4[0].plot(t_fb,  c0_fb,  linewidth=1.2, color="r", linestyle="--", label="fb PORT")
     if c1_cmd is not None: axes4[0].plot(t_cmd, c1_cmd, linewidth=1.2, color="b", linestyle="-", label="cmd STBD")
     if c1_fb  is not None: axes4[0].plot(t_fb,  c1_fb,  linewidth=1.2, color="b", linestyle="--", label="fb STBD")
-    axes4[0].set_ylabel("ctrl_0 / ctrl_1")
+    axes4[0].set_ylabel("n_p_cmd / n_s_cmd")
     axes4[0].legend(loc="best", fontsize=9)
 
     # Subplot 2: ctrl_2(red), ctrl_3(blue)
@@ -402,7 +407,7 @@ def main():
     if c2_fb  is not None: axes4[1].plot(t_fb,  c2_fb,  linewidth=1.2, color="r", linestyle="--", label="fb PORT")
     if c3_cmd is not None: axes4[1].plot(t_cmd, c3_cmd, linewidth=1.2, color="b", linestyle="-", label="cmd STBD")
     if c3_fb  is not None: axes4[1].plot(t_fb,  c3_fb,  linewidth=1.2, color="b", linestyle="--", label="fb STBD")
-    axes4[1].set_ylabel("ctrl_2 / ctrl_3")
+    axes4[1].set_ylabel("del_p_cmd / del_s_cmd")
 
     # # x축 포맷(mm:ss.sss) 재사용
     # def _fmt_mmss(val, _pos):

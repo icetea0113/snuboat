@@ -18,6 +18,7 @@ from std_msgs.msg import Float32MultiArray
 from nav_msgs.msg import Odometry
 from snumsg_pkg.msg import MissionCode, Sensor
 import numpy as np
+from collections import deque
 
 # MissionDirector message information
 # uint32 aabbcccc
@@ -100,6 +101,8 @@ class Navigation(Node):
         self.status_sils = STATUS_SILS_OFF
         self.pose_sils = np.zeros(6, dtype=np.float32)
         self.vel_sils = np.zeros(6, dtype=np.float32)
+        
+        self.x_data_queue = None
 
 
     def mission_callback(self, msg):
@@ -117,18 +120,81 @@ class Navigation(Node):
             self.vel_qualisys = np.array(msg.data[7:13], dtype=np.float32)
 
             # unit translation
-            self.pose_qualisys[:4] *= 0.001
-            self.vel_qualisys[:4] *= 0.001 
-            self.pose_qualisys[4:] *= np.pi/180
-            self.vel_qualisys[4:] *= np.pi/180 
+            # self.pose_qualisys[:4] *= 0.001
+            # self.vel_qualisys[:4] *= 0.001 
+            self.pose_qualisys[3:] *= np.pi/180
+            self.vel_qualisys[3:] *= np.pi/180 
 
-            self.pose_qualisys_queue = np.roll(self.pose_qualisys_queue, -1, axis=0)
-            self.pose_qualisys_queue[-1] = self.pose_qualisys
-            self.vel_qualisys_queue = np.roll(self.vel_qualisys_queue, -1, axis=0)
-            self.vel_qualisys_queue[-1] = self.vel_qualisys
+            # filter
+            # self.pose_qualisys_queue = np.roll(self.pose_qualisys_queue, -1, axis=0)
+            # self.pose_qualisys_queue[-1] = self.pose_qualisys
+            # self.vel_qualisys_queue = np.roll(self.vel_qualisys_queue, -1, axis=0)
+            # self.vel_qualisys_queue[-1] = self.vel_qualisys
 
-            self.pose_qualisys_filt = np.mean(self.pose_qualisys_queue, axis=0)
-            self.vel_qualisys_filt = np.mean(self.vel_qualisys_queue, axis=0)
+            # self.pose_qualisys_filt = np.mean(self.pose_qualisys_queue, axis=0)
+            # self.vel_qualisys_filt = np.mean(self.vel_qualisys_queue, axis=0)
+            
+            # Median filter
+            if self.x_data_queue is None:
+                self.pos_maxlen_param = 20
+                self.pos_avglen_param = 4
+                self.x_data_queue = deque(maxlen = self.pos_maxlen_param)
+                self.y_data_queue = deque(maxlen = self.pos_maxlen_param)
+                self.z_data_queue = deque(maxlen = self.pos_maxlen_param)
+                self.roll_data_queue = deque(maxlen = self.pos_maxlen_param)
+                self.pitch_data_queue = deque(maxlen = self.pos_maxlen_param)
+                self.yaw_data_queue = deque(maxlen = self.pos_maxlen_param)
+
+                self.pos_data_queues = [self.x_data_queue, self.y_data_queue, self.z_data_queue,
+                                        self.roll_data_queue, self.pitch_data_queue, self.yaw_data_queue]
+
+                self.vel_maxlen_param = 20
+                self.vel_avglen_param = 4
+                self.u_data_queue = deque(maxlen = self.vel_maxlen_param)
+                self.v_data_queue = deque(maxlen = self.vel_maxlen_param)
+                self.w_data_queue = deque(maxlen = self.vel_maxlen_param)
+                self.p_data_queue = deque(maxlen = self.vel_maxlen_param)
+                self.q_data_queue = deque(maxlen = self.vel_maxlen_param)
+                self.r_data_queue = deque(maxlen = self.vel_maxlen_param)
+
+                self.vel_data_queues = [self.u_data_queue, self.v_data_queue, self.w_data_queue,
+                                        self.p_data_queue, self.q_data_queue, self.r_data_queue]
+
+            if len(self.x_data_queue) >= self.pos_maxlen_param:
+                for idx in range(len(self.pos_data_queues)):
+                    self.pos_data_queues[idx].popleft()
+                
+                for idx in range(len(self.vel_data_queues)):
+                    self.vel_data_queues[idx].popleft()
+        
+            if len(self.x_data_queue) < self.pos_maxlen_param:
+                for idx, data in enumerate(self.pose_qualisys):
+                    self.pos_data_queues[idx].append(data)
+                self.pose_qualisys_filt = [
+                    median_filter(self.x_data_queue, self.pos_avglen_param),
+                    median_filter(self.y_data_queue, self.pos_avglen_param),
+                    median_filter(self.z_data_queue, self.pos_avglen_param),
+                    median_filter(self.roll_data_queue, self.pos_avglen_param),
+                    median_filter(self.pitch_data_queue, self.pos_avglen_param),
+                    self.pose_qualisys[5]
+                ]
+                # self.get_logger().info(f"Pose data added to queue: {data}")
+
+            if len(self.u_data_queue) < self.vel_maxlen_param:
+                for idx, data in enumerate(self.vel_qualisys):
+                    self.vel_data_queues[idx].append(data)
+                                
+                self.vel_qualisys_filt = [
+                    median_filter(self.u_data_queue, self.vel_avglen_param),
+                    median_filter(self.v_data_queue, self.vel_avglen_param),
+                    median_filter(self.w_data_queue, self.vel_avglen_param),
+                    median_filter(self.p_data_queue, self.vel_avglen_param),
+                    median_filter(self.q_data_queue, self.vel_avglen_param),
+                    # median_filter(self.r_data_queue, self.vel_avglen_param)
+                    self.vel_qualisys[5]
+                ]
+                # self.get_logger().info(f"Velocity data added to queue: {data}")
+                
 
         self.timer_callback()
         
@@ -181,8 +247,17 @@ class Navigation(Node):
         if self.active_sensor_mode == 0x0: # Qualisys
             # self.pose = self.pose_qualisys
             # self.vel = self.vel_qualisys
-            self.pose = np.array(self.pose_qualisys_filt)
-            self.vel = np.array(self.vel_qualisys_filt)
+            if self.x_data_queue is None:
+                self.pose = self.pose_qualisys
+                self.vel = self.vel_qualisys
+                # self.get_logger().info("not filter!!!")  
+            elif len(self.x_data_queue) < self.pos_maxlen_param:
+                self.pose = self.pose_qualisys
+                self.vel = self.vel_qualisys
+                # self.get_logger().info("not filter!!!")  
+            else:
+                self.pose = np.array(self.pose_qualisys_filt)
+                self.vel = np.array(self.vel_qualisys_filt)
             status_suffix = str(self.status_qualisys)
         elif self.active_sensor_mode == 0x1: # SLAM
             self.pose = np.array(self.pose_slam)
@@ -217,6 +292,10 @@ class Navigation(Node):
         
         self.sensor_state_publisher_.publish(msg)
 
+def median_filter(dataset, filter_size=6):
+    sorted_data = np.sort(dataset)
+    median_data_set = sorted_data[len(sorted_data) // 2 - filter_size // 2:len(sorted_data) // 2 + filter_size // 2]
+    return np.mean(median_data_set)
 
 def main(args=None):
     rclpy.init(args=args)

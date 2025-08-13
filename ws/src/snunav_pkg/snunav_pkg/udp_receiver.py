@@ -3,7 +3,7 @@ import socket
 import threading
 from dataclasses import dataclass
 from typing import Optional
-
+import numpy as np
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
@@ -71,15 +71,49 @@ def parse_curmc(line: str) -> Optional[CurmcMsg]:
     if len(parts) < 12:
         return None
 
+    # return CurmcMsg(
+    #     status=parts[2] if len(parts) > 2 else None,
+    #     x=_to_float(parts[3]),
+    #     y=_to_float(parts[4]),
+    #     z=_to_float(parts[5]),
+    #     roll_deg=_to_float(parts[6]),
+    #     pitch_deg=_to_float(parts[7]),
+    #     u=_to_float(parts[8]),
+    #     yaw_deg=_to_float(parts[11])
+    # )
+
+    # translate ENU to NED coordinate
+    # return CurmcMsg(
+    #     status=parts[2] if len(parts) > 2 else None,
+    #     x=_to_float(parts[4]),
+    #     y=_to_float(parts[3]),
+    #     z=-_to_float(parts[5]),
+    #     roll_deg=_to_float(parts[6]),
+    #     pitch_deg=-_to_float(parts[7]),
+    #     u=_to_float(parts[8]),
+    #     yaw_deg=90-_to_float(parts[11])
+    # )
+
+    # return CurmcMsg(
+    #     status=parts[2] if len(parts) > 2 else None,
+    #     x=_to_float(parts[3]),
+    #     y=-_to_float(parts[4]),
+    #     z=-_to_float(parts[5]),
+    #     roll_deg=_to_float(parts[6]),
+    #     pitch_deg=-_to_float(parts[7]),
+    #     u=_to_float(parts[8]),
+    #     yaw_deg=-_to_float(parts[11])
+    # )
+
     return CurmcMsg(
         status=parts[2] if len(parts) > 2 else None,
         x=_to_float(parts[3]),
-        y=_to_float(parts[4]),
-        z=_to_float(parts[5]),
+        y=-_to_float(parts[4]),
+        z=-_to_float(parts[5]),
         roll_deg=_to_float(parts[6]),
-        pitch_deg=_to_float(parts[7]),
+        pitch_deg=-_to_float(parts[7]),
         u=_to_float(parts[8]),
-        yaw_deg=_to_float(parts[11])
+        yaw_deg=-_to_float(parts[11])
     )
 
 def wrap_to_pi(angle: float) -> float:
@@ -91,7 +125,7 @@ class UdpCurmcNode(Node):
 
         self.port = self.declare_parameter('port', 56001).get_parameter_value().integer_value
         self.bind_address = self.declare_parameter('bind_address', '0.0.0.0').get_parameter_value().string_value
-        self.use_raw_speed = self.declare_parameter('publish_raw_speed', True).get_parameter_value().bool_value
+        self.use_raw_speed = self.declare_parameter('publish_raw_speed', False).get_parameter_value().bool_value
 
         self.pub = self.create_publisher(Float32MultiArray, 'qualisys_data', 10)
 
@@ -122,15 +156,13 @@ class UdpCurmcNode(Node):
 
             for sentence in data.decode(errors='ignore').strip().splitlines():
                 msg = parse_curmc(sentence)
-                self.get_logger().debug(f"Received: {sentence}")
+                # self.get_logger().debug(f"Received: {sentence}")
                 if msg:
                     self._handle_curmc(msg)
 
     def _handle_curmc(self, m: CurmcMsg):
         now = self.get_clock().now().nanoseconds * 1e-9
         psi = wrap_to_pi(math.radians(m.yaw_deg)) if m.yaw_deg is not None else None
-        roll_rad = math.radians(m.roll_deg) if m.roll_deg is not None else None
-        pitch_rad = math.radians(m.pitch_deg) if m.pitch_deg is not None else None
 
         # u,v 계산
         u_calc, v_calc = None, None
@@ -150,16 +182,16 @@ class UdpCurmcNode(Node):
         r_out, p_out, q_out = float('nan'), float('nan'), float('nan')
         if psi is not None and self.prev_psi is not None and self.prev_t is not None:
             dt = now - self.prev_t
-            if dt > 1e-3:
-                r_out = wrap_to_pi(psi - self.prev_psi) / dt
-        if roll_rad is not None and self.prev_roll is not None and self.prev_t is not None:
+            if dt > 5e-2:
+                r_out = np.rad2deg(wrap_to_pi(psi - self.prev_psi) / dt)
+        if m.roll_deg is not None and self.prev_roll is not None and self.prev_t is not None:
             dt = now - self.prev_t
-            if dt > 1e-3:
-                p_out = (roll_rad - self.prev_roll) / dt
-        if pitch_rad is not None and self.prev_pitch is not None and self.prev_t is not None:
+            if dt > 5e-2:
+                p_out = (m.roll_deg - self.prev_roll) / dt
+        if m.pitch_deg is not None and self.prev_pitch is not None and self.prev_t is not None:
             dt = now - self.prev_t
-            if dt > 1e-3:
-                q_out = (pitch_rad - self.prev_pitch) / dt
+            if dt > 5e-2:
+                q_out = (m.pitch_deg - self.prev_pitch) / dt
 
         arr = Float32MultiArray()
         arr.data = [
@@ -169,7 +201,7 @@ class UdpCurmcNode(Node):
             m.z if m.z is not None else float('nan'),
             m.roll_deg if m.roll_deg is not None else float('nan'),
             m.pitch_deg if m.pitch_deg is not None else float('nan'),
-            psi if psi is not None else float('nan'),
+            m.yaw_deg if m.yaw_deg is not None else float('nan'),
             u_out,
             v_out,
             z_out,
@@ -178,14 +210,14 @@ class UdpCurmcNode(Node):
             r_out,
         ]
         self.pub.publish(arr)
-        self.get_logger().info(f"Published: {arr.data}")
+        # self.get_logger().info(f"Published: {arr.data}")
         # 상태 업데이트
         self.prev_t = now
         if m.x is not None: self.prev_x = m.x
         if m.y is not None: self.prev_y = m.y
         if psi is not None: self.prev_psi = psi
-        if roll_rad is not None: self.prev_roll = roll_rad
-        if pitch_rad is not None: self.prev_pitch = pitch_rad
+        if m.roll_deg is not None: self.prev_roll = m.roll_deg
+        if m.pitch_deg is not None: self.prev_pitch = m.pitch_deg
 
 def main(args=None):
     rclpy.init(args=args)

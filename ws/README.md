@@ -15,7 +15,11 @@ source ./install/local_setup.bash
 source ~/.bashrc
 
 # 4. roslaunch
+ros2 run snunav_pkg udp_receiver
+
 ros2 launch snunav_pkg sils.launch.py
+ros2 launch snunav_pkg snunav.launch.py
+
 
 ### If you want to run SILS mode, please change field named sils_mode 0 to 1 in params.yaml
 
@@ -27,4 +31,4 @@ ros2 bad record -o test.bag(bag file name) /ctrl_cmd_sils /sensor (topic name)
   sudo pip install git+https://github.com/fishros/ros2bag_convert.git
 ## 6.2 rosbag to csv command
 ros2bag-convert test.bag_0.db3 (bag file name)
-python3 ~/snuboat/ws/src/snunav_pkg/snunav_pkg/utils/data.py
+python3 /home/orinnx/snuboat/ws/src/snunav_pkg/snunav_pkg/utils/data.py

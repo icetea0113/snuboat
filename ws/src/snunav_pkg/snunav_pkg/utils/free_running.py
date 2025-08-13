@@ -1,7 +1,10 @@
-import rclpy
+import rclpy, math
 from rclpy.node import Node
 import numpy as np
 from scipy.interpolate import interp1d
+
+def wrap_to_pi(angle: float) -> float:
+    return math.atan2(math.sin(angle), math.cos(angle))
 
 class FreeRunning(Node):
     def __init__(self):
@@ -35,6 +38,9 @@ class FreeRunning(Node):
 
         self._steady_state_time = -1
         self._steady_state_status = False
+
+        self._max_rps_time = -1
+        self._max_rps_time_status = False
 
         self.U_queue = np.array([], dtype=np.float64)  # Control command queue for averaging
 
@@ -103,31 +109,37 @@ class FreeRunning(Node):
         self.get_logger().info(f'  deadzone_start: {self.deadzone_start}')
         self.get_logger().info(f'  deadzone_end: {self.deadzone_end}')
 
-    # def to_steady_state(self, tick, vel, target_rps):
-    #     if self._steady_state_time == -1:
-    #         duration = 10
-    #         self._steady_state_time = tick + duration
-    #     if tick < self._steady_state_time:
-    #         rpsP_cmd = target_rps  
-    #         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max) 
-    #         rpsS_cmd = target_rps  
-    #         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)    
-    #         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])
-    #     return ctrl_cmd
+    def to_max_rps(self, tick, vel, duration, target_rps):
+        if self._max_rps_time == -1:
+            self._max_rps_time = tick + duration
+        if tick < self._max_rps_time:
+            # rpsP_cmd = target_rps  
+            # rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max) 
+            # rpsS_cmd = target_rps  
+            # rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)    
+            # ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])
+            ctrl_cmd = np.array([target_rps, target_rps, 0.0, 0.0])
+        return ctrl_cmd
 
-    def to_steady_state(self, tick, target_rps):
-        U_mean = np.mean(self.U_queue) if len(self.U_queue) > 0 else 0.0
+    def to_steady_state(self, tick, target_rps, vel):
+        # U_mean = np.mean(self.U_queue) if len(self.U_queue) > 0 else 0.0
+        U_mean = self.U_queue[-1]
         target_U = self._interp_rps_U(target_rps)
+        # target_U = 0.0181*target_rps - 0.0452 # LC3
         self.get_logger().info(f'To steady state: tick={tick}, U_mean={U_mean}, target_U={target_U}, target_rps={target_rps}')
-        if abs(U_mean - target_U) < self.U_tol:
+        # if abs(U_mean - target_U) < self.U_tol:
+        if U_mean > target_U - self.U_tol:
             self._steady_state_status = True
             self.get_logger().info(f'##### Steady state achieved at tick {tick} with U_mean: {U_mean}, target_U: {target_U} #####')
         rpsP_cmd = target_rps
         rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
         rpsS_cmd = target_rps
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)
-        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])  # [rpsP, rpsS, delP, delS]
-          
+        # delP_cmd = np.round(-200.0 * vel[2], 0) # for LC3 Fn 0.1
+        # delP_cmd = np.round(-50.0 * vel[2], 0) # for LC3 Fn 0.15
+        delP_cmd = np.round(-200.0 * vel[2], 0) # for LC1 Fn 0.1
+        delS_cmd = delP_cmd
+        ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
         return ctrl_cmd
     
     def speed_mapping(self, tick, pos, vel, ctrl):
@@ -172,6 +184,10 @@ class FreeRunning(Node):
         rpsS_cmd = np.clip(rpsS_cmd, -self.rps_max, self.rps_max)    
         
         ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, 0.0, 0.0])  # [rpsP, rpsS, delP, delS]
+        
+        if self._max_rps_time == -1 or self._max_rps_time > tick:
+            ctrl_cmd = self.to_max_rps(tick, vel, 4.0, 25)
+            self.get_logger().info('Transitioning to max RPS before turning.')
         return ctrl_cmd, self._speed_mapping_end
 
     def turning(self, tick, pos, vel, ctrl):
@@ -197,7 +213,10 @@ class FreeRunning(Node):
         #     ctrl_cmd = self.to_steady_state(tick, self._turning_params['target_rps'])
         #     self.get_logger().info('Transitioning to steady state before turning.')
         if self._steady_state_status == False:
-            ctrl_cmd = self.to_steady_state(tick, self._turning_params['target_rps'])
+            ctrl_cmd = self.to_steady_state(tick, self._turning_params['target_rps'], vel)
+            # if self._max_rps_time == -1 or self._max_rps_time > tick:
+            #     ctrl_cmd = self.to_max_rps(tick, vel, 2.0, 30)
+            #     self.get_logger().info('Transitioning to max RPS before turning.')
         else:
             if not self._turning_start:
                 self._turning_start = True
@@ -229,6 +248,7 @@ class FreeRunning(Node):
             delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
 
             ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
+
             self.get_logger().info(f'Turning control command: {ctrl_cmd}')
         return ctrl_cmd, self._turning_end
 
@@ -241,7 +261,7 @@ class FreeRunning(Node):
                 'initial_psi_direction': self.declare_parameter('free_running_mode.zigzag_mode.initial_psi_direction', 1).get_parameter_value().integer_value,
                 'duration': self.declare_parameter('free_running_mode.zigzag_mode.duration', 0.0).get_parameter_value().double_value
             }
-            self.target_del = (30) * self._zigzag_params['initial_psi_direction']
+            self.target_del = None
             self._zigzag_loaded = True
 
         # update U_queue
@@ -257,8 +277,14 @@ class FreeRunning(Node):
         #     ctrl_cmd = self.to_steady_state(tick, self._zigzag_params['target_rps'])
         #     self.get_logger().info('Transitioning to steady state before zigzag.')
         if self._steady_state_status == False:
-            ctrl_cmd = self.to_steady_state(tick, self._zigzag_params['target_rps'])
+            ctrl_cmd = self.to_steady_state(tick, self._zigzag_params['target_rps'], vel)
+            if self._max_rps_time == -1 or self._max_rps_time > tick:
+                ctrl_cmd = self.to_max_rps(tick, vel, 3.0, 35)
+                self.get_logger().info('Transitioning to max RPS before zigzag.')
         else:
+            if self.target_del is None:
+                self.target_del = self._zigzag_params['target_psi'] * self._zigzag_params['initial_psi_direction']
+                self.get_logger().info(f'target_del: {self.target_del}, dir: {self._zigzag_params["initial_psi_direction"]}') 
             rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
             psi = (pos[2])  # pos[2]는 yaw 또는 heading을 나타낸다고 가정
             target_rps = self._zigzag_params['target_rps']
@@ -269,6 +295,7 @@ class FreeRunning(Node):
                 self._zigzag_start = True
                 self._zigzag_direction = initial_psi_direction
                 self._zigzag_duration = tick + self._zigzag_params['duration']
+                self._initial_zigzag_psi = psi
             if tick >= self._zigzag_duration:
                 self.get_logger().info('Zigzag completed.')
                 self._zigzag_end = True
@@ -277,14 +304,14 @@ class FreeRunning(Node):
                 
             if self._zigzag_direction == 0:
                 self._zigzag_direction = initial_psi_direction
-
-            target_psi = np.deg2rad(self._zigzag_params['target_psi']) * self._zigzag_direction
-            if abs(psi) - abs(target_psi) >= 0 and psi * target_psi > 0:
+        
+            target_psi = wrap_to_pi(self._initial_zigzag_psi + np.deg2rad(self._zigzag_params['target_psi']) * self._zigzag_direction)
+            if wrap_to_pi(abs(psi) - abs(target_psi)) >= 0 and (psi - self._initial_zigzag_psi) * (target_psi - self._initial_zigzag_psi) > 0:
                 self._zigzag_direction *= -1  # 방향 전환
                 self.target_del *= -1
-                direction_message = "left" if self._zigzag_direction < 0 else "right"
-                self.get_logger().info(f'Zigzag direction changed to {direction_message}. Current psi: {psi}, Target psi: {target_psi}')
-            
+                direction_message = "right" if self._zigzag_direction < 0 else "left"
+                self.get_logger().info(f'Zigzag direction changed to {direction_message}. Current psi: {np.rad2deg(psi)}, Target psi: {np.rad2deg(target_psi)}')
+
             rpsP_cmd = target_rps
             rpsP_cmd = np.clip(rpsP_cmd, -self.rps_max, self.rps_max)
 
@@ -296,7 +323,7 @@ class FreeRunning(Node):
             
             delS_cmd = self.target_del
             delS_cmd = np.clip(delS_cmd, -self.del_max, self.del_max)
-                    
+            self.get_logger().info(f'now_psi: {np.rad2deg(psi)},target_del: {(self.target_del)}, target_psi: {np.rad2deg(target_psi)} ')
             ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
             # del_rate를 사용한 zigzag 로직 구현
         return ctrl_cmd, self._zigzag_end
@@ -324,7 +351,7 @@ class FreeRunning(Node):
         #     ctrl_cmd = self.to_steady_state(tick, self._pivot_turn_params['target_rps'])
         #     self.get_logger().info('Transitioning to steady state before pivot turn.')
         if self._steady_state_status == False:
-            ctrl_cmd = self.to_steady_state(tick, self._pivot_turn_params['target_rpsP'])
+            ctrl_cmd = self.to_steady_state(tick, self._pivot_turn_params['target_rpsP'], vel)
         else:
             if not self._pivot_turn_start:
                 self._pivot_turn_start = True
@@ -377,7 +404,7 @@ class FreeRunning(Node):
         #     ctrl_cmd = self.to_steady_state(tick, self._crabbing_params['target_rps'])
         #     self.get_logger().info('Transitioning to steady state before crabbing.')
         if self._steady_state_status == False:
-            ctrl_cmd = self.to_steady_state(tick, self._crabbing_params['target_rpsP'])
+            ctrl_cmd = self.to_steady_state(tick, self._crabbing_params['target_rpsP'], vel)
         else:
             if not self._crabbing_start:
                 self._crabbing_start = True
@@ -440,7 +467,7 @@ class FreeRunning(Node):
         #     ctrl_cmd = self.to_steady_state(tick, self._pull_out_params['target_rps'])
         #     self.get_logger().info('Transitioning to steady state before pull out.')
         if self._steady_state_status == False:
-            ctrl_cmd = self.to_steady_state(tick, self._pull_out_params['target_rps'])
+            ctrl_cmd = self.to_steady_state(tick, self._pull_out_params['target_rps'], vel)
         else:
             if not self._pull_out_start:
                 self._pull_out_start = True
@@ -500,7 +527,7 @@ class FreeRunning(Node):
         #     ctrl_cmd = self.to_steady_state(tick, self._spiral_params['target_rps'])
         #     self.get_logger().info('Transitioning to steady state before spiral.')
         if self._steady_state_status == False:
-            ctrl_cmd = self.to_steady_state(tick, self._spiral_params['target_rps'])
+            ctrl_cmd = self.to_steady_state(tick, self._spiral_params['target_rps'], vel)
         else:
             rpsP, rpsS, delP, delS = ctrl[0], ctrl[1], ctrl[2], ctrl[3]
             
@@ -575,7 +602,7 @@ class FreeRunning(Node):
         #     return ctrl_cmd, False
 
         if self._steady_state_status == False:
-            ctrl_cmd = self.to_steady_state(tick, self._random_bangbang_params['target_rps'])
+            ctrl_cmd = self.to_steady_state(tick, self._random_bangbang_params['target_rps'], vel)
 
         # 2) 초기화 (첫 사이클 시작)
         if not self._random_bangbang_start:
@@ -641,7 +668,7 @@ class FreeRunning(Node):
         #     return ctrl_cmd, False
 
         if self._steady_state_status == False:
-            ctrl_cmd = self.to_steady_state(tick, self._random_3321_params['target_rps'])
+            ctrl_cmd = self.to_steady_state(tick, self._random_3321_params['target_rps'], vel)
 
         if self._random_3321_end:
             return np.zeros(4), True
@@ -705,7 +732,7 @@ class FreeRunning(Node):
             self.U_queue[-1] = U
 
         if self._steady_state_status == False:
-            ctrl_cmd = self.to_steady_state(tick, self._random_3211_params['target_rps'])
+            ctrl_cmd = self.to_steady_state(tick, self._random_3211_params['target_rps'], vel)
 
         # if self._steady_state_time == -1 or tick < self._steady_state_time:
         #     ctrl_cmd = self.to_steady_state(tick, vel,

@@ -93,8 +93,8 @@ class Controller(Node):
             self.vel[0] = float(msg.vel[0])
             self.vel[1] = float(msg.vel[1])
             self.vel[2] = float(msg.vel[5])
-            self.get_logger().info(f'Sensor data received: '
-                                      f'Position: {self.pos}, Velocity: {self.vel}')
+            # self.get_logger().info(f'Sensor data received: '
+            #                           f'Position: {self.pos}, Velocity: {self.vel}')
     def controllerMode(self):
         maneuver_mode = (self.mission_code & 0x00F000) >> 12
         if maneuver_mode == 0x1:
@@ -112,7 +112,7 @@ class Controller(Node):
         status_msg = Int32()
         status_msg.data = self.status
         self.status_publisher.publish(status_msg)
-        self.get_logger().info(f'Published status command: {self.status}')
+        # self.get_logger().info(f'Published status command: {self.status}')
 
         ctrl_msg = Control()
         ctrl_msg.ctrl = self.ctrl_cmd.tolist()
@@ -120,10 +120,10 @@ class Controller(Node):
         
         if self.is_sils == 1:
             self.__ctrlcmdsilsPublisher.publish(ctrl_msg)
-            self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
+            # self.get_logger().info(f'Published control command to SILS: {self.ctrl_cmd}')
         else:
             self.__ctrlcmdboatPublisher.publish(ctrl_msg)
-            self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
+            # self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
         # self.__ctrlcmdboatPublisher.publish(ctrl_msg)
         # self.get_logger().info(f'Published control command to boat: {self.ctrl_cmd}')
 
@@ -142,7 +142,7 @@ class Controller(Node):
         elif submaneuver_mode == 0x1:
             ctrl_cmd, state = self.free_running.turning(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x2:
-            self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
+            # self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
             ctrl_cmd, state = self.free_running.zigzag(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x3:
             ctrl_cmd, state = self.free_running.pivot_turn(self.tick, self.pos, self.vel, self.ctrl)
@@ -151,17 +151,17 @@ class Controller(Node):
         elif submaneuver_mode == 0x5:
             ctrl_cmd, state = self.free_running.pull_out(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x6:
-            self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
+            # self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
             ctrl_cmd, state = self.free_running.spiral(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x7:
-            self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
+            # self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
             ctrl_cmd, state = self.free_running.random_bangbang(self.tick, self.pos, self.vel, self.ctrl)
         elif submaneuver_mode == 0x8:
             if subsub_maneuver_mode == 0x0:
-                self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
+                # self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
                 ctrl_cmd, state = self.free_running.random_3321(self.tick, self.pos, self.vel, self.ctrl)
             elif subsub_maneuver_mode == 0x1:
-                self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
+                # self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
                 ctrl_cmd, state = self.free_running.random_3211(self.tick, self.pos, self.vel, self.ctrl)
             else:
                 self.get_logger().error(f'Unknown subsub maneuver mode: {subsub_maneuver_mode}')

@@ -139,13 +139,12 @@ def generate_launch_description():
     
     # SLAM 모드 (sensor_mode == '1'): Ouster + KISS-ICP
     if sensor_mode == '0':
-        # Qualisys UDP Receiver
         ld.add_action(Node(
             package='snunav_pkg',
             executable='udp_receiver',
-            name='udp_curmc_node',
+            name='udp_node',
             output='screen',
-            parameters=[udp_params],
+            parameters=[udp_params]
         ))
         
     elif sensor_mode == '1':
