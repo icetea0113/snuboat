@@ -64,10 +64,6 @@ class Navigation(Node):
         self.gps_rtk_subscriber_ = self.create_subscription(Float32MultiArray, 'gps_rtk_data', self.gps_rtk_callback, 10)
         self.marker_subscriber_ = self.create_subscription(Float32MultiArray, 'marker_data', self.marker_callback, 10)
         self.sils_subscriber_ = self.create_subscription(Float32MultiArray, 'sils_navigation_data', self.sils_callback, 10)
-
-        # Timer
-        timer_period = 0.1  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
         
         # State variables
         self.mission_code = 0
@@ -178,7 +174,7 @@ class Navigation(Node):
                     median_filter(self.pitch_data_queue, self.pos_avglen_param),
                     self.pose_qualisys[5]
                 ]
-                # self.get_logger().info(f"Pose data added to queue: {data}")
+                self.get_logger().info(f"Pose data added to queue: {data}")
 
             if len(self.u_data_queue) < self.vel_maxlen_param:
                 for idx, data in enumerate(self.vel_qualisys):

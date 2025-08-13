@@ -131,7 +131,7 @@ class Controller(Node):
         # sils_mode, motor_mode, sensor_mode, maneuver_mode, sub_maneuver_mode, subsub_maneuver_mode, status
         ctrl_cmd = np.zeros(4)  # [rpsP, rpsS, delP, delS]
         submaneuver_mode    = (self.mission_code & 0x0F00) >> 8
-        subsub_maneuver_mode = (self.mission_code & 0x000F)
+        subsub_maneuver_mode = (self.mission_code & 0x00F0) >> 4
 
         # print("submaneuver_mode: {}, subsub_maneuver_mode: {}".format(hex(submaneuver_mode), 
         # hex(subsub_maneuver_mode)))
@@ -163,6 +163,9 @@ class Controller(Node):
             elif subsub_maneuver_mode == 0x1:
                 # self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
                 ctrl_cmd, state = self.free_running.random_3211(self.tick, self.pos, self.vel, self.ctrl)
+            elif subsub_maneuver_mode == 0x2:
+                # self.get_logger().info(f'pos: {self.pos}, vel: {self.vel}, ctrl: {self.ctrl}')
+                ctrl_cmd, state = self.free_running.random_211(self.tick, self.pos, self.vel, self.ctrl)
             else:
                 self.get_logger().error(f'Unknown subsub maneuver mode: {subsub_maneuver_mode}')
                 raise ValueError("Unknown subsub maneuver mode: {}".format(hex(subsub_maneuver_mode)))
@@ -176,7 +179,9 @@ class Controller(Node):
             self.status = 1
         if state == 1:
             self.status = 3
-            ctrl_cmd = np.zeros(4)  # Stop the controller
+            if not (submaneuver_mode == 0x8 or submaneuver_mode == 0x7):
+                ctrl_cmd = np.zeros(4)  # Stop the controller
+            # ctrl_cmd = np.zeros(4)
             
         self.ctrl_cmd = ctrl_cmd
 

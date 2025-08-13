@@ -1,0 +1,38 @@
+rosbag2_bagfile_information:
+  version: 5
+  storage_identifier: sqlite3
+  duration:
+    nanoseconds: 11937907616
+  starting_time:
+    nanoseconds_since_epoch: 1755073140041028272
+  message_count: 241
+  topics_with_message_count:
+    - topic_metadata:
+        name: /sensor
+        type: snumsg_pkg/msg/Sensor
+        serialization_format: cdr
+        offered_qos_profiles: "- history: 3\n  depth: 0\n  reliability: 1\n  durability: 2\n  deadline:\n    sec: 9223372036\n    nsec: 854775807\n  lifespan:\n    sec: 9223372036\n    nsec: 854775807\n  liveliness: 1\n  liveliness_lease_duration:\n    sec: 9223372036\n    nsec: 854775807\n  avoid_ros_namespace_conventions: false"
+      message_count: 0
+    - topic_metadata:
+        name: /ctrl_fb_boat
+        type: snumsg_pkg/msg/Control
+        serialization_format: cdr
+        offered_qos_profiles: "- history: 3\n  depth: 0\n  reliability: 1\n  durability: 2\n  deadline:\n    sec: 9223372036\n    nsec: 854775807\n  lifespan:\n    sec: 9223372036\n    nsec: 854775807\n  liveliness: 1\n  liveliness_lease_duration:\n    sec: 9223372036\n    nsec: 854775807\n  avoid_ros_namespace_conventions: false"
+      message_count: 121
+    - topic_metadata:
+        name: /ctrl_cmd_boat
+        type: snumsg_pkg/msg/Control
+        serialization_format: cdr
+        offered_qos_profiles: "- history: 3\n  depth: 0\n  reliability: 1\n  durability: 2\n  deadline:\n    sec: 9223372036\n    nsec: 854775807\n  lifespan:\n    sec: 9223372036\n    nsec: 854775807\n  liveliness: 1\n  liveliness_lease_duration:\n    sec: 9223372036\n    nsec: 854775807\n  avoid_ros_namespace_conventions: false"
+      message_count: 120
+  compression_format: ""
+  compression_mode: ""
+  relative_file_paths:
+    - FREE_RUNNING_ZIGZAG_0813_171859_0.db3
+  files:
+    - path: FREE_RUNNING_ZIGZAG_0813_171859_0.db3
+      starting_time:
+        nanoseconds_since_epoch: 1755073140041028272
+      duration:
+        nanoseconds: 11937907616
+      message_count: 241
