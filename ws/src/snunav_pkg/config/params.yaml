@@ -12,7 +12,7 @@ mission_director:
         # TBD
       # 4: Navigation
         # TBD
-    sub_maneuver_mode: '2'
+    sub_maneuver_mode: '1'
       # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Bangbang, 8: RANDOM
     subsub_maneuver_mode: '0' 
       # 1: Free running
@@ -60,7 +60,7 @@ controller:
       zigzag_mode:
         target_rps : 31.8
         target_psi : 20.0
-        initial_psi_direction : 1 # -1: Left, 1: Right
+        initial_psi_direction : -1 # -1: Left, 1: Right
         duration : 300.0 # [s]
 
       pivot_turn_mode:

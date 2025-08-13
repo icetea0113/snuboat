@@ -22,6 +22,7 @@ class FreeRunning(Node):
         self.U_queue_len = self.declare_parameter('common_params.U_queue_len', 10).get_parameter_value().integer_value
         self.target_rps_set = self.declare_parameter('common_params.target_rps_set', [10.0, 20.0, 30.0, 40.0, 50.0]).get_parameter_value().double_array_value
         self.target_U_set = self.declare_parameter('common_params.target_U_set', [0.2, 0.4, 0.5, 0.6, 0.7]).get_parameter_value().double_array_value
+        self.get_logger().info(f'target_rps_set : {self.target_rps_set}, target_u_set : {self.target_U_set}')
         self._interp_rps_U = interp1d(self.target_rps_set, self.target_U_set, bounds_error=False, fill_value='extrapolate', kind='linear')
 
         # 각 함수별 파라미터 로드 상태 추적
@@ -249,7 +250,7 @@ class FreeRunning(Node):
 
             ctrl_cmd = np.array([rpsP_cmd, rpsS_cmd, delP_cmd, delS_cmd])  # [rpsP, rpsS, delP, delS]
 
-            self.get_logger().info(f'Turning control command: {ctrl_cmd}')
+            # self.get_logger().info(f'Turning control command: {ctrl_cmd}')
         return ctrl_cmd, self._turning_end
 
     def zigzag(self, tick, pos, vel, ctrl):
@@ -306,7 +307,7 @@ class FreeRunning(Node):
                 self._zigzag_direction = initial_psi_direction
         
             target_psi = wrap_to_pi(self._initial_zigzag_psi + np.deg2rad(self._zigzag_params['target_psi']) * self._zigzag_direction)
-            if wrap_to_pi(abs(psi) - abs(target_psi)) >= 0 and (psi - self._initial_zigzag_psi) * (target_psi - self._initial_zigzag_psi) > 0:
+            if wrap_to_pi(abs(psi - self._initial_zigzag_psi) - abs(target_psi - self._initial_zigzag_psi)) >= 0 and (psi - self._initial_zigzag_psi) * (target_psi - self._initial_zigzag_psi) > 0:
                 self._zigzag_direction *= -1  # 방향 전환
                 self.target_del *= -1
                 direction_message = "right" if self._zigzag_direction < 0 else "left"

@@ -64,10 +64,6 @@ class Navigation(Node):
         self.gps_rtk_subscriber_ = self.create_subscription(Float32MultiArray, 'gps_rtk_data', self.gps_rtk_callback, 10)
         self.marker_subscriber_ = self.create_subscription(Float32MultiArray, 'marker_data', self.marker_callback, 10)
         self.sils_subscriber_ = self.create_subscription(Float32MultiArray, 'sils_navigation_data', self.sils_callback, 10)
-
-        # Timer
-        timer_period = 0.1  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
         
         # State variables
         self.mission_code = 0
@@ -291,6 +287,7 @@ class Navigation(Node):
         msg.vel = self.vel.tolist()
         
         self.sensor_state_publisher_.publish(msg)
+        self.get_logger().info(f'Published Pose: {msg.pose}, Velocity: {msg.vel} at time {self.get_clock().now().to_msg()}')
 
 def median_filter(dataset, filter_size=6):
     sorted_data = np.sort(dataset)
