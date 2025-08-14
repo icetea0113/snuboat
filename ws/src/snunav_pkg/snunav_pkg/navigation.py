@@ -287,6 +287,7 @@ class Navigation(Node):
         msg.vel = self.vel.tolist()
         
         self.sensor_state_publisher_.publish(msg)
+        self.get_logger().info(f'Published Pose: {msg.pose}, Velocity: {msg.vel} at time {self.get_clock().now().to_msg()}')
 
 def median_filter(dataset, filter_size=6):
     sorted_data = np.sort(dataset)

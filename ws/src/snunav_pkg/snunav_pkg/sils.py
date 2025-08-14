@@ -92,14 +92,14 @@ class SILS(Node):
             self.vel[0], self.vel[1], self.vel[2],
             self.vel[3], self.vel[4], self.vel[5]]
         self.navigation_sils_pub.publish(nav_msg)
-        # self.get_logger().info(f'Published SILS navigation data: {nav_msg.data}')
+        self.get_logger().info(f'Published SILS navigation data: {nav_msg.data}')
         
         #Publish Motor Feedback Data
         motor_fb_msg = Control()
         motor_fb_msg.ctrl = [self.port_rps_fb, self.stbd_rps_fb, self.port_steer_fb, self.stbd_steer_fb]
         motor_fb_msg.tick = self.get_clock().now().to_msg()
         self.motor_fb_sils_pub.publish(motor_fb_msg)
-        self.get_logger().info(f'Published SILS motor feedback data: {motor_fb_msg.ctrl}')
+        # self.get_logger().info(f'Published SILS motor feedback data: {motor_fb_msg.ctrl}')
 
 def main(args=None):
     rclpy.init(args=args)

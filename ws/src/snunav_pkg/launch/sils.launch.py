@@ -161,7 +161,7 @@ def generate_launch_description():
             'ros2', 'bag', 'record',
             '-o', bag_name,                      # 옵션 먼저
             '/sensor', '/ctrl_cmd_sils', '/sils_motor_fb_data',
-            '/imu/data'
+            '/imu/data', '/sils_navigation_data'
             # 필요시: '--include-hidden-topics'
         ],
         output='screen'
