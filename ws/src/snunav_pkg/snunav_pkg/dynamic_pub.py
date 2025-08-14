@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray
+from snumsg_pkg.msg import Control
 import threading
 import os
 
@@ -17,7 +17,7 @@ class DynamicPublisher(Node):
             with open(INPUT_FILE, 'w') as f:
                 f.write("0 0 0 0\n")
         super().__init__('rqt')
-        self.publisher_ = self.create_publisher(Float32MultiArray, '/ctrl_cmd_boat', 10)
+        self.publisher_ = self.create_publisher(Control, '/ctrl_cmd_boat', 10)
         self.get_logger().info(
             "[rps P, rps S, del P, del S]\n"
             "Example: 11.8 11.8 0.0 0.0\n"
@@ -28,8 +28,9 @@ class DynamicPublisher(Node):
         self.running = True
 
     def timer_callback(self):
-        msg = Float32MultiArray()
-        msg.data = self.latest_values
+        msg = Control()
+        msg.tick = self.get_clock().now().to_msg()
+        msg.ctrl = self.latest_values
         self.get_logger().info(f"Publishing: {self.latest_values}")
         self.publisher_.publish(msg)
 

@@ -106,16 +106,16 @@ def generate_launch_description():
     # sensor_mode 값 가져오기
     sensor_mode = mission_params.get('sensor_mode', '0')
     
-    microstrain_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(
-                    get_package_share_directory('microstrain_inertial_driver'),
-                    'launch',
-                    'microstrain_launch.py'
-                )
-            )
-        )
-    ld.add_action(microstrain_launch)
+    # microstrain_launch = IncludeLaunchDescription(
+    #         PythonLaunchDescriptionSource(
+    #             os.path.join(
+    #                 get_package_share_directory('microstrain_inertial_driver'),
+    #                 'launch',
+    #                 'microstrain_launch.py'
+    #             )
+    #         )
+    #     )
+    # ld.add_action(microstrain_launch)
         
     # 기존 노드들
     ld.add_action(Node(
@@ -133,6 +133,14 @@ def generate_launch_description():
         output='screen',
         parameters=[controller_params]
     ))
+    
+    # ld.add_action(Node(
+    #     package='snunav_pkg',
+    #     executable='rqt',
+    #     name='rqt_node',
+    #     output='screen',
+    #     parameters=[controller_params]
+    # ))
     
     ld.add_action(Node(
         package='snunav_pkg',
