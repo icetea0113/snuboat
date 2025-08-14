@@ -31,6 +31,7 @@ setup(
             'controller = snunav_pkg.controller:main',
             'sils = snunav_pkg.sils:main',
             'udp_receiver = snunav_pkg.udp_receiver:main',
+            'rqt = snunav_pkg.dynamic_pub:main',
         ],
     },
 )

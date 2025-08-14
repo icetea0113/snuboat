@@ -30,12 +30,15 @@ class MotorInterface(Node):
         self.sock.bind(self.BIND)
         self.sock.settimeout(0.05)            # non-blocking recv
         
-        frame = (f"$SET,{self.del_rate}\r\n")
+        frame_set_ini = (f"$SET,{self.del_rate}\r\n")
+        frame_ctrl_ini = (f"$CTRL,{0.0},{0.0},{0.0},{0.0}\r\n")
         self.ctrl_cmd = [0.0, 0.0, 0.0, 0.0]  # 초기값 설정
         self.ctrl_fb = [0.0, 0.0, 0.0, 0.0]  # 피드백 초기값 설정
         try:
-            self.sock.sendto(frame.encode('ascii'), self.DEST)
-            self.get_logger().info(f'Sent: {frame.strip()}')
+            self.sock.sendto(frame_set_ini.encode('ascii'), self.DEST)
+            self.get_logger().info(f'Sent: {frame_set_ini.strip()}')
+            self.sock.sendto(frame_ctrl_ini.encode('ascii'), self.DEST)
+            self.get_logger().info(f'Sent: {frame_ctrl_ini.strip()}')
         except OSError as e:
             self.get_logger().error(f'UDP send error: {e}')
         

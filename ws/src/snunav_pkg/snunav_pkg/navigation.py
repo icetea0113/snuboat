@@ -174,7 +174,7 @@ class Navigation(Node):
                     median_filter(self.pitch_data_queue, self.pos_avglen_param),
                     self.pose_qualisys[5]
                 ]
-                # self.get_logger().info(f"Pose data added to queue: {data}")
+                self.get_logger().info(f"Pose data added to queue: {data}")
 
             if len(self.u_data_queue) < self.vel_maxlen_param:
                 for idx, data in enumerate(self.vel_qualisys):

@@ -7,10 +7,8 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource, Fro
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, DeclareLaunchArgument
 from datetime import datetime
-from launch.actions import ExecuteProcess, RegisterEventHandler
-from launch.event_handlers import OnProcessStart
 
 maneuver_mode_map = {
     '1': 'FREE_RUNNING',
@@ -28,9 +26,7 @@ sub_maneuver_mode_map = {
         '3': 'PIVOT_TURN',
         '4': 'CRABBING',
         '5': 'PULL_OUT',
-        '6': 'SPIRAL',
-        '7': 'BANGBANG',
-        '8': 'RANDOM',
+        '6': 'SPIRAL'
     },
     '2': {  # Docking
         '0': 'HEUR_ENTER',
@@ -62,6 +58,17 @@ subsub_mode_map_docking = {
 
 def generate_launch_description():
     ld = LaunchDescription()
+
+    enable_manual_cmd_arg = DeclareLaunchArgument(
+        'enable_manual_cmd', default_value='true',
+        description='Enable manual Float32MultiArray cmd publisher'
+    )
+    publish_rate_arg = DeclareLaunchArgument(
+        'manual_publish_rate', default_value='10.0',
+        description='Publish rate (Hz) for manual cmd publisher'
+    )
+    ld.add_action(enable_manual_cmd_arg)
+    ld.add_action(publish_rate_arg)
     
     # Config 파일 읽기
     config_path = os.path.join(
@@ -76,12 +83,13 @@ def generate_launch_description():
     # 파라미터 추출
     mission_params = {}
     controller_params = {}
-    
+    udp_params = {}
+
     if 'mission_director' in config:
         mission_params = config.get('mission_director', {}).get('ros__parameters', {})
-    if 'controller' in config:
-        controller_params = config.get('controller', {}).get('ros__parameters', {})
-    
+    if 'qualisys_udp' in config:
+        udp_params = config.get('qualisys_udp', {}).get('ros__parameters', {})
+        
     # 2. 코드 추출
     man_code = mission_params.get('maneuver_mode', '-1')
     sub_code = mission_params.get('sub_maneuver_mode', '-1')
@@ -106,17 +114,6 @@ def generate_launch_description():
     # sensor_mode 값 가져오기
     sensor_mode = mission_params.get('sensor_mode', '0')
     
-    # microstrain_launch = IncludeLaunchDescription(
-    #         PythonLaunchDescriptionSource(
-    #             os.path.join(
-    #                 get_package_share_directory('microstrain_inertial_driver'),
-    #                 'launch',
-    #                 'microstrain_launch.py'
-    #             )
-    #         )
-    #     )
-    # ld.add_action(microstrain_launch)
-        
     # 기존 노드들
     ld.add_action(Node(
         package='snunav_pkg',
@@ -128,52 +125,92 @@ def generate_launch_description():
     
     ld.add_action(Node(
         package='snunav_pkg',
-        executable='controller',
-        name='controller_node',
-        output='screen',
-        parameters=[controller_params]
-    ))
-    
-    # ld.add_action(Node(
-    #     package='snunav_pkg',
-    #     executable='rqt',
-    #     name='rqt_node',
-    #     output='screen',
-    #     parameters=[controller_params]
-    # ))
-    
-    ld.add_action(Node(
-        package='snunav_pkg',
         executable='navigation',
         name='navigation_node',  # controller_node에서 수정
         output='screen',
     ))
     
-    sils_node = Node(
+    ld.add_action(Node(
         package='snunav_pkg',
-        executable='sils',
-        name='sils_node',
+        executable='rqt',
+        name='ctrl_cmd_node',  # controller_node에서 수정
         output='screen',
-    )
-
-    recorder = ExecuteProcess(
-        cmd=[
-            'ros2', 'bag', 'record',
-            '-o', bag_name,                      # 옵션 먼저
-            '/sensor', '/ctrl_cmd_sils', '/sils_motor_fb_data',
-            '/imu/data', '/sils_navigation_data'
-            # 필요시: '--include-hidden-topics'
-        ],
-        output='screen'
-    )
-    ld.add_action(sils_node)
-    ld.add_action(
-        RegisterEventHandler(
-            OnProcessStart(
-                target_action=sils_node,
-                on_start=[recorder],
+    ))
+    
+    # ld.add_action(Node(
+    #     package='snunav_pkg',
+    #     executable='motor_interface',
+    #     name='motor_interface_node',
+    #     output='screen',
+    #     parameters=[controller_params]
+    # ))
+    
+    # SLAM 모드 (sensor_mode == '1'): Ouster + KISS-ICP
+    if sensor_mode == '0':
+        pass
+        # ld.add_action(Node(
+        #     package='snunav_pkg',
+        #     executable='udp_receiver',
+        #     name='udp_node',
+        #     output='screen',
+        #     parameters=[udp_params]
+        # ))
+        
+    elif sensor_mode == '1':
+        # Ouster 센서 launch
+        ouster_launch = IncludeLaunchDescription(
+            FrontendLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory('ouster_ros'),
+                    'launch',
+                    'sensor.launch.xml'
+                )
+            ),
+            launch_arguments={
+                'sensor_hostname': '192.168.1.5',
+                'viz': 'false'  # rviz 비활성화 (필요시 수정)
+            }.items()
+        )
+        ld.add_action(ouster_launch)
+        
+        # KISS-ICP odometry launch
+        kiss_icp_launch = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory('kiss_icp'),
+                    'launch',
+                    'odometry.launch.py'
+                )
+            ),
+            launch_arguments={
+                'topic': '/ouster/points',
+                'lidar_odom_frame': 'odom',
+                'visualize': 'false'
+            }.items()
+        )
+        ld.add_action(kiss_icp_launch)
+    
+    # GPS-RTK 모드 (sensor_mode == '2'): Microstrain IMU
+    elif sensor_mode == '2':
+        microstrain_launch = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory('microstrain_inertial_driver'),
+                    'launch',
+                    'microstrain_launch.py'
+                )
             )
         )
+        ld.add_action(microstrain_launch)
+    
+    ld.add_action(
+        ExecuteProcess(
+            cmd=['ros2', 'bag', 'record',
+                 '/sensor', '/ctrl_cmd_boat',
+                 '/ctrl_fb_boat', '/imu/data',
+                 '-o', bag_name],
+            output='screen'
+        )
     )
-
+    
     return ld

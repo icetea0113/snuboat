@@ -12,12 +12,12 @@ mission_director:
         # TBD
       # 4: Navigation
         # TBD
-    sub_maneuver_mode: '1'
+    sub_maneuver_mode: '7'
       # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Bangbang, 8: RANDOM
     subsub_maneuver_mode: '0' 
       # 1: Free running
         # 8: RANDOM
-          # 0: 3321, 1: 3211
+          # 0: 3321, 1: 3211, 2: 211
       # 2: Docking
         # 0: Approaching stage, 1: Turning stage, 2: Entering stage, 3: Pushing stage
     sensor_mode: '0' # 0: Qualisys, 1: SLAM, 2: GPS-RTK, 3: Marker, 4: SILS
@@ -37,9 +37,9 @@ controller:
       U_tol: 0.02 # [m/s]
       U_queue_len: 10 # Length of the U queue for averaging control commands
       target_rps_set: [10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0] # [rps]
-      # target_U_set: [0.18, 0.27, 0.38, 0.5, 0.61, 0.7, 0.8, 0.9, 1] # [m/s] LC1
+      target_U_set: [0.18, 0.27, 0.38, 0.5, 0.61, 0.7, 0.8, 0.9, 1] # [m/s] LC1
       # target_U_set: [0.15, 0.25, 0.34, 0.45, 0.54, 0.63, 0.72, 0.83, 0.91] # [m/s] LC2
-      target_U_set: [0.14, 0.22, 0.31, 0.41, 0.5, 0.6, 0.68, 0.76, 0.86] # [m/s] LC3
+      # target_U_set: [0.14, 0.22, 0.31, 0.41, 0.5, 0.6, 0.68, 0.76, 0.86] # [m/s] LC3
 
     free_running_mode : 
       speed_mapping_mode:
@@ -54,12 +54,12 @@ controller:
         # LC2: 23.9, 34.9 rps
         # LC3: 25.7, 37.3 rps
         target_rps : 21.6
-        target_del : -20.0
+        target_del : -30.0
         duration : 300.0 # [s]
 
       zigzag_mode:
-        target_rps : 31.8
-        target_psi : 20.0
+        target_rps : 21.6
+        target_psi : 10.0
         initial_psi_direction : -1 # -1: Left, 1: Right
         duration : 300.0 # [s]
 
@@ -87,25 +87,33 @@ controller:
         duration : 20.0 # [s]
 
       bangbang_mode:
-        target_rps : 20.0
-        target_del : 20.0
+        target_rps : 21.6
+        target_del : 30.0
         initial_psi_direction : 1 # 1: Right, -1: Left
-        duration : 5.0 # [s]
-        repeat: 4
+        # [s] 9.3 7.8 7.7 7.0 6.8 6.2 7.6 7.4 (1.0*T) indv
+        # [s] 7.88, 7.0 (1.0*T) avg
+        duration : 7.88 
+        repeat: 2
 
       random_mode:
         3321_mode:
           target_rps : 20.0
           target_del : 20.0
-          initial_psi_direction : 1 # 1: Right, -1: Left
-          duration : 5.0 # [s]
+          initial_psi_direction : -1 # 1: Right, -1: Left
+          duration : 6.51 # [s]
           repeat: 4
         3211_mode:
-          target_rps : 20.0
+          target_rps : 21.6
+          target_del : 30.0
+          initial_psi_direction : 1 # 1: Right, -1: Left
+          duration : 6.51 # [s] 6.51 5.46 5.39 4.9 4.76 4.34 5.32 5.18 (0.7*T)
+          repeat: 4
+        211_mode:
+          target_rps : 31.8
           target_del : 20.0
           initial_psi_direction : 1 # 1: Right, -1: Left
-          duration : 5.0 # [s]
-          repeat: 4
+          duration : 7.6 # [s] 9.3 7.8 7.7 7.0 6.8 6.2 7.6 7.4 (1.0*T)
+          repeat: 3 
 ##################################################################################
 qualisys_udp:
   ros__parameters:
