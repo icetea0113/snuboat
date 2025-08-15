@@ -2,7 +2,7 @@
 mission_director:
   ros__parameters:
     frequency: 10.0 # [Hz]
-    sils_mode: '1' # 0: Normal, 1: SILS
+    sils_mode: '0' # 0: Normal, 1: SILS
     maneuver_mode: '1' # 1: Free running, 2: Docking, 3: DP, 4: Navigation
       # 1: Free running
         # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Bangbang, 8: 3321
@@ -12,7 +12,7 @@ mission_director:
         # TBD
       # 4: Navigation
         # TBD
-    sub_maneuver_mode: '7'
+    sub_maneuver_mode: '1'
       # 0: Speed mapping, 1: Turning, 2: Zigzag, 3: Pivot turn, 4: Crabbing, 5: Pull out, 6: Spiral, 7: Bangbang, 8: RANDOM
     subsub_maneuver_mode: '0' 
       # 1: Free running
@@ -37,8 +37,8 @@ controller:
       U_tol: 0.02 # [m/s]
       U_queue_len: 10 # Length of the U queue for averaging control commands
       target_rps_set: [10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0] # [rps]
-      target_U_set: [0.18, 0.27, 0.38, 0.5, 0.61, 0.7, 0.8, 0.9, 1] # [m/s] LC1
-      # target_U_set: [0.15, 0.25, 0.34, 0.45, 0.54, 0.63, 0.72, 0.83, 0.91] # [m/s] LC2
+      # target_U_set: [0.18, 0.27, 0.38, 0.5, 0.61, 0.7, 0.8, 0.9, 1] # [m/s] LC1
+      target_U_set: [0.15, 0.25, 0.34, 0.45, 0.54, 0.63, 0.72, 0.83, 0.91] # [m/s] LC2
       # target_U_set: [0.14, 0.22, 0.31, 0.41, 0.5, 0.6, 0.68, 0.76, 0.86] # [m/s] LC3
 
     free_running_mode : 
@@ -53,14 +53,14 @@ controller:
         # LC1: 21.6, 31.8 rps
         # LC2: 23.9, 34.9 rps
         # LC3: 25.7, 37.3 rps
-        target_rps : 21.6
-        target_del : -30.0
+        target_rps : 23.9
+        target_del : 30.0
         duration : 300.0 # [s]
 
       zigzag_mode:
-        target_rps : 21.6
+        target_rps : 31.8
         target_psi : 10.0
-        initial_psi_direction : -1 # -1: Left, 1: Right
+        initial_psi_direction : 1 # -1: Left, 1: Right
         duration : 300.0 # [s]
 
       pivot_turn_mode:

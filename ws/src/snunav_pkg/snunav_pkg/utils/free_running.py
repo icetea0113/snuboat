@@ -221,11 +221,17 @@ class FreeRunning(Node):
         # if self._steady_state_time == -1 or self._steady_state_time > tick:
         #     ctrl_cmd = self.to_steady_state(tick, self._turning_params['target_rps'])
         #     self.get_logger().info('Transitioning to steady state before turning.')
+        
+        
         if self._steady_state_status == False:
             ctrl_cmd = self.to_steady_state(tick, self._turning_params['target_rps'], vel)
             if self._max_rps_time == -1 or self._max_rps_time > tick:
-                ctrl_cmd = self.to_max_rps(tick, vel, 3.7, 35)
+                # ctrl_cmd = self.to_max_rps(tick, vel, 3.7, 35)
+                # LC2
+                ctrl_cmd = self.to_max_rps(tick, vel, 3.7, 38) # Fn 0.1
                 self.get_logger().info('Transitioning to max RPS before turning.')
+        # if False:
+        #     pass
         else:
             if not self._turning_start:
                 self._turning_start = True
@@ -260,6 +266,7 @@ class FreeRunning(Node):
 
             # self.get_logger().info(f'Turning control command: {ctrl_cmd}')
         return ctrl_cmd, self._turning_end
+        # return ctrl_cmd, True
 
     def zigzag(self, tick, pos, vel, ctrl):
         # 한 번만 파라미터 로드
@@ -288,7 +295,9 @@ class FreeRunning(Node):
         if self._steady_state_status == False:
             ctrl_cmd = self.to_steady_state(tick, self._zigzag_params['target_rps'], vel)
             if self._max_rps_time == -1 or self._max_rps_time > tick:
-                ctrl_cmd = self.to_max_rps(tick, vel, 3.7, 35)
+                # ctrl_cmd = self.to_max_rps(tick, vel, 3.7, 35)
+                # ctrl_cmd = self.to_max_rps(tick, vel, 4.0, 44.0)
+                ctrl_cmd = self.to_max_rps(tick, vel, 4.3, 44.0)
                 self.get_logger().info('Transitioning to max RPS before zigzag.')
         else:
             if self.target_del is None:

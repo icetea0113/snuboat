@@ -67,13 +67,10 @@ class MotorInterface(Node):
             return
         
         self.ctrl_cmd = msg.ctrl  # 저장 (추후 사용 가능)
-        self.motor_worker_cmd()
         l_rps, r_rps, l_deg, r_deg = self.ctrl_cmd
         frame = (f"$CTRL,{l_rps},{r_rps},{l_deg},{r_deg}\r\n")
-        # frame = (f"$CTR,1,{l_rps},{r_rps},{l_deg},{r_deg},0\r\n")
         try:
             self.sock.sendto(frame.encode('ascii'), self.DEST)
-            # self.get_logger().info(f'Sent: {frame.strip()}')
         except OSError as e:
             self.get_logger().error(f'UDP send error: {e}')
 
@@ -109,8 +106,6 @@ class MotorInterface(Node):
                            float(parts[4]),  # L_deg
                            float(parts[5])]  # R_deg
                 
-                fb.ctrl = self.motor_worker_fb(fb)
-                # self.get_logger().info(f'Feedback received: {fb.ctrl}')
                 self.fb_pub.publish(fb)
 
             except ValueError:
@@ -125,44 +120,6 @@ class MotorInterface(Node):
             pass
              
         
-        
-    def motor_worker_cmd(self):
-        if(self.ctrl_cmd[0] > 0.1):
-            self.ctrl_cmd[0] = 0.8563 * self.ctrl_cmd[0] + 5.8419 + random.random()/1000
-        elif(self.ctrl_cmd[0] < -0.1):
-            self.ctrl_cmd[0] = -(0.8563 * abs(self.ctrl_cmd[0]) + 5.8419) + random.random()/1000
-        
-        if(self.ctrl_cmd[1] > 0.1):
-            self.ctrl_cmd[1] = 0.8563 * self.ctrl_cmd[1] + 5.8419 + random.random()/1000
-        elif(self.ctrl_cmd[1] < -0.1):
-            self.ctrl_cmd[1] = -(0.8563 * abs(self.ctrl_cmd[1]) + 5.8419) + random.random()/1000
-    def motor_worker_fb(self, fb):
-        # update rps
-        if(fb.ctrl[0] > 0.1):
-            self.ctrl_fb[0] = 1.1677 * fb.ctrl[0] - 6.8189
-        elif(fb.ctrl[0] < -0.1):
-            self.ctrl_fb[0] = -(1.1677 * abs(fb.ctrl[0]) - 6.8189)
-
-        if(fb.ctrl[1] > 0.1):
-            self.ctrl_fb[1] = 1.1677 * fb.ctrl[1] - 6.8189
-        elif(fb.ctrl[1] < -0.1):
-            self.ctrl_fb[1] = -(1.1677 * abs(fb.ctrl[1]) - 6.8189)
-
-        # update steering
-        if abs(fb.ctrl[2]-self.ctrl_fb[2]) < self.del_rate*0.1:
-            self.ctrl_fb[2] = fb.ctrl[2]
-        else:
-            self.ctrl_fb[2] = np.sign(fb.ctrl[2]-self.ctrl_fb[2])*self.del_rate*0.1 + self.ctrl_fb[2]+ random.random()/1000
-        if abs(fb.ctrl[3]-self.ctrl_fb[3]) < self.del_rate*0.1:
-            self.ctrl_fb[3] = fb.ctrl[3]
-        else:
-            self.ctrl_fb[3] = np.sign(fb.ctrl[3]-self.ctrl_fb[3])*self.del_rate*0.1 + self.ctrl_fb[3]+ random.random()/1000
-        self.ctrl_fb[2] = np.clip(self.ctrl_fb[2] , -30.0, 30.0)
-        self.ctrl_fb[3] = np.clip(self.ctrl_fb[3] , -30.0, 30.0)
-        return self.ctrl_fb
-        
-
-def main(args=None):
     rclpy.init(args=args)
     node = MotorInterface()
 
